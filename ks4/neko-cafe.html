@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neko Neko Café: Year 10 Python Challenge Board</title>
+<style>
+:root {
+  --cream:      #fbf1e3;
+  --milk:       #fffdf9;
+  --card:       #fffaf2;
+  --pink:       #f4a9bb;
+  --pink-soft:  #fcdfe6;
+  --pink-deep:  #d97189;
+  --matcha:     #a9c99a;
+  --matcha-soft:#e0eed4;
+  --matcha-deep:#6f9461;
+  --coffee:     #7a5a44;
+  --coffee-soft:#cbad92;
+  --caramel:    #eb9d6b;
+  --caramel-soft:#fae0cb;
+  --lilac:      #c8b6e2;
+  --lilac-soft: #ece4f7;
+  --text:       #5e4636;
+  --text-soft:  #95806c;
+  --line:       #ecdcc6;
+  --code-bg:    #3b2c24;
+  --code-fg:    #f4e9da;
+  --code-acc:   #f4a9bb;
+  --code-com:   #b79a86;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'M PLUS Rounded 1c', system-ui, sans-serif;
+  color: var(--text);
+  background-color: var(--cream);
+  background-image:
+    radial-gradient(ellipse at 12% 0%, rgba(244,169,187,.22) 0%, transparent 45%),
+    radial-gradient(ellipse at 88% 4%, rgba(169,201,154,.22) 0%, transparent 45%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42'%3E%3Ccircle cx='10' cy='10' r='2.2' fill='%23eddcc6' opacity='.55'/%3E%3Ccircle cx='31' cy='31' r='2.2' fill='%23f4d4dd' opacity='.5'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 0 16px 70px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1040px; margin: 0 auto; }
+
+/* ---------- Header ---------- */
+.topbar {
+  text-align: center;
+  padding: 30px 0 6px;
+}
+.cafe-mark { width: 124px; height: 124px; margin: 0 auto 6px; display: block; }
+.cafe-name {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 6vw, 3rem);
+  color: var(--coffee);
+  letter-spacing: 1px;
+  line-height: 1.05;
+}
+.cafe-name .neko { color: var(--pink-deep); }
+.cafe-sub {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 500;
+  color: var(--text-soft);
+  font-size: .95rem;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+.cafe-tag {
+  display: inline-block;
+  margin-top: 14px;
+  background: var(--milk);
+  border: 2px dashed var(--coffee-soft);
+  border-radius: 40px;
+  padding: 9px 20px;
+  font-size: .92rem;
+  color: var(--text);
+  box-shadow: 0 6px 16px rgba(122,90,68,.08);
+}
+
+/* ---------- Progress ---------- */
+.progress-card {
+  background: var(--milk);
+  border: 2px solid var(--line);
+  border-radius: 22px;
+  padding: 18px 22px;
+  margin: 24px auto 8px;
+  max-width: 620px;
+  box-shadow: 0 10px 26px rgba(122,90,68,.09);
+}
+.progress-top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 10px; gap: 12px; flex-wrap: wrap;
+}
+.progress-title {
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
+  color: var(--coffee); font-size: 1.05rem;
+}
+.progress-msg { font-size: .86rem; color: var(--text-soft); }
+.progress-track {
+  height: 16px; background: var(--pink-soft); border-radius: 20px;
+  overflow: hidden; border: 1px solid #f4cdd6;
+}
+.progress-fill {
+  height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--pink) 0%, var(--caramel) 100%);
+  border-radius: 20px; transition: width .5s cubic-bezier(.34,1.56,.64,1);
+}
+.progress-count {
+  text-align: right; font-size: .82rem; color: var(--text-soft); margin-top: 6px;
+}
+.progress-count b { color: var(--pink-deep); font-size: 1rem; }
+
+/* ---------- Shift sections ---------- */
+.shift { margin-top: 38px; }
+.shift-head {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+}
+.shift-sign {
+  background: var(--coffee);
+  color: var(--milk);
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
+  padding: 8px 18px; border-radius: 14px;
+  box-shadow: 0 5px 0 rgba(94,70,54,.45);
+  font-size: 1.05rem; letter-spacing: .5px;
+  display: flex; align-items: center; gap: 9px;
+  position: relative;
+}
+.shift-sign .clock-emoji { font-size: 1rem; }
+.shift-line { flex: 1; height: 3px; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--coffee-soft) 0 9px, transparent 9px 18px); opacity: .6; }
+.shift-when { font-size: .82rem; color: var(--text-soft); white-space: nowrap; }
+.shift-done-pill {
+  display: none; align-items: center; gap: 6px;
+  background: var(--matcha-soft); color: var(--matcha-deep);
+  border: 1.5px solid var(--matcha); border-radius: 30px;
+  padding: 5px 13px; font-size: .8rem; font-weight: 700; white-space: nowrap;
+  animation: pop .4s cubic-bezier(.34,1.56,.64,1);
+}
+.shift.complete .shift-done-pill { display: inline-flex; }
+
+/* ---------- Card grid ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 22px;
+  padding: 20px 20px 18px;
+  cursor: pointer;
+  position: relative;
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 20px rgba(122,90,68,.08);
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s, border-color .22s;
+  overflow: hidden;
+  opacity: 0; transform: translateY(14px);
+  animation: rise .5s forwards;
+}
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+.card:hover {
+  transform: translateY(-5px) rotate(-.4deg);
+  box-shadow: 0 16px 30px rgba(122,90,68,.16);
+  border-color: var(--pink);
+}
+.card-icon {
+  width: 70px; height: 70px; margin: 2px auto 12px;
+}
+.card-no {
+  position: absolute; top: 13px; left: 15px;
+  font-family: 'DM Mono', monospace; font-size: .72rem;
+  color: var(--text-soft); opacity: .7;
+}
+.card-title {
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
+  font-size: 1.12rem; color: var(--coffee); text-align: center;
+  margin-bottom: 7px; line-height: 1.25;
+}
+.card-summary {
+  font-size: .87rem; color: var(--text-soft); text-align: center;
+  line-height: 1.55; margin-bottom: 14px; flex: 1;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.chip {
+  font-family: 'DM Mono', monospace; font-size: .68rem;
+  padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+  background: var(--matcha-soft); color: var(--matcha-deep); border: 1px solid #cfe2bf;
+}
+.chip.c-talk  { background: var(--pink-soft);   color: var(--pink-deep);   border-color:#f5cdd6; }
+.chip.c-pick  { background: var(--caramel-soft);color: #c9763f;            border-color:#f3cfb0; }
+.chip.c-func  { background: #efe5dc;            color: var(--coffee);      border-color:#e0cdbd; }
+.chip.c-star  { background: var(--lilac-soft);  color: #7d5fb0;            border-color:#ddd0ef; }
+
+.card .tick {
+  position: absolute; top: 12px; right: 13px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--matcha); color: #fff;
+  display: none; align-items: center; justify-content: center;
+  font-size: .9rem; font-weight: 800;
+  box-shadow: 0 3px 7px rgba(111,148,97,.4);
+  animation: pop .35s cubic-bezier(.34,1.56,.64,1);
+}
+.card.done { border-color: var(--matcha); background: #f7fbf3; }
+.card.done .tick { display: flex; }
+.card.done .card-icon { filter: saturate(1.05); }
+
+/* ---------- Modal ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(94,70,54,.42);
+  backdrop-filter: blur(3px);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 26px 14px; overflow-y: auto;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--milk);
+  border-radius: 26px;
+  max-width: 660px; width: 100%;
+  box-shadow: 0 30px 70px rgba(59,44,36,.4);
+  border: 2px solid var(--line);
+  animation: modalPop .32s cubic-bezier(.34,1.56,.64,1);
+  margin: auto 0;
+  overflow: hidden;
+}
+@keyframes modalPop { from { opacity: 0; transform: translateY(20px) scale(.97); } to { opacity: 1; transform: none; } }
+.modal-head {
+  background: linear-gradient(135deg, var(--pink-soft) 0%, var(--caramel-soft) 100%);
+  padding: 22px 26px 20px; position: relative;
+  border-bottom: 2px solid var(--line);
+}
+.modal-head .m-icon { width: 56px; height: 56px; float: left; margin: 0 14px 4px 0; }
+.modal-eyebrow { font-family: 'DM Mono', monospace; font-size: .74rem; color: var(--text-soft); letter-spacing: 1px; }
+.modal-title {
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900;
+  font-size: 1.5rem; color: var(--coffee); line-height: 1.15; margin: 2px 0 4px;
+}
+.modal-sum { font-size: .9rem; color: var(--text); }
+.modal-chips { clear: both; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.x-close {
+  position: absolute; top: 14px; right: 16px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,.7); border: 1.5px solid var(--coffee-soft);
+  color: var(--coffee); font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .2s;
+}
+.x-close:hover { background: #fff; transform: rotate(90deg); }
+
+.modal-body { padding: 22px 26px 26px; }
+.modal-body p { font-size: .95rem; line-height: 1.78; margin-bottom: 12px; }
+.modal-body strong { color: var(--coffee); }
+.modal-body ul { margin: 4px 0 14px 20px; }
+.modal-body li { font-size: .93rem; line-height: 1.7; margin-bottom: 4px; }
+code {
+  font-family: 'DM Mono', monospace; font-size: .86em;
+  background: var(--pink-soft); color: var(--pink-deep);
+  padding: 1px 6px; border-radius: 6px;
+}
+
+.field-label {
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
+  font-size: .76rem; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-soft); margin: 18px 0 6px;
+  display: flex; align-items: center; gap: 7px;
+}
+.field-label::before { content: ''; width: 14px; height: 3px; border-radius: 3px; background: var(--pink); }
+
+.cb-wrap { position: relative; margin-bottom: 6px; }
+pre.cb {
+  background: var(--code-bg); color: var(--code-fg);
+  font-family: 'DM Mono', monospace; font-size: .85rem; line-height: 1.6;
+  padding: 16px 18px; border-radius: 14px; overflow-x: auto;
+  white-space: pre; tab-size: 4; border-left: 4px solid var(--code-acc);
+}
+pre.cb .com { color: var(--code-com); font-style: italic; }
+.copy-btn {
+  position: absolute; top: 9px; right: 9px;
+  background: rgba(255,255,255,.12); color: #f4e9da;
+  border: 1px solid rgba(255,255,255,.22); border-radius: 8px;
+  font-family: 'DM Mono', monospace; font-size: .68rem;
+  padding: 4px 10px; cursor: pointer; transition: all .2s;
+}
+.copy-btn:hover { background: rgba(255,255,255,.24); }
+.copy-btn.ok { color: #b6e6a0; border-color: #b6e6a0; }
+
+.out-box {
+  background: #fff; border: 1.5px dashed var(--coffee-soft);
+  border-radius: 14px; padding: 13px 16px;
+}
+.out-box pre {
+  font-family: 'DM Mono', monospace; font-size: .85rem; color: var(--text);
+  white-space: pre-wrap; line-height: 1.65;
+}
+
+.callout {
+  border-radius: 14px; padding: 12px 16px; margin: 14px 0;
+  font-size: .88rem; line-height: 1.65;
+}
+.callout.tip   { background: var(--matcha-soft); border-left: 4px solid var(--matcha-deep); color: #3f5a36; }
+.callout.note  { background: var(--lilac-soft);  border-left: 4px solid var(--lilac);       color: #5a4880; }
+.callout.stretch { background: var(--caramel-soft); border-left: 4px solid var(--caramel); color: #9a5a2c; }
+.callout b { color: inherit; }
+
+/* hints */
+.hints { margin-top: 22px; padding-top: 16px; border-top: 2px dashed var(--line); }
+.hints-h { font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700; font-size: .82rem; color: var(--coffee); margin-bottom: 10px; }
+.hint-btns { display: flex; gap: 9px; flex-wrap: wrap; }
+.h-btn {
+  background: var(--milk); border: 1.5px solid var(--coffee-soft);
+  color: var(--coffee); font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 500;
+  font-size: .84rem; padding: 8px 16px; border-radius: 30px; cursor: pointer; transition: all .2s;
+}
+.h-btn:hover:not(:disabled) { background: var(--pink-soft); border-color: var(--pink); }
+.h-btn:disabled { opacity: .55; cursor: default; background: var(--pink-soft); border-color: var(--pink); }
+.hint-card {
+  background: var(--milk); border: 1.5px solid var(--pink); border-radius: 14px;
+  padding: 13px 16px; margin-top: 11px; animation: slide .3s ease;
+  position: relative;
+}
+.hint-card::before {
+  content: ''; position: absolute; left: -1px; top: 14px; bottom: 14px;
+  width: 4px; border-radius: 4px; background: var(--pink);
+}
+@keyframes slide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.hint-tag { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--pink-deep); letter-spacing: 1px; margin-bottom: 5px; }
+.hint-card p { font-size: .9rem; line-height: 1.7; margin: 0; }
+.hint-card pre.cb { margin-top: 9px; }
+
+/* done button */
+.done-row { margin-top: 24px; text-align: center; }
+.done-btn {
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700; font-size: .95rem;
+  padding: 12px 28px; border-radius: 40px; cursor: pointer; transition: all .22s;
+  border: 2px solid var(--matcha-deep); background: var(--matcha-soft); color: var(--matcha-deep);
+}
+.done-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(111,148,97,.25); }
+.done-btn.is-done { background: var(--matcha-deep); color: #fff; }
+
+/* footer */
+.footer {
+  text-align: center; margin-top: 50px; color: var(--text-soft); font-size: .82rem;
+}
+.reset-btn {
+  background: none; border: none; color: var(--text-soft); text-decoration: underline;
+  cursor: pointer; font-family: inherit; font-size: .8rem; margin-top: 6px;
+}
+.reset-btn:hover { color: var(--pink-deep); }
+
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--coffee); color: var(--milk); padding: 12px 22px; border-radius: 40px;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700; font-size: .92rem;
+  box-shadow: 0 12px 30px rgba(59,44,36,.4); z-index: 80; opacity: 0;
+  transition: all .4s cubic-bezier(.34,1.56,.64,1); pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 4</a></nav>
+
+<div class="wrap">
+
+  <header class="topbar">
+    <svg class="cafe-mark" viewBox="0 0 120 120" aria-hidden="true">
+      <!-- saucer -->
+      <ellipse cx="60" cy="103" rx="40" ry="7" fill="#cbad92" opacity=".5"/>
+      <!-- cup -->
+      <path d="M30 60 h60 v18 a30 30 0 0 1 -60 0 z" fill="#fffaf2" stroke="#7a5a44" stroke-width="3"/>
+      <!-- handle -->
+      <path d="M90 64 a14 14 0 0 1 0 24" fill="none" stroke="#7a5a44" stroke-width="3"/>
+      <!-- coffee surface -->
+      <ellipse cx="60" cy="60" rx="30" ry="6" fill="#a9c99a"/>
+      <!-- steam -->
+      <path d="M50 50 q-5 -8 0 -16 q5 -8 0 -16" fill="none" stroke="#cbad92" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+      <path d="M70 50 q5 -8 0 -16 q-5 -8 0 -16" fill="none" stroke="#cbad92" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+      <!-- cat peeking over rim -->
+      <g>
+        <path d="M46 60 q0 -16 14 -16 q14 0 14 16 z" fill="#f4d9c2"/>
+        <path d="M48 49 l-3 -10 l10 4 z" fill="#f4d9c2"/>
+        <path d="M72 49 l3 -10 l-10 4 z" fill="#f4d9c2"/>
+        <circle cx="53" cy="55" r="2.1" fill="#5e4636"/>
+        <circle cx="67" cy="55" r="2.1" fill="#5e4636"/>
+        <path d="M58 58 q2 2 4 0" fill="none" stroke="#5e4636" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="49" cy="57" r="2.4" fill="#f4a9bb" opacity=".7"/>
+        <circle cx="71" cy="57" r="2.4" fill="#f4a9bb" opacity=".7"/>
+      </g>
+    </svg>
+    <h1 class="cafe-name"><span class="neko">Neko Neko</span> Café</h1>
+    <div class="cafe-sub">A TINY PYTHON KITCHEN · YEAR 10</div>
+    <div class="cafe-tag">Twelve little coding jobs. Pick any card, any order. Take your time. ☕</div>
+  </header>
+
+  <section class="progress-card">
+    <div class="progress-top">
+      <span class="progress-title">Your shift so far</span>
+      <span class="progress-msg" id="progMsg">Welcome in! Tap a card to begin.</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+    <div class="progress-count"><b id="progNum">0</b> / 12 challenges done</div>
+  </section>
+
+  <div id="board"></div>
+
+  <div class="footer">
+    <div>Made for the Neko Neko Café kitchen crew. Progress saves on this computer.</div>
+    <button class="reset-btn" id="resetBtn">Start a fresh shift (clear my progress)</button>
+  </div>
+
+</div>
+
+<!-- modal -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- helpers for code blocks ---------------- */
+// e() escapes < and & so Python code shows correctly inside HTML
+function e(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+// codeBlock: dark box with a copy button. `lines` is raw Python text.
+function codeBlock(lines){
+  return '<div class="cb-wrap"><button class="copy-btn" onclick="cp(this)">copy</button>'
+    + '<pre class="cb">' + e(lines) + '</pre></div>';
+}
+function outBox(text){
+  return '<div class="out-box"><pre>' + e(text) + '</pre></div>';
+}
+
+/* ---------------- icons ---------------- */
+const I = {
+  bell:`<svg viewBox="0 0 64 64"><path d="M32 8a4 4 0 0 1 4 4v2a14 14 0 0 1 10 13v9l5 6H13l5-6v-9a14 14 0 0 1 10-13v-2a4 4 0 0 1 4-4z" fill="#f4d9c2" stroke="#7a5a44" stroke-width="2.4" stroke-linejoin="round"/><path d="M27 48a5 5 0 0 0 10 0z" fill="#f4a9bb" stroke="#7a5a44" stroke-width="2.2"/><circle cx="44" cy="20" r="4" fill="#a9c99a" stroke="#7a5a44" stroke-width="2"/></svg>`,
+  cake:`<svg viewBox="0 0 64 64"><path d="M12 30h40v18a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" fill="#fbe2c0" stroke="#7a5a44" stroke-width="2.4"/><path d="M12 38h40" stroke="#f4a9bb" stroke-width="3"/><path d="M12 30c5 5 9-3 14 0s9 5 14 0 9-3 12 0" fill="#fff" stroke="#7a5a44" stroke-width="2.2" stroke-linejoin="round"/><circle cx="32" cy="18" r="5" fill="#f4a9bb" stroke="#7a5a44" stroke-width="2.2"/><path d="M32 13l2 4-4 0z" fill="#a9c99a"/></svg>`,
+  speech:`<svg viewBox="0 0 64 64"><path d="M12 14h40a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H30l-12 10v-10h-6a6 6 0 0 1-6-6V20a6 6 0 0 1 6-6z" fill="#fce0e6" stroke="#7a5a44" stroke-width="2.4" stroke-linejoin="round"/><circle cx="24" cy="28" r="2.6" fill="#d97189"/><circle cx="34" cy="28" r="2.6" fill="#d97189"/><circle cx="44" cy="28" r="2.6" fill="#d97189"/></svg>`,
+  table:`<svg viewBox="0 0 64 64"><ellipse cx="32" cy="40" rx="22" ry="5" fill="#f4d9c2" stroke="#7a5a44" stroke-width="2.4"/><path d="M16 42v12M48 42v12" stroke="#7a5a44" stroke-width="2.4" stroke-linecap="round"/><circle cx="32" cy="22" r="3" fill="none"/><path d="M24 34h16v-3a8 8 0 0 0-16 0z" fill="#a9c99a" stroke="#7a5a44" stroke-width="2.2"/><path d="M22 22c0 6 3 9 10 9s10-3 10-9" fill="none" stroke="#7a5a44" stroke-width="2.2"/><path d="M44 19a4 4 0 0 1 0 8" fill="none" stroke="#7a5a44" stroke-width="2.2"/></svg>`,
+  menu:`<svg viewBox="0 0 64 64"><rect x="16" y="10" width="32" height="44" rx="4" fill="#fffaf2" stroke="#7a5a44" stroke-width="2.4"/><rect x="24" y="6" width="16" height="8" rx="3" fill="#a9c99a" stroke="#7a5a44" stroke-width="2.2"/><path d="M22 24h20M22 32h20M22 40h12" stroke="#f4a9bb" stroke-width="2.6" stroke-linecap="round"/></svg>`,
+  plateplus:`<svg viewBox="0 0 64 64"><ellipse cx="32" cy="42" rx="22" ry="9" fill="#fffaf2" stroke="#7a5a44" stroke-width="2.4"/><ellipse cx="32" cy="42" rx="13" ry="5" fill="#fce0e6"/><circle cx="32" cy="20" r="11" fill="#a9c99a" stroke="#7a5a44" stroke-width="2.4"/><path d="M32 15v10M27 20h10" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>`,
+  magnify:`<svg viewBox="0 0 64 64"><ellipse cx="28" cy="46" rx="18" ry="6" fill="#f4d9c2" opacity=".6"/><circle cx="27" cy="27" r="15" fill="#fce0e6" stroke="#7a5a44" stroke-width="2.6"/><circle cx="27" cy="27" r="8" fill="#fff"/><path d="M38 38l12 12" stroke="#7a5a44" stroke-width="3.4" stroke-linecap="round"/></svg>`,
+  receipt:`<svg viewBox="0 0 64 64"><path d="M18 8h28v44l-5-3-5 3-4-3-5 3-4-3-5 3z" fill="#fffaf2" stroke="#7a5a44" stroke-width="2.4" stroke-linejoin="round"/><path d="M24 20h16M24 28h16M24 36h10" stroke="#cbad92" stroke-width="2.4" stroke-linecap="round"/><circle cx="40" cy="38" r="7" fill="#a9c99a" stroke="#7a5a44" stroke-width="2"/><text x="40" y="42" font-size="9" text-anchor="middle" fill="#5e4636" font-family="DM Mono, monospace">£</text></svg>`,
+  clock:`<svg viewBox="0 0 64 64"><circle cx="28" cy="30" r="20" fill="#fce0e6" stroke="#7a5a44" stroke-width="2.6"/><path d="M28 18v12l8 5" fill="none" stroke="#7a5a44" stroke-width="2.6" stroke-linecap="round"/><circle cx="48" cy="48" r="11" fill="#a9c99a" stroke="#7a5a44" stroke-width="2.2"/><text x="48" y="52" font-size="10" text-anchor="middle" fill="#fff" font-family="DM Mono, monospace">%</text></svg>`,
+  star:`<svg viewBox="0 0 64 64"><circle cx="32" cy="30" r="22" fill="#fbe2c0" stroke="#7a5a44" stroke-width="2.4"/><path d="M32 16l4.5 9.5 10.5 1.4-7.7 7.2 1.9 10.4L32 39.6 22.8 44l1.9-10.4-7.7-7.2 10.5-1.4z" fill="#f4a9bb" stroke="#7a5a44" stroke-width="2" stroke-linejoin="round"/></svg>`,
+  ticket:`<svg viewBox="0 0 64 64"><path d="M10 18h44v10a4 4 0 0 0 0 8v10H10v-10a4 4 0 0 0 0-8z" fill="#fce0e6" stroke="#7a5a44" stroke-width="2.4" stroke-linejoin="round"/><path d="M30 18v28" stroke="#7a5a44" stroke-width="2.2" stroke-dasharray="3 3"/><path d="M37 28h12M37 36h9" stroke="#d97189" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="32" r="6" fill="#a9c99a" stroke="#7a5a44" stroke-width="2"/></svg>`,
+  jar:`<svg viewBox="0 0 64 64"><rect x="18" y="20" width="28" height="34" rx="8" fill="#e0eed4" stroke="#7a5a44" stroke-width="2.4"/><rect x="20" y="12" width="24" height="9" rx="3" fill="#cbad92" stroke="#7a5a44" stroke-width="2.2"/><circle cx="28" cy="38" r="5" fill="#fbe2c0" stroke="#7a5a44" stroke-width="2"/><circle cx="38" cy="44" r="5" fill="#fbe2c0" stroke="#7a5a44" stroke-width="2"/><path d="M30 30c2-3 4-3 6 0" fill="none" stroke="#d97189" stroke-width="2.2" stroke-linecap="round"/></svg>`
+};
+
+/* ---------------- the 12 challenges ---------------- */
+const SHIFTS = [
+  {
+    name: 'Opening Up', when: '8am · lights on, kettle on', emoji: '🌅',
+    cards: [
+      {
+        id:'open-up', icon:'bell', title:'Open Up',
+        summary:'Print the café\u2019s cheery opening message to start the day.',
+        chips:[['printing','c-talk'],['subroutines','c-talk']],
+        brief:`<p>Every morning the café needs a friendly welcome on screen. Write a subroutine called <code>open_cafe()</code> that prints the two lines below. It takes <strong>no inputs</strong> and returns nothing. It just prints.</p><p>Call it at the bottom of your file so it runs.</p>`,
+        outLabel:'Expected output',
+        out:`Welcome to the Neko Neko Café!\nThe kettle is on and the cats are awake.`,
+        hints:[
+          {p:`A subroutine with no inputs is just <code>def</code>, empty brackets, a colon, then your indented <code>print()</code> lines. What does the very first line look like?`},
+          {p:`Like this, and remember to call it afterwards:`, code:`def open_cafe():\n    print("Welcome to the Neko Neko Café!")\n    print("The kettle is on and the cats are awake.")\n\nopen_cafe()`}
+        ]
+      },
+      {
+        id:'special', icon:'cake', title:'Today\u2019s Special',
+        summary:'A function that puts any dish up on the specials board.',
+        chips:[['subroutines','c-talk'],['strings','c-talk']],
+        brief:`<p>Write a subroutine called <code>show_special(dish)</code> that takes one input, the name of a dish, and prints it framed up as today\u2019s special.</p>`,
+        exampleLabel:'Example call',
+        example:`show_special("Matcha cheesecake")`,
+        outLabel:'Expected output',
+        out:`*** TODAY'S SPECIAL: Matcha cheesecake ***`,
+        hints:[
+          {p:`The function has one input called <code>dish</code>. You need to print the text around it joined to it. You can glue strings with <code>+</code>, or drop the value into an f-string.`},
+          {p:`Either of these works:`, code:`def show_special(dish):\n    print("*** TODAY'S SPECIAL: " + dish + " ***")\n\n# or, using an f-string:\n# print(f"*** TODAY'S SPECIAL: {dish} ***")`}
+        ]
+      },
+      {
+        id:'shout', icon:'speech', title:'Shout the Order',
+        summary:'Take the customer\u2019s order and bellow it to the kitchen in CAPITALS.',
+        chips:[['input','c-talk'],['string methods','c-talk']],
+        brief:`<p>The kitchen can only read orders in capitals. Ask the customer what they would like, then print it back <strong>in capital letters</strong>.</p>`,
+        exampleLabel:'Example run',
+        example:`What can we get you? hot chocolate\nORDER: HOT CHOCOLATE`,
+        hints:[
+          {p:`You need <code>input()</code> to collect the order, and a string method that turns text into capitals. Do you remember which method that is?`},
+          {p:`<code>.upper()</code> is the one:`, code:`order = input("What can we get you? ")\nprint("ORDER: " + order.upper())`}
+        ]
+      }
+    ]
+  },
+  {
+    name: 'The Morning Rush', when: '10am · getting busy', emoji: '☕',
+    cards: [
+      {
+        id:'table', icon:'table', title:'Table for How Many?',
+        summary:'Ask the party size and give a warm reply, with a nudge for big groups.',
+        chips:[['input','c-talk'],['if / else','c-pick']],
+        brief:`<p>Ask how many people are in the party. If it is <strong>more than 6</strong>, say you will push some tables together. Otherwise, seat them as normal.</p><div class="callout note">📐 <b>Remember:</b> <code>input()</code> always gives you text. Wrap it in <code>int()</code> to turn it into a whole number you can compare.</div>`,
+        exampleLabel:'Two example runs',
+        example:`How many in your party? 2\nLovely, right this way to a table for 2.\n\nHow many in your party? 8\nA party of 8! We'll push some tables together.`,
+        hints:[
+          {p:`Turn the answer into a number with <code>int()</code>, then use <code>if</code> and <code>else</code> to pick the reply. What is the test for a big group?`},
+          {p:`The f-strings here let you drop the number straight into the sentence:`, code:`size = int(input("How many in your party? "))\nif size > 6:\n    print(f"A party of {size}! We'll push some tables together.")\nelse:\n    print(f"Lovely, right this way to a table for {size}.")`}
+        ]
+      },
+      {
+        id:'menu-board', icon:'menu', title:'The Menu Board',
+        summary:'Store the dishes in a list and print them out, nicely numbered.',
+        chips:[['lists','c-pick'],['loops','c-pick']],
+        brief:`<p>Put the café\u2019s dishes in a list, then print every one on its own line, numbered from 1.</p>`,
+        starterLabel:'Starter data · copy this in first',
+        starter:`menu = ["Cinnamon roll", "Matcha latte", "Strawberry mochi", "Iced coffee", "Cat-paw cookie"]`,
+        outLabel:'Expected output',
+        out:`1. Cinnamon roll\n2. Matcha latte\n3. Strawberry mochi\n4. Iced coffee\n5. Cat-paw cookie`,
+        hints:[
+          {p:`Loop through the list, but you also need a number that starts at 1 and goes up by one each time. How could you keep your own counter that climbs as the loop runs?`},
+          {p:`Start a counter before the loop, print it with the dish, then add one each time:`, code:`menu = ["Cinnamon roll", "Matcha latte", "Strawberry mochi", "Iced coffee", "Cat-paw cookie"]\nnumber = 1\nfor dish in menu:\n    print(str(number) + ". " + dish)\n    number = number + 1`}
+        ],
+        aside:`Flying already? Python has <code>enumerate()</code> which counts for you, e.g. <code>for i, dish in enumerate(menu, 1):</code>. It is outside the J277 spec, so treat it as a bonus, not the expected answer.`
+      },
+      {
+        id:'add-dish', icon:'plateplus', title:'Add a Dish',
+        summary:'Let the chef type in a new dish and pop it onto the menu.',
+        chips:[['lists','c-pick'],['input','c-talk']],
+        brief:`<p>Ask the user for a brand new dish, add it to the end of the <code>menu</code> list, then confirm it has been added.</p>`,
+        starterLabel:'Starter data · copy this in first',
+        starter:`menu = ["Cinnamon roll", "Matcha latte", "Strawberry mochi", "Iced coffee", "Cat-paw cookie"]`,
+        exampleLabel:'Example run',
+        example:`What new dish shall we add? Honey toast\nHoney toast has been added to the menu!`,
+        hints:[
+          {p:`Two pieces: <code>input()</code> for the new dish, and the list method that sticks an item on the end. Which method adds to the end of a list?`},
+          {p:`<code>.append()</code> does the adding:`, code:`menu = ["Cinnamon roll", "Matcha latte", "Strawberry mochi", "Iced coffee", "Cat-paw cookie"]\nnew_dish = input("What new dish shall we add? ")\nmenu.append(new_dish)\nprint(new_dish + " has been added to the menu!")`}
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Lunch Service', when: '12pm · full house', emoji: '🍱',
+    cards: [
+      {
+        id:'find-dish', icon:'magnify', title:'Find My Dish',
+        summary:'A customer asks for something. Search the menu and tell them if it\u2019s on.',
+        chips:[['lists','c-pick'],['loops','c-pick'],['if / else','c-pick']],
+        brief:`<p>Ask the customer which dish they are after, then search the menu. If it is there, say you have it. If not, say sorry.</p>`,
+        starterLabel:'Starter data · copy this in first',
+        starter:`menu = ["Cinnamon roll", "Matcha latte", "Strawberry mochi", "Iced coffee", "Cat-paw cookie"]`,
+        exampleLabel:'Two example runs',
+        example:`Which dish are you looking for? Iced coffee\nYes! Iced coffee is on the menu.\n\nWhich dish are you looking for? Pizza\nSorry, we don't have Pizza today.`,
+        hints:[
+          {p:`The classic way to search: set a flag like <code>found = False</code>, loop through every dish, and flip the flag to <code>True</code> if you spot a match. Then decide what to print after the loop.`},
+          {p:`Here is the search-with-a-flag pattern:`, code:`menu = ["Cinnamon roll", "Matcha latte", "Strawberry mochi", "Iced coffee", "Cat-paw cookie"]\nwanted = input("Which dish are you looking for? ")\nfound = False\nfor dish in menu:\n    if dish == wanted:\n        found = True\nif found:\n    print("Yes! " + wanted + " is on the menu.")\nelse:\n    print("Sorry, we don't have " + wanted + " today.")`}
+        ],
+        aside:`Python has a neat shortcut for exactly this: <code>if wanted in menu:</code> does the whole search in one line. Worth knowing once you have done it the long way.`
+      },
+      {
+        id:'total-bill', icon:'receipt', title:'Total the Bill',
+        summary:'Add up a list of prices and print the total for the table.',
+        chips:[['loops','c-pick'],['lists','c-pick']],
+        brief:`<p>A table\u2019s order has these prices. Add them all up and print the total bill.</p>`,
+        starterLabel:'Starter data · copy this in first',
+        starter:`prices = [3.20, 2.50, 4.00, 1.80]`,
+        outLabel:'Expected output',
+        out:`Total bill: £11.5`,
+        hints:[
+          {p:`Start a total at <code>0</code> before the loop, then add each price onto it as you go. This is called a running total.`},
+          {p:`Build the total up one price at a time:`, code:`prices = [3.20, 2.50, 4.00, 1.80]\ntotal = 0\nfor price in prices:\n    total = total + price\nprint("Total bill: £" + str(total))`}
+        ],
+        aside:`Spotted that it prints £11.5 and not £11.50? That is just how Python shows numbers. When you are ready, <code>f"£{total:.2f}"</code> forces two decimal places like real money.`
+      },
+      {
+        id:'happy-hour', icon:'clock', title:'Happy Hour',
+        summary:'20% off, but only at the right time AND on a weekday.',
+        chips:[['selection','c-pick'],['and / or / not','c-pick']],
+        brief:`<p>Happy Hour is <strong>20% off</strong>, but only between 2pm and 4pm <strong>and</strong> only on a weekday. Ask the hour (24-hour clock, so 2pm is 14) and whether it is a weekday. Then decide.</p>`,
+        exampleLabel:'Two example runs',
+        example:`What hour is it (24-hour clock)? 15\nIs it a weekday (yes/no)? yes\nHappy Hour is on! Enjoy 20% off.\n\nWhat hour is it (24-hour clock)? 18\nIs it a weekday (yes/no)? yes\nSorry, no Happy Hour right now.`,
+        hints:[
+          {p:`More than one thing has to be true at the same time: the hour is in range, and it is a weekday. Which keyword joins conditions so they must <em>all</em> hold?`},
+          {p:`<code>and</code> chains the three tests together:`, code:`hour = int(input("What hour is it (24-hour clock)? "))\nweekday = input("Is it a weekday (yes/no)? ")\nif hour >= 14 and hour < 16 and weekday == "yes":\n    print("Happy Hour is on! Enjoy 20% off.")\nelse:\n    print("Sorry, no Happy Hour right now.")`}
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Last Orders', when: '4pm · winding down', emoji: '🌙',
+    cards: [
+      {
+        id:'best-seller', icon:'star', title:'Best Seller',
+        summary:'Two lists, dishes and their sales. Return the day\u2019s top seller.',
+        chips:[['functions / return','c-func'],['loops','c-pick']],
+        brief:`<p>Write a function <code>best_seller(dishes, sales)</code> that <strong>returns</strong> the name of the dish that sold the most. The two lists line up: <code>dishes[0]</code> sold <code>sales[0]</code>, and so on. Print the result after calling it.</p>`,
+        starterLabel:'Starter data · copy this in first',
+        starter:`dishes = ["Cinnamon roll", "Matcha latte", "Strawberry mochi", "Iced coffee"]\nsales = [12, 30, 18, 25]`,
+        outLabel:'Expected output',
+        out:`Best seller today: Matcha latte`,
+        hints:[
+          {p:`Track the position of the best so far. Loop through by index with <code>range(len(sales))</code> so you can compare each sales figure to the best one you have seen. Then <code>return</code> the dish at that position.`},
+          {p:`Keep hold of the winning index, then return its dish:`, code:`def best_seller(dishes, sales):\n    best_index = 0\n    for i in range(len(sales)):\n        if sales[i] > sales[best_index]:\n            best_index = i\n    return dishes[best_index]\n\ndishes = ["Cinnamon roll", "Matcha latte", "Strawberry mochi", "Iced coffee"]\nsales = [12, 30, 18, 25]\nprint("Best seller today: " + best_seller(dishes, sales))`}
+        ]
+      },
+      {
+        id:'order-up', icon:'ticket', title:'Order Up!',
+        summary:'Keep taking items until they say "done", then read the order back.',
+        chips:[['while loops','c-pick'],['lists','c-pick']],
+        brief:`<p>You do not know how many things a customer will order. Keep asking for items and adding each one, until they type <code>done</code>. Then print the whole order back.</p>`,
+        exampleLabel:'Example run',
+        example:`Add an item (or 'done'): latte\nAdd an item (or 'done'): cookie\nAdd an item (or 'done'): done\nYour order:\n- latte\n- cookie`,
+        hints:[
+          {p:`Because you do not know how many loops you need, a <code>while</code> loop fits better than a <code>for</code>. Keep going while the input is not <code>"done"</code>. Where will you store each item as it comes in?`},
+          {p:`Ask once before the loop, then again at the end of each pass:`, code:`order = []\nitem = input("Add an item (or 'done'): ")\nwhile item != "done":\n    order.append(item)\n    item = input("Add an item (or 'done'): ")\nprint("Your order:")\nfor thing in order:\n    print("- " + thing)`}
+        ]
+      },
+      {
+        id:'takings', icon:'jar', title:'Save the Takings',
+        summary:'Write the day\u2019s total to a file, then read it back tomorrow.',
+        chips:[['file handling','c-star']],
+        brief:`<p>At closing time, save the day\u2019s takings into a text file so they are still there next time. Then open the file again and read the number back out.</p><div class="callout stretch">🌟 <b>Stretch challenge:</b> basic file handling (open, read, write, close) is on the J277 spec, but it usually comes later in the course. Lovely if you get it now, no worries if you save it for another day.</div>`,
+        starterLabel:'Starter data · copy this in first',
+        starter:`total = 142.5`,
+        outLabel:'Expected output',
+        out:`Saved today's takings: £142.5\nRead back from file: £142.5`,
+        hints:[
+          {p:`Open a file with a mode: <code>"w"</code> to write, <code>"r"</code> to read. A file only stores text, so turn the number into a string with <code>str()</code> before writing. Close the file when you are done with it.`},
+          {p:`Write it, close it, then open it again to read:`, code:`total = 142.5\n\nfile = open("takings.txt", "w")\nfile.write(str(total))\nfile.close()\nprint("Saved today's takings: £" + str(total))\n\nfile = open("takings.txt", "r")\nsaved = file.read()\nfile.close()\nprint("Read back from file: £" + saved)`}
+        ],
+        aside:`The file <code>takings.txt</code> appears in the same folder as your Python program. Open it and you will see the number sitting there.`
+      }
+    ]
+  }
+];
+
+/* flatten for lookups */
+const ALL = [];
+SHIFTS.forEach(s => s.cards.forEach(c => ALL.push(c)));
+
+/* ---------------- progress storage ---------------- */
+const KEY = 'nekoCafeDone_v1';
+function loadDone(){
+  try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveDone(arr){
+  try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e){}
+}
+let done = loadDone();
+function isDone(id){ return done.includes(id); }
+
+/* ---------------- build the board ---------------- */
+function chipHTML(ch){ return `<span class="chip ${ch[1]}">${ch[0]}</span>`; }
+
+function buildBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  let n = 0;
+  SHIFTS.forEach((shift, si) => {
+    const sec = document.createElement('section');
+    sec.className = 'shift';
+    sec.dataset.shift = si;
+
+    const head = document.createElement('div');
+    head.className = 'shift-head';
+    head.innerHTML = `
+      <span class="shift-sign"><span class="clock-emoji">${shift.emoji}</span>${shift.name}</span>
+      <span class="shift-when">${shift.when}</span>
+      <span class="shift-line"></span>
+      <span class="shift-done-pill">🐾 Shift complete!</span>`;
+    sec.appendChild(head);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    shift.cards.forEach(card => {
+      n++;
+      const el = document.createElement('div');
+      el.className = 'card' + (isDone(card.id) ? ' done' : '');
+      el.style.animationDelay = (n * 0.05) + 's';
+      el.innerHTML = `
+        <span class="card-no">#${String(n).padStart(2,'0')}</span>
+        <span class="tick">✓</span>
+        <div class="card-icon">${I[card.icon]}</div>
+        <div class="card-title">${card.title}</div>
+        <div class="card-summary">${card.summary}</div>
+        <div class="chips">${card.chips.map(chipHTML).join('')}</div>`;
+      el.onclick = () => openCard(card.id);
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
+      el.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCard(card.id); } };
+      grid.appendChild(el);
+    });
+    sec.appendChild(grid);
+    board.appendChild(sec);
+  });
+  refreshState();
+}
+
+/* ---------------- modal ---------------- */
+let currentId = null;
+const hintShown = {};
+
+function openCard(id){
+  currentId = id;
+  const c = ALL.find(x => x.id === id);
+  if(!hintShown[id]) hintShown[id] = 0;
+  renderModal(c);
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCard(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentId = null;
+}
+
+function renderModal(c){
+  let html = '';
+  html += `<div class="modal-head">
+    <button class="x-close" onclick="closeCard()" aria-label="Close">✕</button>
+    <div class="m-icon">${I[c.icon]}</div>
+    <div class="modal-eyebrow">CHALLENGE</div>
+    <div class="modal-title">${c.title}</div>
+    <div class="modal-sum">${c.summary}</div>
+    <div class="modal-chips">${c.chips.map(chipHTML).join('')}</div>
+  </div>`;
+
+  html += `<div class="modal-body">`;
+  html += `<div class="field-label">The job</div>${c.brief}`;
+
+  if(c.starter){
+    html += `<div class="field-label">${c.starterLabel || 'Starter data'}</div>` + codeBlock(c.starter);
+  }
+  if(c.example){
+    html += `<div class="field-label">${c.exampleLabel || 'Example'}</div>` + outBox(c.example);
+  }
+  if(c.out){
+    html += `<div class="field-label">${c.outLabel || 'Expected output'}</div>` + outBox(c.out);
+  }
+  if(c.aside){
+    html += `<div class="callout tip">⭐ ${c.aside}</div>`;
+  }
+
+  /* hints */
+  const shown = hintShown[c.id] || 0;
+  html += `<div class="hints"><div class="hints-h">Stuck? Two hints, whenever you need them.</div><div class="hint-btns">`;
+  c.hints.forEach((h, i) => {
+    const isOut = i < shown;
+    const label = i === 0 ? 'Hint 1 · gentle nudge' : 'Hint 2 · more detail';
+    html += `<button class="h-btn" onclick="reveal(${i+1})" ${isOut ? 'disabled' : ''}>${isOut ? '✓ ' + (i===0?'Hint 1':'Hint 2') : label}</button>`;
+  });
+  html += `</div>`;
+  c.hints.forEach((h, i) => {
+    if(i < shown){
+      html += `<div class="hint-card"><div class="hint-tag">HINT ${i+1}</div><p>${h.p}</p>${h.code ? codeBlock(h.code) : ''}</div>`;
+    }
+  });
+  html += `</div>`;
+
+  /* done button */
+  const d = isDone(c.id);
+  html += `<div class="done-row"><button class="done-btn ${d ? 'is-done' : ''}" onclick="toggleDone()">${d ? '✓ Done. Tap to undo' : 'Mark this one done'}</button></div>`;
+
+  html += `</div>`;
+  document.getElementById('modal').innerHTML = html;
+}
+
+function reveal(n){
+  hintShown[currentId] = n;
+  renderModal(ALL.find(x => x.id === currentId));
+}
+
+function toggleDone(){
+  if(isDone(currentId)){
+    done = done.filter(x => x !== currentId);
+  } else {
+    done.push(currentId);
+    toast(pickPraise());
+  }
+  saveDone(done);
+  renderModal(ALL.find(x => x.id === currentId));
+  buildBoard();
+}
+
+/* ---------------- progress + shift state ---------------- */
+function refreshState(){
+  const num = done.length;
+  document.getElementById('progNum').textContent = num;
+  document.getElementById('progFill').style.width = (num / ALL.length * 100) + '%';
+  document.getElementById('progMsg').textContent = progressMessage(num);
+
+  SHIFTS.forEach((shift, si) => {
+    const all = shift.cards.every(c => isDone(c.id));
+    const sec = document.querySelector(`.shift[data-shift="${si}"]`);
+    if(sec) sec.classList.toggle('complete', all);
+  });
+}
+
+function progressMessage(n){
+  if(n === 0) return 'Welcome in! Tap a card to begin.';
+  if(n < 3)  return 'Nice start. The kettle approves.';
+  if(n < 6)  return 'Getting into the swing of it now.';
+  if(n < 9)  return 'The lunch crowd is well looked after.';
+  if(n < 12) return 'Almost closing time. So close!';
+  return 'Every job done. The cats are proud of you. 🐾';
+}
+const PRAISE = ['Nicely done! 🐾','One for the board!','The cats approve. ☕','Lovely work!','Order up! ✓','That hit the spot.'];
+function pickPraise(){ return PRAISE[Math.floor(Math.random()*PRAISE.length)]; }
+
+/* ---------------- bits and bobs ---------------- */
+function cp(btn){
+  const pre = btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = '✓ copied'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('ok'); }, 1800);
+  }).catch(() => { btn.textContent = 'select & copy'; });
+}
+
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+document.getElementById('overlay').addEventListener('click', e => {
+  if(e.target.id === 'overlay') closeCard();
+});
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeCard(); });
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if(confirm('Clear all your progress and start a fresh shift?')){
+    done = []; saveDone(done); buildBoard();
+  }
+});
+
+buildBoard();
+</script>
+</body>
+</html>

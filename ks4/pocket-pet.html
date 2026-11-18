@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Pocket Pet Project: Year 10 Python Challenge Board</title>
+<style>
+:root {
+  --plastic:    #e9e6dd;   /* 90s computer beige                */
+  --plastic-dk: #d8d4c6;
+  --card:       #fffdf7;
+  --ink:        #33302a;
+  --ink-soft:   #7c766a;
+  --line:       #d4cfc0;
+
+  --shell:      #ff8fb4;   /* classic pink shell                */
+  --shell-deep: #e0497f;
+  --shell-soft: #ffe1ec;
+
+  --lcd-bg:     #a3b75c;   /* pea-green LCD                     */
+  --lcd-bg-dk:  #8aa04a;
+  --lcd-ink:    #20300e;
+  --lcd-dim:    #5d7032;
+
+  --teal:       #2a9d9d;
+  --teal-soft:  #d9f0ef;
+  --purple:     #7d6fc9;
+  --purple-soft:#e9e4f8;
+  --amber:      #d98c1f;
+  --amber-soft: #fbecd2;
+
+  --code-bg:    #222a1a;
+  --code-fg:    #d9e8b4;
+  --code-acc:   #ffadc9;
+  --code-com:   #8fa06b;
+
+  --px-shadow:  4px 4px 0 rgba(51,48,42,.16);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  color: var(--ink);
+  background-color: var(--plastic);
+  background-image:
+    radial-gradient(ellipse at 15% 0%, rgba(255,143,180,.16) 0%, transparent 42%),
+    radial-gradient(ellipse at 85% 2%, rgba(163,183,92,.20) 0%, transparent 42%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect x='11' y='11' width='2' height='2' fill='%23cdc8b8' opacity='.5'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 0 16px 80px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1040px; margin: 0 auto; }
+
+/* ============ HEADER / DEVICE ============ */
+.topbar { text-align: center; padding: 34px 0 4px; }
+
+.device {
+  width: 280px;
+  margin: 0 auto;
+  background: linear-gradient(160deg, #ffa6c4 0%, var(--shell) 45%, #f06fa0 100%);
+  border: 3px solid var(--shell-deep);
+  border-radius: 48% 48% 46% 46% / 56% 56% 42% 42%;
+  padding: 26px 26px 20px;
+  box-shadow:
+    inset 0 4px 10px rgba(255,255,255,.55),
+    inset 0 -8px 14px rgba(180,40,100,.25),
+    0 14px 28px rgba(180,40,100,.22);
+  position: relative;
+}
+.device-loop {
+  width: 26px; height: 26px;
+  border: 5px solid var(--shell-deep);
+  border-radius: 50%;
+  position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+  background: var(--plastic);
+}
+.lcd {
+  background: var(--lcd-bg);
+  border: 3px solid #5d6b32;
+  border-radius: 12px;
+  padding: 14px 10px 8px;
+  box-shadow: inset 0 0 0 3px var(--lcd-bg-dk), inset 0 5px 14px rgba(32,48,14,.35);
+  position: relative;
+  overflow: hidden;
+}
+.lcd::after {  /* scanlines */
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(32,48,14,.07) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+  border-radius: 9px;
+}
+.pet-stage { width: 108px; height: 108px; margin: 0 auto; position: relative; }
+.pixel-pet { position: absolute; top: 0; left: 0; background: transparent; }
+.lcd-caption {
+  font-family: 'VT323', monospace;
+  color: var(--lcd-ink);
+  font-size: 1.3rem;
+  text-align: center;
+  letter-spacing: 1px;
+  line-height: 1.15;
+  margin-top: 6px;
+}
+.lcd-caption .meter { color: var(--lcd-dim); }
+.lcd-heart {
+  position: absolute;
+  font-family: 'VT323', monospace;
+  color: var(--lcd-ink);
+  font-size: 1.5rem;
+  animation: floatup 1.2s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes floatup {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-46px); }
+}
+.dev-btns { display: flex; justify-content: center; gap: 22px; margin-top: 16px; }
+.dev-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 3px solid var(--shell-deep);
+  background: linear-gradient(180deg, #fff0f6, #ffc6da);
+  box-shadow: 0 4px 0 var(--shell-deep);
+  cursor: pointer;
+  font-family: 'Press Start 2P', monospace;
+  font-size: .6rem; color: var(--shell-deep);
+  transition: transform .08s, box-shadow .08s;
+}
+.dev-btn:hover { filter: brightness(1.04); }
+.dev-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--shell-deep); }
+.dev-btn:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+.dev-hint { font-size: .78rem; color: var(--ink-soft); margin-top: 10px; }
+
+.page-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1.15rem, 4vw, 1.7rem);
+  color: var(--ink);
+  margin-top: 26px;
+  line-height: 1.5;
+  text-shadow: 3px 3px 0 rgba(255,143,180,.45);
+}
+.page-sub {
+  font-family: 'Press Start 2P', monospace;
+  font-size: .58rem;
+  color: var(--shell-deep);
+  letter-spacing: 2px;
+  margin-top: 12px;
+}
+.page-tag {
+  display: inline-block;
+  margin-top: 16px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: var(--px-shadow);
+  padding: 9px 18px;
+  font-size: .92rem;
+}
+
+/* ============ PROGRESS ============ */
+.progress-card {
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: var(--px-shadow);
+  padding: 16px 20px;
+  margin: 28px auto 6px;
+  max-width: 620px;
+}
+.progress-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 9px; }
+.progress-title { font-family: 'Press Start 2P', monospace; font-size: .68rem; letter-spacing: 1px; color: var(--ink); }
+.progress-msg { font-size: .85rem; color: var(--ink-soft); }
+.progress-track {
+  height: 18px;
+  background: var(--shell-soft);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%; width: 0;
+  background: repeating-linear-gradient(90deg, var(--shell) 0 12px, var(--shell-deep) 12px 14px);
+  transition: width .5s steps(12);
+}
+.progress-count { text-align: right; font-size: .82rem; color: var(--ink-soft); margin-top: 6px; }
+.progress-count b { color: var(--shell-deep); font-size: 1rem; }
+
+/* ============ STAGES ============ */
+.stage { margin-top: 40px; }
+.stage-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.stage-sign {
+  font-family: 'Press Start 2P', monospace;
+  font-size: .72rem;
+  background: var(--ink);
+  color: var(--card);
+  padding: 11px 16px;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 var(--shell);
+  display: flex; align-items: center; gap: 10px;
+  line-height: 1.4;
+}
+.stage-sign .emoji { font-size: 1rem; font-family: system-ui; }
+.stage-sub { font-size: .82rem; color: var(--ink-soft); white-space: nowrap; }
+.stage-line { flex: 1; height: 4px; min-width: 40px; background: repeating-linear-gradient(90deg, var(--ink) 0 8px, transparent 8px 16px); opacity: .25; }
+.stage-pill {
+  display: none; align-items: center; gap: 6px;
+  font-family: 'Press Start 2P', monospace; font-size: .52rem;
+  background: var(--lcd-bg); color: var(--lcd-ink);
+  border: 2px solid var(--lcd-ink); border-radius: 3px;
+  padding: 7px 11px;
+  animation: pop .35s ease-out;
+}
+.stage.complete .stage-pill { display: inline-flex; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ============ CARD GRID ============ */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+.card {
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: var(--px-shadow);
+  padding: 18px 16px 14px;
+  cursor: pointer;
+  position: relative;
+  transition: transform .12s, box-shadow .12s;
+  animation: cardin .4s ease-out backwards;
+}
+@keyframes cardin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.card:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 rgba(51,48,42,.18); }
+.card:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+.card-no {
+  font-family: 'Press Start 2P', monospace; font-size: .55rem;
+  color: var(--ink-soft); position: absolute; top: 12px; right: 12px;
+}
+.tick {
+  display: none;
+  position: absolute; top: -10px; left: -10px;
+  width: 30px; height: 30px;
+  background: var(--lcd-bg); color: var(--lcd-ink);
+  border: 2px solid var(--lcd-ink); border-radius: 4px;
+  font-weight: 700; font-size: 1rem;
+  text-align: center; line-height: 26px;
+}
+.card.done { border-color: var(--lcd-dim); background: #fbfcf3; }
+.card.done .tick { display: block; animation: pop .3s ease-out; }
+.card-icon {
+  width: 52px; height: 52px;
+  background: var(--lcd-bg);
+  border: 2px solid var(--lcd-ink);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+  box-shadow: inset 0 2px 6px rgba(32,48,14,.25);
+}
+.card-title { font-weight: 700; font-size: 1.06rem; margin-bottom: 4px; }
+.card-sum { font-size: .86rem; color: var(--ink-soft); line-height: 1.45; min-height: 3.6em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip {
+  font-family: 'DM Mono', monospace; font-size: .68rem;
+  padding: 3px 9px; border-radius: 3px; border: 1.5px solid;
+}
+.chip.c-data { background: var(--teal-soft);   color: #19706f; border-color: var(--teal); }
+.chip.c-sub  { background: var(--shell-soft);  color: #b73767; border-color: var(--shell-deep); }
+.chip.c-flow { background: var(--purple-soft); color: #5b4daa; border-color: var(--purple); }
+.chip.c-star { background: var(--amber-soft);  color: #a3690f; border-color: var(--amber); }
+
+/* ============ MODAL ============ */
+.overlay {
+  position: fixed; inset: 0; background: rgba(51,48,42,.55);
+  display: none; z-index: 40;
+}
+.overlay.open { display: block; animation: fadein .15s ease-out; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  position: fixed; z-index: 50;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: min(720px, calc(100vw - 28px));
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 8px 8px 0 rgba(51,48,42,.25);
+  padding: 26px 28px 22px;
+  display: none;
+}
+.modal.open { display: block; animation: pop .2s ease-out; }
+.x-close {
+  position: sticky; top: 0; float: right;
+  width: 34px; height: 34px;
+  background: var(--shell-soft); color: var(--shell-deep);
+  border: 2px solid var(--shell-deep); border-radius: 4px;
+  font-size: 1.05rem; font-weight: 700; cursor: pointer;
+}
+.x-close:hover { background: var(--shell); color: #fff; }
+.m-eyebrow { font-family: 'Press Start 2P', monospace; font-size: .55rem; color: var(--shell-deep); letter-spacing: 2px; margin-bottom: 10px; }
+.m-title { font-weight: 700; font-size: 1.45rem; line-height: 1.3; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.m-title .m-emoji { font-size: 1.3rem; }
+.m-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.m-body { font-size: .95rem; }
+.m-body p { margin-bottom: 12px; }
+.m-body code {
+  font-family: 'DM Mono', monospace; font-size: .86em;
+  background: var(--plastic); border: 1px solid var(--line);
+  border-radius: 3px; padding: 1px 5px;
+}
+.callout {
+  border: 2px solid; border-radius: 6px;
+  padding: 11px 14px; margin: 12px 0; font-size: .88rem;
+}
+.callout.note    { background: var(--teal-soft);  border-color: var(--teal); }
+.callout.stretch { background: var(--amber-soft); border-color: var(--amber); }
+
+.field-label {
+  font-family: 'Press Start 2P', monospace; font-size: .52rem;
+  color: var(--ink-soft); letter-spacing: 1.5px; text-transform: uppercase;
+  margin: 18px 0 7px;
+}
+.code-wrap { position: relative; }
+.code-box {
+  background: var(--code-bg); color: var(--code-fg);
+  font-family: 'DM Mono', monospace; font-size: .84rem;
+  border-radius: 6px; border: 2px solid #161c10;
+  padding: 14px 16px; overflow-x: auto;
+  line-height: 1.55; white-space: pre;
+}
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  font-family: 'DM Mono', monospace; font-size: .68rem;
+  background: #39452a; color: var(--code-fg);
+  border: 1px solid #556a3a; border-radius: 4px;
+  padding: 4px 10px; cursor: pointer;
+}
+.copy-btn:hover { background: #485834; }
+.out-box {
+  background: var(--lcd-bg); color: var(--lcd-ink);
+  font-family: 'DM Mono', monospace; font-size: .84rem;
+  border: 2px solid var(--lcd-ink); border-radius: 6px;
+  box-shadow: inset 0 0 0 2px var(--lcd-bg-dk), inset 0 3px 8px rgba(32,48,14,.3);
+  padding: 13px 16px; overflow-x: auto;
+  line-height: 1.55; white-space: pre;
+}
+
+.hints { margin-top: 20px; }
+.hints-h { font-family: 'Press Start 2P', monospace; font-size: .52rem; color: var(--ink-soft); letter-spacing: 1.5px; margin-bottom: 8px; }
+.hint-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.h-btn {
+  font-family: 'Press Start 2P', monospace; font-size: .55rem;
+  background: var(--purple-soft); color: #5b4daa;
+  border: 2px solid var(--purple); border-radius: 4px;
+  box-shadow: 3px 3px 0 rgba(125,111,201,.35);
+  padding: 10px 14px; cursor: pointer; line-height: 1.5;
+}
+.h-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(125,111,201,.35); }
+.h-btn[disabled] { opacity: .45; cursor: default; }
+.hint-card {
+  border: 2px solid var(--purple); background: #f6f3fd;
+  border-radius: 6px; padding: 12px 14px; margin-top: 10px;
+  font-size: .9rem; animation: pop .25s ease-out;
+}
+.hint-card .hint-tag { font-family: 'Press Start 2P', monospace; font-size: .5rem; color: #5b4daa; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+.hint-card .code-wrap { margin-top: 10px; }
+
+.catchup {
+  margin-top: 20px;
+  border: 2px dashed var(--amber);
+  border-radius: 6px;
+  background: var(--amber-soft);
+}
+.catchup summary {
+  font-family: 'Press Start 2P', monospace; font-size: .55rem;
+  color: #a3690f; letter-spacing: 1px; line-height: 1.6;
+  padding: 12px 14px; cursor: pointer; list-style: none;
+}
+.catchup summary::-webkit-details-marker { display: none; }
+.catchup summary::before { content: "▸ "; }
+.catchup[open] summary::before { content: "▾ "; }
+.catchup-inner { padding: 0 14px 14px; }
+.catchup-warn { font-size: .82rem; color: #7a4e0a; margin-bottom: 10px; font-style: italic; }
+
+.aside { margin-top: 18px; font-size: .85rem; color: var(--ink-soft); border-top: 1px dashed var(--line); padding-top: 12px; }
+
+.done-row { margin-top: 22px; display: flex; justify-content: flex-end; }
+.done-btn {
+  font-family: 'Press Start 2P', monospace; font-size: .6rem;
+  background: var(--card); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 4px;
+  box-shadow: 3px 3px 0 rgba(51,48,42,.2);
+  padding: 12px 18px; cursor: pointer; line-height: 1.5;
+}
+.done-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(51,48,42,.2); }
+.done-btn.is-done { background: var(--lcd-bg); color: var(--lcd-ink); border-color: var(--lcd-ink); }
+
+/* ============ BADGES ============ */
+.badges-panel {
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: var(--px-shadow);
+  padding: 20px 24px;
+  margin-top: 46px;
+}
+.badges-head { font-family: 'Press Start 2P', monospace; font-size: .62rem; color: var(--shell-deep); letter-spacing: 2px; margin-bottom: 16px; }
+.badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.badge {
+  background: var(--plastic);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  padding: 13px 10px;
+  text-align: center;
+  transition: all .2s;
+}
+.badge-icon { font-size: 1.5rem; filter: grayscale(1); opacity: .4; margin-bottom: 5px; }
+.badge-name { font-weight: 700; font-size: .82rem; color: var(--ink-soft); }
+.badge-desc { font-size: .74rem; color: var(--ink-soft); margin-top: 2px; line-height: 1.4; }
+.badge.earned { border-color: var(--shell-deep); background: var(--shell-soft); box-shadow: 3px 3px 0 rgba(224,73,127,.25); }
+.badge.earned .badge-icon { filter: none; opacity: 1; }
+.badge.earned .badge-name { color: var(--shell-deep); }
+.badge.earned .badge-desc { color: var(--ink); }
+
+/* ============ TOAST / FOOTER ============ */
+.toast {
+  position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(90px);
+  background: var(--ink); color: var(--card);
+  font-family: 'Press Start 2P', monospace; font-size: .58rem;
+  border-radius: 6px; border: 2px solid var(--shell);
+  padding: 13px 20px; z-index: 60; line-height: 1.6;
+  transition: transform .3s ease-out; pointer-events: none;
+  max-width: calc(100vw - 40px); text-align: center;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+.footer { margin-top: 50px; text-align: center; font-size: .82rem; color: var(--ink-soft); }
+.reset-btn {
+  font-family: 'Press Start 2P', monospace; font-size: .52rem;
+  background: none; color: var(--ink-soft);
+  border: 2px solid var(--line); border-radius: 4px;
+  padding: 9px 14px; cursor: pointer; margin-top: 10px;
+}
+.reset-btn:hover { color: var(--shell-deep); border-color: var(--shell-deep); }
+
+@media (max-width: 560px) {
+  .modal { padding: 20px 16px 18px; }
+  .stage-sub { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 4</a></nav>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="device" aria-hidden="true">
+      <div class="device-loop"></div>
+      <div class="lcd">
+        <div class="pet-stage" id="petStage"><div class="pixel-pet" id="pixelPet"></div></div>
+        <div class="lcd-caption" id="lcdCaption">PIXL&nbsp;&nbsp;<span class="meter">CARE ░░░░░░░░</span></div>
+      </div>
+      <div class="dev-btns">
+        <button class="dev-btn" id="btnA" title="Jump to your next challenge">A</button>
+        <button class="dev-btn" id="btnB" title="See your achievements">B</button>
+        <button class="dev-btn" id="btnC" title="Give the pet some love">C</button>
+      </div>
+    </div>
+    <p class="dev-hint">A: next challenge &nbsp;·&nbsp; B: achievements &nbsp;·&nbsp; C: ♥</p>
+    <h1 class="page-title">THE POCKET PET PROJECT</h1>
+    <p class="page-sub">YEAR 10 · PYTHON · LISTS &amp; SUBROUTINES</p>
+    <p class="page-tag">12 challenges · one growing program · your pet's whole life is in your subroutines 🐾</p>
+  </header>
+
+  <section class="progress-card">
+    <div class="progress-top">
+      <span class="progress-title">CARE LEVEL</span>
+      <span class="progress-msg" id="progressMsg">The egg sits quietly. Waiting.</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-count"><b id="doneCount">0</b> / 12 challenges complete</div>
+  </section>
+
+  <main id="board"></main>
+
+  <section class="badges-panel" id="badgesPanel">
+    <div class="badges-head">ACHIEVEMENTS</div>
+    <div class="badges-grid" id="badgesGrid"></div>
+  </section>
+
+  <footer class="footer">
+    <p>Progress and achievements are saved in this browser only. Finish on the same machine you started on.</p>
+    <button class="reset-btn" id="resetBtn">RESET ALL PROGRESS</button>
+  </footer>
+
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <button class="x-close" id="xClose" aria-label="Close">✕</button>
+  <div class="m-eyebrow" id="mEyebrow"></div>
+  <div class="m-title" id="mTitle"></div>
+  <div class="m-chips" id="mChips"></div>
+  <div class="m-body" id="mBody"></div>
+  <div class="done-row"><button class="done-btn" id="doneBtn">MARK COMPLETE ✓</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/*DATA-START*/
+
+/* ---------- shared Python building blocks (used to assemble catch-up code) ---------- */
+
+const PY_HEADER = `# The Pocket Pet Project
+# The pet lives in a list: [name, age, hunger, tiredness, boredom, sadness]
+# Stats run from 0 to 10.  0 is GOOD, 10 is BAD. Every stat works the same way.
+
+NAME = 0
+AGE = 1
+HUNGER = 2
+TIREDNESS = 3
+BOREDOM = 4
+SADNESS = 5`;
+
+const PY_HEADER_RANDOM = `# The Pocket Pet Project
+# The pet lives in a list: [name, age, hunger, tiredness, boredom, sadness]
+# Stats run from 0 to 10.  0 is GOOD, 10 is BAD. Every stat works the same way.
+
+import random
+
+NAME = 0
+AGE = 1
+HUNGER = 2
+TIREDNESS = 3
+BOREDOM = 4
+SADNESS = 5`;
+
+const PY_GET_FACE = `def get_face(pet):
+    if pet[SADNESS] >= 8:
+        return "( ;_; )"
+    elif pet[HUNGER] >= 8:
+        return "( >_< )"
+    elif pet[TIREDNESS] >= 8:
+        return "( -_- )"
+    elif pet[BOREDOM] >= 8:
+        return "( =_= )"
+    else:
+        return "( ^_^ )"`;
+
+const PY_STATUS = `def show_status(pet):
+    print("--- " + pet[NAME] + " ---")
+    print("Age:", pet[AGE])
+    print("Hunger:", pet[HUNGER])
+    print("Tiredness:", pet[TIREDNESS])
+    print("Boredom:", pet[BOREDOM])
+    print("Sadness:", pet[SADNESS])`;
+
+const PY_STATUS_FACE = `def show_status(pet):
+    print("--- " + pet[NAME] + "  " + get_face(pet) + " ---")
+    print("Age:", pet[AGE])
+    print("Hunger:", pet[HUNGER])
+    print("Tiredness:", pet[TIREDNESS])
+    print("Boredom:", pet[BOREDOM])
+    print("Sadness:", pet[SADNESS])`;
+
+const PY_FEED = `def feed(pet):
+    pet[HUNGER] = pet[HUNGER] - 3
+    if pet[HUNGER] < 0:
+        pet[HUNGER] = 0
+    return pet`;
+
+const PY_PLAY = `def play(pet):
+    pet[BOREDOM] = pet[BOREDOM] - 2
+    pet[SADNESS] = pet[SADNESS] - 1
+    pet[TIREDNESS] = pet[TIREDNESS] + 1
+    if pet[BOREDOM] < 0:
+        pet[BOREDOM] = 0
+    if pet[SADNESS] < 0:
+        pet[SADNESS] = 0
+    if pet[TIREDNESS] > 10:
+        pet[TIREDNESS] = 10
+    return pet`;
+
+const PY_SLEEP = `def sleep(pet):
+    pet[TIREDNESS] = pet[TIREDNESS] - 4
+    pet[HUNGER] = pet[HUNGER] + 1
+    if pet[TIREDNESS] < 0:
+        pet[TIREDNESS] = 0
+    if pet[HUNGER] > 10:
+        pet[HUNGER] = 10
+    return pet`;
+
+const PY_PASS_TIME = `def pass_time(pet):
+    pet[AGE] = pet[AGE] + 1
+    pet[HUNGER] = pet[HUNGER] + 1
+    pet[TIREDNESS] = pet[TIREDNESS] + 1
+    pet[BOREDOM] = pet[BOREDOM] + 1
+    if pet[HUNGER] > 10:
+        pet[HUNGER] = 10
+    if pet[TIREDNESS] > 10:
+        pet[TIREDNESS] = 10
+    if pet[BOREDOM] > 10:
+        pet[BOREDOM] = 10
+    return pet`;
+
+const PY_CHECK_PET = `def check_pet(pet):
+    if pet[HUNGER] >= 8:
+        print(pet[NAME] + " is very hungry!")
+    if pet[TIREDNESS] >= 8:
+        print(pet[NAME] + " is exhausted!")
+    if pet[BOREDOM] >= 8:
+        print(pet[NAME] + " is so bored!")
+    if pet[SADNESS] >= 8:
+        print(pet[NAME] + " looks really sad.")`;
+
+const PY_RANDOM_EVENT = `def random_event(pet):
+    event = random.randint(1, 5)
+    if event == 1:
+        print(pet[NAME] + " found a squeaky toy!")
+        pet[BOREDOM] = pet[BOREDOM] - 2
+        if pet[BOREDOM] < 0:
+            pet[BOREDOM] = 0
+    elif event == 2:
+        print(pet[NAME] + " had a nightmare.")
+        pet[TIREDNESS] = pet[TIREDNESS] + 2
+        if pet[TIREDNESS] > 10:
+            pet[TIREDNESS] = 10
+    elif event == 3:
+        print("A kind stranger gave " + pet[NAME] + " a snack.")
+        pet[HUNGER] = pet[HUNGER] - 1
+        if pet[HUNGER] < 0:
+            pet[HUNGER] = 0
+    elif event == 4:
+        print("It is raining. " + pet[NAME] + " hates rain.")
+        pet[SADNESS] = pet[SADNESS] + 1
+        if pet[SADNESS] > 10:
+            pet[SADNESS] = 10
+    # event 5: a quiet moment - nothing happens
+    return pet`;
+
+const PY_HAS_LEFT = `def has_left(pet):
+    if pet[SADNESS] >= 10 or pet[HUNGER] >= 10:
+        return True
+    else:
+        return False`;
+
+const PY_PET_LINE = `pet = ["Milo", 0, 5, 5, 5, 5]`;
+
+const PY_MENU_BASIC = `choice = ""
+while choice != "4":
+    show_status(pet)
+    print("1. Feed")
+    print("2. Play")
+    print("3. Sleep")
+    print("4. Quit")
+    choice = input("What would you like to do? ")
+    if choice == "1":
+        pet = feed(pet)
+    elif choice == "2":
+        pet = play(pet)
+    elif choice == "3":
+        pet = sleep(pet)
+    elif choice == "4":
+        print("Goodbye!")
+    else:
+        print("Please choose 1, 2, 3 or 4.")`;
+
+const PY_TIME_BLOCK = `    if choice == "1" or choice == "2" or choice == "3":
+        pet = pass_time(pet)`;
+
+const PY_TIME_VET_BLOCK = `    if choice == "1" or choice == "2" or choice == "3":
+        pet = pass_time(pet)
+        check_pet(pet)`;
+
+const PY_TIME_RAND_VET_BLOCK = `    if choice == "1" or choice == "2" or choice == "3":
+        pet = pass_time(pet)
+        pet = random_event(pet)
+        check_pet(pet)`;
+
+const PY_FULL_TURN_BLOCK = `    if choice == "1" or choice == "2" or choice == "3":
+        pet = pass_time(pet)
+        pet = random_event(pet)
+        check_pet(pet)
+        if has_left(pet):
+            exits = ["packed a tiny suitcase and joined the circus.",
+                     "squeezed through the cat flap in search of better snacks.",
+                     "left a note saying 'Gone to find myself.'",
+                     "moved in with the neighbours. They have biscuits."]
+            print(pet[NAME] + " has " + random.choice(exits))
+            choice = "4"`;
+
+/* ---------- cumulative catch-up programs (everything up to the END of card N) ---------- */
+
+const CATCHUP = {};
+
+CATCHUP[1] = PY_HEADER + "\n\n" + PY_PET_LINE + "\n\nprint(pet[NAME])\nprint(\"Hunger:\", pet[HUNGER])";
+
+CATCHUP[2] = PY_HEADER + "\n\n" + PY_STATUS + "\n\n" + PY_PET_LINE + "\n\nshow_status(pet)";
+
+CATCHUP[3] = PY_HEADER + "\n\n" + PY_STATUS + "\n\n" + PY_FEED + "\n\n" + PY_PET_LINE +
+  "\n\npet = feed(pet)\nprint(pet[NAME] + \" munches happily.\")\nprint(\"Hunger is now:\", pet[HUNGER])";
+
+CATCHUP[4] = PY_HEADER + "\n\n" + PY_STATUS + "\n\n" + PY_FEED + "\n\n" + PY_PLAY + "\n\n" + PY_PET_LINE +
+  "\n\npet = play(pet)\nprint(pet[NAME] + \" had a lovely time playing!\")\nshow_status(pet)";
+
+CATCHUP[5] = PY_HEADER + "\n\n" + PY_STATUS + "\n\n" + PY_FEED + "\n\n" + PY_PLAY + "\n\n" + PY_SLEEP + "\n\n" + PY_PET_LINE +
+  "\n\npet = feed(pet)\npet = play(pet)\npet = sleep(pet)\nshow_status(pet)";
+
+CATCHUP[6] = PY_HEADER + "\n\n" + PY_STATUS + "\n\n" + PY_FEED + "\n\n" + PY_PLAY + "\n\n" + PY_SLEEP + "\n\n" + PY_PET_LINE +
+  "\n\n" + PY_MENU_BASIC;
+
+CATCHUP[7] = PY_HEADER + "\n\n" + PY_STATUS + "\n\n" + PY_FEED + "\n\n" + PY_PLAY + "\n\n" + PY_SLEEP + "\n\n" + PY_PASS_TIME + "\n\n" + PY_PET_LINE +
+  "\n\n" + PY_MENU_BASIC + "\n" + PY_TIME_BLOCK;
+
+CATCHUP[8] = PY_HEADER + "\n\n" + PY_STATUS + "\n\n" + PY_FEED + "\n\n" + PY_PLAY + "\n\n" + PY_SLEEP + "\n\n" + PY_PASS_TIME + "\n\n" + PY_CHECK_PET + "\n\n" + PY_PET_LINE +
+  "\n\n" + PY_MENU_BASIC + "\n" + PY_TIME_VET_BLOCK;
+
+CATCHUP[9] = PY_HEADER + "\n\n" + PY_GET_FACE + "\n\n" + PY_STATUS_FACE + "\n\n" + PY_FEED + "\n\n" + PY_PLAY + "\n\n" + PY_SLEEP + "\n\n" + PY_PASS_TIME + "\n\n" + PY_CHECK_PET + "\n\n" + PY_PET_LINE +
+  "\n\n" + PY_MENU_BASIC + "\n" + PY_TIME_VET_BLOCK;
+
+CATCHUP[10] = PY_HEADER_RANDOM + "\n\n" + PY_GET_FACE + "\n\n" + PY_STATUS_FACE + "\n\n" + PY_FEED + "\n\n" + PY_PLAY + "\n\n" + PY_SLEEP + "\n\n" + PY_PASS_TIME + "\n\n" + PY_CHECK_PET + "\n\n" + PY_RANDOM_EVENT + "\n\n" + PY_PET_LINE +
+  "\n\n" + PY_MENU_BASIC + "\n" + PY_TIME_RAND_VET_BLOCK;
+
+CATCHUP[11] = PY_HEADER_RANDOM + "\n\n" + PY_GET_FACE + "\n\n" + PY_STATUS_FACE + "\n\n" + PY_FEED + "\n\n" + PY_PLAY + "\n\n" + PY_SLEEP + "\n\n" + PY_PASS_TIME + "\n\n" + PY_CHECK_PET + "\n\n" + PY_RANDOM_EVENT + "\n\n" + PY_HAS_LEFT + "\n\n" + PY_PET_LINE +
+  "\n\n" + PY_MENU_BASIC + "\n" + PY_FULL_TURN_BLOCK;
+
+/* ---------- the 12 challenges ---------- */
+
+const STAGES = [
+  {
+    name: 'STAGE 1: HATCHING', sub: 'the egg wobbles', emoji: '🥚',
+    cards: [
+      {
+        id: 'hatch', icon: '🐣', title: 'Hello, Pet!',
+        summary: 'Meet your pet: six values living in one list. Print its name and hunger.',
+        chips: [['lists','c-data'],['constants','c-data']],
+        brief: `<p>Your pet is a <strong>list</strong>: six values in a fixed order. Copy in the starter code, then add two <code>print()</code> lines underneath: one printing the pet's <strong>name</strong>, one printing <code>Hunger:</code> followed by its <strong>hunger</strong> value. Use the constants, not bare numbers.</p>
+<div class="callout note">📐 <b>Why constants?</b> <code>pet[2]</code> means nothing at a glance. <code>pet[HUNGER]</code> reads like English, and if the list order ever changed, you would fix one number at the top instead of fifty scattered through your code.</div>`,
+        starterLabel: 'Starter code · copy this in first',
+        starter: PY_HEADER + "\n\n" + PY_PET_LINE,
+        outLabel: 'Expected output',
+        out: `Milo\nHunger: 5`,
+        hints: [
+          { p: `The constants are just friendly names for list positions. <code>pet[NAME]</code> means "the item at position 0", which is the name. What goes inside the square brackets to get the hunger value?` },
+          { p: `Two lines, both using a constant as the index:`, code: `print(pet[NAME])\nprint("Hunger:", pet[HUNGER])` }
+        ],
+        aside: `Remember the golden rule, printed at the top of every program in this project: <b>stats run 0 to 10, where 0 is good and 10 is bad</b>. Hunger, tiredness, boredom and sadness all behave the same way. No exceptions, no excuses.`
+      },
+      {
+        id: 'status', icon: '📋', title: 'Status Report',
+        summary: 'A subroutine that takes the pet list and prints every stat, nicely laid out.',
+        chips: [['subroutines','c-sub'],['parameters','c-sub']],
+        brief: `<p>Typing six <code>print()</code> lines every time you want to see the pet is misery. Write a subroutine called <code>show_status(pet)</code> that takes the pet list as a <strong>parameter</strong> and prints the name in a little banner, then the five number stats, one per line.</p>
+<p>Define it near the top of your program (after the constants), then call it with <code>show_status(pet)</code> at the bottom.</p>`,
+        outLabel: 'Expected output',
+        out: `--- Milo ---\nAge: 0\nHunger: 5\nTiredness: 5\nBoredom: 5\nSadness: 5`,
+        hints: [
+          { p: `The first line is <code>def show_status(pet):</code>. Then everything indented underneath belongs to the subroutine. Inside it, the list is called <code>pet</code>, so the printing works exactly as it did in challenge 1.` },
+          { p: `Like this, and do not forget to actually call it at the bottom:`, code: PY_STATUS + `\n\nshow_status(pet)` }
+        ],
+        aside: `Notice there is no <code>return</code> here. This subroutine only <em>reads</em> the list and prints things out. Nothing changes, so there is nothing to send back. Keep that thought. It matters in the next challenge.`
+      },
+      {
+        id: 'feed', icon: '🍖', title: 'Dinner Time',
+        summary: 'The pattern the whole project is built on: change a stat, clamp it, return the list.',
+        chips: [['return values','c-sub'],['selection','c-flow']],
+        brief: `<p>Time to actually change the pet. Write <code>feed(pet)</code> which:</p>
+<p>1. reduces hunger by <strong>3</strong><br>2. makes sure hunger never drops below <strong>0</strong><br>3. <strong>returns</strong> the updated list</p>
+<p>Then call it like this: <code>pet = feed(pet)</code>: the list goes <em>in</em> as a parameter and comes <em>back out</em> through the return.</p>
+<div class="callout note">🔁 <b>This is THE pattern.</b> Change → clamp → return. Every action your pet ever learns will follow these same three beats. Learn it here and challenges 4 and 5 will feel easy.</div>`,
+        starterLabel: 'Test code · add below your subroutines',
+        starter: PY_PET_LINE + `\npet = feed(pet)\nprint(pet[NAME] + " munches happily.")\nprint("Hunger is now:", pet[HUNGER])`,
+        outLabel: 'Expected output',
+        out: `Milo munches happily.\nHunger is now: 2`,
+        hints: [
+          { p: `Inside the subroutine: take 3 off <code>pet[HUNGER]</code>, then use an <code>if</code> to push it back up to 0 if it went negative. The very last line of the subroutine should hand the list back. Which keyword does that?` },
+          { p: `Change, clamp, return:`, code: PY_FEED }
+        ],
+        aside: `Test the clamp properly: call <code>feed(pet)</code> two more times. Hunger must stop at 0. If you ever see <code>-1</code>, your clamp is missing or in the wrong place. A pet cannot be less than not hungry.`
+      }
+    ]
+  },
+  {
+    name: 'STAGE 2: DAILY CARE', sub: 'a creature of habit', emoji: '🍼',
+    cards: [
+      {
+        id: 'play', icon: '🎾', title: 'Zoomies',
+        summary: 'Playing changes three stats at once, and they all need keeping in bounds.',
+        chips: [['lists','c-data'],['validation','c-flow']],
+        brief: `<p>Write <code>play(pet)</code>. Playing is brilliant but tiring:</p>
+<p>• boredom goes <strong>down by 2</strong> (never below 0)<br>• sadness goes <strong>down by 1</strong> (never below 0)<br>• tiredness goes <strong>up by 1</strong> (never above 10)</p>
+<p>Same three beats as <code>feed()</code>: change, clamp, return. There are just more stats to look after this time.</p>`,
+        starterLabel: 'Test code · add at the bottom',
+        starter: PY_PET_LINE + `\npet = play(pet)\nprint(pet[NAME] + " had a lovely time playing!")\nshow_status(pet)`,
+        outLabel: 'Expected output',
+        out: `Milo had a lovely time playing!\n--- Milo ---\nAge: 0\nHunger: 5\nTiredness: 6\nBoredom: 3\nSadness: 4`,
+        hints: [
+          { p: `Three changes first, then three separate <code>if</code> checks: two stopping values falling below 0, one stopping tiredness climbing above 10. Then return the list, exactly as before.` },
+          { p: `Notice how it is the same shape as <code>feed()</code>, just bigger:`, code: PY_PLAY }
+        ]
+      },
+      {
+        id: 'sleep', icon: '😴', title: 'Lights Out',
+        summary: 'You have seen the pattern twice. Now write a whole subroutine on your own.',
+        chips: [['subroutines','c-sub']],
+        brief: `<p>No worked example this time. You have everything you need. Write <code>sleep(pet)</code>:</p>
+<p>• tiredness goes <strong>down by 4</strong> (never below 0)<br>• hunger goes <strong>up by 1</strong>: sleeping builds an appetite (never above 10)<br>• return the list</p>
+<p>Test it with the code below and check your output matches exactly.</p>`,
+        starterLabel: 'Test code · add at the bottom',
+        starter: PY_PET_LINE + `\npet = sleep(pet)\nshow_status(pet)`,
+        outLabel: 'Expected output',
+        out: `--- Milo ---\nAge: 0\nHunger: 6\nTiredness: 1\nBoredom: 5\nSadness: 5`,
+        hints: [
+          { p: `Say it out loud before you type: "change tiredness, change hunger, clamp tiredness at the bottom, clamp hunger at the top, return." Five jobs, roughly seven lines.` },
+          { p: `Here it is, but only peek if you are properly stuck:`, code: PY_SLEEP }
+        ],
+        aside: `If yours works first time without the hints, congratulations: the pattern is officially in your head. That feeling is what learning to program actually is.`
+      },
+      {
+        id: 'menu', icon: '📟', title: 'The Care Menu',
+        summary: 'A menu loop that runs until quit, so your pet finally becomes interactive.',
+        chips: [['while loops','c-flow'],['selection','c-flow']],
+        brief: `<p>Time to glue everything together. Build a <strong>menu loop</strong> that keeps offering choices until the user picks quit:</p>
+<p>1. show the status<br>2. print the four options<br>3. take the choice with <code>input()</code><br>4. call the matching subroutine, remembering it is <code>pet = feed(pet)</code>, list in, list out<br>5. anything else gets a polite telling-off</p>`,
+        exampleLabel: 'Example run · one trip around the loop',
+        example: `--- Milo ---\nAge: 0\nHunger: 5\nTiredness: 5\nBoredom: 5\nSadness: 5\n1. Feed\n2. Play\n3. Sleep\n4. Quit\nWhat would you like to do? 2`,
+        hints: [
+          { p: `The shape is: <code>choice = ""</code>, then <code>while choice != "4":</code> with everything indented inside. Why set choice to an empty string first? Because the loop condition needs <em>something</em> to look at on the very first lap.` },
+          { p: `The whole loop:`, code: PY_PET_LINE + `\n\n` + PY_MENU_BASIC }
+        ],
+        aside: `Remember <code>input()</code> always gives you text, which is why we compare against <code>"4"</code> in quotes, not the number 4. Comparing text with a number is a classic way to build a menu that ignores you completely.`
+      }
+    ]
+  },
+  {
+    name: 'STAGE 3: TIME MARCHES ON', sub: 'the simulation wakes up', emoji: '⏰',
+    cards: [
+      {
+        id: 'time', icon: '⏰', title: 'Tick Tock',
+        summary: 'After every action, time passes and every need creeps upward. It lives!',
+        chips: [['subroutines','c-sub'],['boolean logic','c-flow']],
+        brief: `<p>Real pets do not pause politely while you decide what to do. Write <code>pass_time(pet)</code>: age goes up by 1, and hunger, tiredness and boredom each creep <strong>up by 1</strong> (capped at 10). Change, clamp, return. You know the drill.</p>
+<p>Then make it run after every <em>valid action</em> by adding this inside the loop, after your if/elif chain:</p>
+<div class="callout note">🧠 <b>One line, three checks:</b> <code>if choice == "1" or choice == "2" or choice == "3":</code>. The <code>or</code> keyword means time passes after feeding, playing or sleeping, but not after quitting or typing nonsense. This is boolean logic earning its keep.</div>`,
+        outLabel: 'Check it works · feed once, then look',
+        out: `--- Milo ---\nAge: 1\nHunger: 3\nTiredness: 6\nBoredom: 6\nSadness: 5`,
+        hints: [
+          { p: `The subroutine is four additions and three clamps at the top end. For the loop: the time check goes <em>after</em> the whole if/elif chain, at the same indent level as <code>if choice == "1":</code>.` },
+          { p: `The subroutine, plus where the call goes:`, code: PY_PASS_TIME + `\n\n# ...and inside the loop, after the if/elif chain:\n` + PY_TIME_BLOCK }
+        ],
+        aside: `Why is hunger 3 in the check? Feeding takes it from 5 down to 2, then time passing nudges it back up to 3. Two subroutines, each doing one job, combining into something that feels alive. That is modular design.`
+      },
+      {
+        id: 'vet', icon: '🩺', title: 'The Worried Vet',
+        summary: 'Warning messages when any stat hits 8 or more. Separate ifs, on purpose.',
+        chips: [['selection','c-flow']],
+        brief: `<p>Write <code>check_pet(pet)</code> which prints a warning for every stat at <strong>8 or more</strong>: very hungry, exhausted, so bored, really sad. Call it in the loop straight after <code>pass_time</code>.</p>
+<div class="callout note">⚠️ <b>Use four separate <code>if</code> statements, not <code>elif</code>.</b> A pet can be starving AND exhausted at the same time, and deserves to be told off about both. <code>elif</code> would stop after the first warning it found.</div>`,
+        exampleLabel: 'Example · a badly neglected pet',
+        example: `Milo is very hungry!\nMilo is so bored!`,
+        hints: [
+          { p: `Four ifs, each comparing one stat with <code>&gt;=</code> 8 and printing a message with the pet's name in it. Does this subroutine change the list? So does it need a return?` },
+          { p: `Reads only, changes nothing, returns nothing:`, code: PY_CHECK_PET + `\n\n# in the loop:\n` + PY_TIME_VET_BLOCK }
+        ]
+      },
+      {
+        id: 'face', icon: '🙂', title: 'Mood Face',
+        summary: 'A function that RETURNS an ASCII face based on how the pet is feeling.',
+        chips: [['return values','c-sub'],['selection','c-flow']],
+        brief: `<p>Your pet deserves a face. Write <code>get_face(pet)</code> which <strong>returns a string</strong>: it does not print anything itself:</p>
+<p>• sadness 8+ → <code>( ;_; )</code><br>• otherwise hunger 8+ → <code>( &gt;_&lt; )</code><br>• otherwise tiredness 8+ → <code>( -_- )</code><br>• otherwise boredom 8+ → <code>( =_= )</code><br>• otherwise → <code>( ^_^ )</code></p>
+<p>Then upgrade the first line of <code>show_status</code> so the face appears in the banner. The order of the checks matters: sadness wins, because a sad pet looks sad even when it is also hungry.</p>`,
+        outLabel: 'Expected banner line',
+        out: `--- Milo  ( ^_^ ) ---`,
+        hints: [
+          { p: `This is an if/elif/else chain where every branch <code>return</code>s a string instead of printing one. The caller decides what to do with it: here, <code>show_status</code> glues it into the banner with <code>+</code>.` },
+          { p: `The function, and the upgraded banner line:`, code: PY_GET_FACE + `\n\n# new first line of show_status:\n    print("--- " + pet[NAME] + "  " + get_face(pet) + " ---")` }
+        ],
+        aside: `A subroutine that prints versus a function that returns a value: this pair is one of the most-asked-about distinctions at GCSE, and you have now written one of each. <code>show_status</code> talks to the screen; <code>get_face</code> hands an answer back to whoever asked.`
+      }
+    ]
+  },
+  {
+    name: 'STAGE 4: A LIFE OF ITS OWN', sub: 'anything can happen', emoji: '🎲',
+    cards: [
+      {
+        id: 'random', icon: '🎲', title: 'Expect the Unexpected',
+        summary: 'Random events: squeaky toys, nightmares, kind strangers and miserable rain.',
+        chips: [['random','c-star'],['selection','c-flow']],
+        brief: `<p>Add <code>import random</code> at the very top of your file. Then write <code>random_event(pet)</code>: roll <code>random.randint(1, 5)</code> and react:</p>
+<p>1 → found a squeaky toy (boredom −2)<br>2 → had a nightmare (tiredness +2)<br>3 → a kind stranger shares a snack (hunger −1)<br>4 → it is raining and your pet hates rain (sadness +1)<br>5 → a quiet moment; nothing happens</p>
+<p>Print a message for each event, clamp anything you change, return the list. Call it in the loop between <code>pass_time</code> and <code>check_pet</code>, so the vet's warnings reflect whatever chaos just happened.</p>`,
+        exampleLabel: 'Example · three turns, three different fates',
+        example: `Milo found a squeaky toy!\nMilo had a nightmare.\nIt is raining. Milo hates rain.`,
+        hints: [
+          { p: `Store the roll in a variable first: <code>event = random.randint(1, 5)</code>, then an if/elif chain on that variable. If you call <code>randint</code> inside every comparison you will roll a new number each time, which is a marvellous bug to watch and a terrible one to have.` },
+          { p: `One roll, one chain:`, code: PY_RANDOM_EVENT + `\n\n# in the loop:\n` + PY_TIME_RAND_VET_BLOCK }
+        ]
+      },
+      {
+        id: 'escape', icon: '🚪', title: 'The Great Escape',
+        summary: 'Neglect has consequences. A function that decides whether your pet has had enough.',
+        chips: [['boolean logic','c-flow'],['random','c-star']],
+        brief: `<p>If sadness or hunger ever hits <strong>10</strong>, your pet packs up and leaves. Write <code>has_left(pet)</code>, a function that returns <code>True</code> or <code>False</code>, nothing else.</p>
+<p>Then, in the loop after <code>check_pet</code>: if <code>has_left(pet)</code> is True, pick a dramatic exit with <code>random.choice()</code> from a list of leaving lines, print it, and set <code>choice = "4"</code> so the loop ends on its own.</p>
+<div class="callout note">🚪 <b>The <code>choice = "4"</code> trick:</b> rather than smashing out of the loop, we change the very variable the <code>while</code> condition is watching. Next time it checks, the loop ends politely by itself. Elegant, and very exam-friendly.</div>`,
+        exampleLabel: 'Example ending',
+        example: `Milo has moved in with the neighbours. They have biscuits.`,
+        hints: [
+          { p: `The function is one <code>if</code> with an <code>or</code> joining two comparisons, returning <code>True</code> in one branch and <code>False</code> in the other. For the exit lines: make a list of strings, then <code>random.choice(exits)</code> picks one for you.` },
+          { p: `The function and the ending block:`, code: PY_HAS_LEFT + `\n\n# in the loop, after check_pet(pet):\n        if has_left(pet):\n            exits = ["packed a tiny suitcase and joined the circus.",\n                     "squeezed through the cat flap in search of better snacks.",\n                     "left a note saying 'Gone to find myself.'",\n                     "moved in with the neighbours. They have biscuits."]\n            print(pet[NAME] + " has " + random.choice(exits))\n            choice = "4"` }
+        ],
+        aside: `Write your own exit lines: the dafter the better. A function that answers a yes/no question by returning a boolean, like <code>has_left()</code>, is one of the most common patterns in real code <em>and</em> in exam questions.<br><br><b>Game designer's challenge:</b> play your game for 20 turns. Which stat makes your pet leave? Is that fair? At the moment sadness only goes up when it rains, so hunger nearly always wins. Change <em>one</em> rule so sadness matters too (for example, sadness goes up by 1 whenever boredom is 8 or more), then play again. Did your change make the game better or just harder?`
+      },
+      {
+        id: 'save', icon: '💾', title: 'Save Point',
+        summary: 'Write the pet to a file at quit; offer to load it back at launch. Stretch goal!',
+        chips: [['file handling','c-star']],
+        brief: `<p>Right now your pet is reborn every run, memories wiped. Fix that with two subroutines:</p>
+<p>• <code>save_pet(pet)</code>: open <code>pet.txt</code> in <code>"w"</code> mode and write each of the six values on its own line. Call it in the quit branch of your menu.<br>• <code>load_pet()</code>: open the file in <code>"r"</code> mode, read the six lines back, rebuild the list, return it. At the start of the program, ask the user whether to load.</p>
+<div class="callout stretch">🌟 <b>Stretch challenge.</b> The sting is in the types: a file only stores <em>text</em>. Numbers must be wrapped in <code>str()</code> on the way out and <code>int()</code> on the way back in, and the name needs <code>.strip()</code> to peel off its invisible newline.</div>`,
+        exampleLabel: 'Example · the start of a second run',
+        example: `Load your saved pet? (yes/no) yes\n--- Milo  ( ^_^ ) ---\nAge: 7\nHunger: 4\nTiredness: 6\nBoredom: 2\nSadness: 1`,
+        hints: [
+          { p: `Saving: a <code>for</code> loop over the list, writing <code>str(item) + "\\n"</code> each time. Loading: six <code>file.readline()</code> calls: <code>.strip()</code> on the name, <code>int()</code> around each number, then build and return a brand new list.` },
+          { p: `Both subroutines, plus the load question:`, code: `def save_pet(pet):\n    file = open("pet.txt", "w")\n    for item in pet:\n        file.write(str(item) + "\\n")\n    file.close()\n\ndef load_pet():\n    file = open("pet.txt", "r")\n    name = file.readline().strip()\n    age = int(file.readline())\n    hunger = int(file.readline())\n    tiredness = int(file.readline())\n    boredom = int(file.readline())\n    sadness = int(file.readline())\n    file.close()\n    return [name, age, hunger, tiredness, boredom, sadness]\n\n# at the start of the main program:\npet = ["Milo", 0, 5, 5, 5, 5]\nanswer = input("Load your saved pet? (yes/no) ")\nif answer == "yes":\n    pet = load_pet()\n\n# and in the quit branch of the menu:\n#     save_pet(pet)\n#     print("Goodbye! " + pet[NAME] + " has been saved.")` }
+        ],
+        aside: `Why does <code>int()</code> not need <code>.strip()</code> too? Because <code>int()</code> politely ignores whitespace around a number, so <code>int("7\\n")</code> is just 7. The name has no such luck, hence the strip. Open <code>pet.txt</code> in a text editor after saving and admire your pet, flat-packed.`
+      }
+    ]
+  }
+];
+
+/* flatten for lookups */
+const ALL = [];
+STAGES.forEach(s => s.cards.forEach(c => ALL.push(c)));
+
+/* ---------- badges ---------- */
+const BADGES = [
+  { id: 'heartbeat', emoji: '🐣', name: 'First Heartbeat',   desc: 'Complete challenge 1',          req: (n, d) => d.includes('hatch') },
+  { id: 'openwide',  emoji: '🍖', name: 'Open Wide',         desc: 'Feed your pet for the first time', req: (n, d) => d.includes('feed') },
+  { id: 'owner',     emoji: '🏅', name: 'Responsible Owner', desc: 'Finish all of Stage 2',         req: (n, d) => ['play','sleep','menu'].every(x => d.includes(x)) },
+  { id: 'timelord',  emoji: '⏰', name: 'Time Lord',         desc: 'Make time pass (challenge 7)',  req: (n, d) => d.includes('time') },
+  { id: 'artist',    emoji: '🎨', name: 'Pixel Artist',      desc: 'Give your pet a face (challenge 9)', req: (n, d) => d.includes('face') },
+  { id: 'gremlin',   emoji: '🎲', name: 'Chaos Gremlin',     desc: 'Unleash random events (challenge 10)', req: (n, d) => d.includes('random') },
+  { id: 'archivist', emoji: '💾', name: 'Save Scummer',      desc: 'Complete the save/load stretch', req: (n, d) => d.includes('save') },
+  { id: 'best',      emoji: '👑', name: 'Best in Show',      desc: 'Complete all 12 challenges',    req: (n, d) => n >= 12 }
+];
+
+/* ---------- pixel pet maps (12 x 12; # = ink, + = dim) ---------- */
+const PETS = {
+  egg: [
+    "....####....",
+    "..##....##..",
+    ".#........#.",
+    ".#..+..+..#.",
+    "#....##....#",
+    "#..........#",
+    "#...+..+...#",
+    ".#...##...#.",
+    ".#........#.",
+    "..##....##..",
+    "....####....",
+    "............"
+  ],
+  hatch: [
+    "............",
+    "....####....",
+    "..##....##..",
+    ".#........#.",
+    ".#.##..##.#.",
+    "#..........#",
+    "#..#....#..#",
+    "#...####...#",
+    ".#........#.",
+    "..##....##..",
+    "....####....",
+    "............"
+  ],
+  child: [
+    "..#......#..",
+    "..##....##..",
+    "..########..",
+    ".#........#.",
+    ".#.##..##.#.",
+    "#..........#",
+    "#..#....#..#",
+    "#...####...#",
+    ".#........#.",
+    ".#..#..#..#.",
+    "..########..",
+    "............"
+  ],
+  teen: [
+    "..#......#..",
+    "#.##....##.#",
+    "#.########.#",
+    ".##......##.",
+    ".#.##..##.#.",
+    "#..........#",
+    "#..#....#..#",
+    "#...####...#",
+    ".#........#.",
+    ".#..#..#..#.",
+    "..########..",
+    "............"
+  ],
+  party: [
+    "...#.#.#....",
+    "...#####....",
+    "..########..",
+    ".#........#.",
+    ".#.##..##.#.",
+    "#..........#",
+    "#..#....#..#",
+    "#...####...#",
+    ".#........#.",
+    ".#..#..#..#.",
+    "..########..",
+    "..+......+.."
+  ]
+};
+
+/*DATA-END*/
+
+/* ============================================================
+   APPLICATION LOGIC
+   ============================================================ */
+
+/* ---------- helpers ---------- */
+function e(t){
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let COPYSTORE = {};
+let COPY_SEQ = 0;
+function codeBlock(label, code){
+  const cid = 'c' + (++COPY_SEQ);
+  COPYSTORE[cid] = code;
+  return `<div class="field-label">${e(label)}</div>
+    <div class="code-wrap">
+      <button class="copy-btn" data-cid="${cid}">COPY</button>
+      <div class="code-box">${e(code)}</div>
+    </div>`;
+}
+function outBlock(label, text){
+  return `<div class="field-label">${e(label)}</div><div class="out-box">${e(text)}</div>`;
+}
+function chipHTML(ch){ return `<span class="chip ${ch[1]}">${e(ch[0])}</span>`; }
+
+/* ---------- progress storage ---------- */
+const KEY = 'pocketPetDone_v1';
+function loadDone(){
+  try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+  catch(err){ return []; }
+}
+function saveDone(arr){
+  try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(err){}
+}
+let done = loadDone();
+function isDone(id){ return done.includes(id); }
+
+/* global card numbering: id -> 1..12 */
+const CARD_NO = {};
+ALL.forEach((c, i) => { CARD_NO[c.id] = i + 1; });
+
+/* ---------- build the board ---------- */
+function buildBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  let n = 0;
+  STAGES.forEach((stage, si) => {
+    const sec = document.createElement('section');
+    sec.className = 'stage';
+    sec.dataset.stage = si;
+    if (stage.cards.every(c => isDone(c.id))) sec.classList.add('complete');
+
+    const head = document.createElement('div');
+    head.className = 'stage-head';
+    head.innerHTML = `
+      <span class="stage-sign"><span class="emoji">${stage.emoji}</span>${e(stage.name)}</span>
+      <span class="stage-sub">${e(stage.sub)}</span>
+      <span class="stage-line"></span>
+      <span class="stage-pill">★ STAGE CLEAR!</span>`;
+    sec.appendChild(head);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    stage.cards.forEach(card => {
+      n++;
+      const el = document.createElement('div');
+      el.className = 'card' + (isDone(card.id) ? ' done' : '');
+      el.style.animationDelay = (n * 0.04) + 's';
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
+      el.dataset.cardId = card.id;
+      el.innerHTML = `
+        <span class="card-no">#${String(n).padStart(2,'0')}</span>
+        <span class="tick">✓</span>
+        <div class="card-icon">${card.icon}</div>
+        <div class="card-title">${e(card.title)}</div>
+        <div class="card-sum">${e(card.summary)}</div>
+        <div class="chips">${card.chips.map(chipHTML).join('')}</div>`;
+      el.addEventListener('click', () => openCard(card.id));
+      el.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); openCard(card.id); }
+      });
+      grid.appendChild(el);
+    });
+    sec.appendChild(grid);
+    board.appendChild(sec);
+  });
+}
+
+/* ---------- pixel pet ---------- */
+const PX = 9;
+function petStateName(){
+  const n = done.length;
+  if (n === 0)  return 'egg';
+  if (n <= 4)   return 'hatch';
+  if (n <= 8)   return 'child';
+  if (n <= 11)  return 'teen';
+  return 'party';
+}
+function renderPet(){
+  const map = PETS[petStateName()];
+  const shadows = [];
+  map.forEach((row, y) => {
+    [...row].forEach((ch, x) => {
+      if (ch === '#') shadows.push(`${x*PX}px ${y*PX}px 0 0 var(--lcd-ink)`);
+      else if (ch === '+') shadows.push(`${x*PX}px ${y*PX}px 0 0 var(--lcd-dim)`);
+    });
+  });
+  const el = document.getElementById('pixelPet');
+  el.style.width = PX + 'px';
+  el.style.height = PX + 'px';
+  el.style.boxShadow = shadows.join(',');
+}
+
+/* ---------- progress + LCD caption ---------- */
+function progressMessage(n){
+  if (n === 0)  return 'The egg sits quietly. Waiting.';
+  if (n <= 4)   return 'It hatched! It needs you.';
+  if (n <= 8)   return 'Growing nicely. Keep going.';
+  if (n <= 11)  return 'Nearly fully grown. Do not stop now.';
+  return 'Fully evolved. Best in show. 👑';
+}
+function updateProgress(){
+  const n = done.length;
+  document.getElementById('doneCount').textContent = n;
+  document.getElementById('progressFill').style.width = (n / 12 * 100) + '%';
+  document.getElementById('progressMsg').textContent = progressMessage(n);
+  const filled = Math.round(n / 12 * 8);
+  document.getElementById('lcdCaption').innerHTML =
+    'PIXL&nbsp;&nbsp;<span class="meter">CARE ' + '█'.repeat(filled) + '░'.repeat(8 - filled) + '</span>';
+  renderPet();
+}
+
+/* ---------- badges ---------- */
+function earnedBadgeIds(){
+  const n = done.length;
+  return BADGES.filter(b => b.req(n, done)).map(b => b.id);
+}
+function renderBadges(){
+  const grid = document.getElementById('badgesGrid');
+  const earned = earnedBadgeIds();
+  grid.innerHTML = BADGES.map(b => `
+    <div class="badge ${earned.includes(b.id) ? 'earned' : ''}">
+      <div class="badge-icon">${b.emoji}</div>
+      <div class="badge-name">${e(b.name)}</div>
+      <div class="badge-desc">${e(b.desc)}</div>
+    </div>`).join('');
+}
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ---------- modal ---------- */
+const overlay = document.getElementById('overlay');
+const modal = document.getElementById('modal');
+let currentId = null;
+
+function openCard(id){
+  const card = ALL.find(c => c.id === id);
+  if (!card) return;
+  currentId = id;
+  COPYSTORE = {};
+  const no = CARD_NO[id];
+  const stageIdx = STAGES.findIndex(s => s.cards.some(c => c.id === id));
+
+  document.getElementById('mEyebrow').textContent =
+    'CHALLENGE #' + String(no).padStart(2,'0') + ' · STAGE ' + (stageIdx + 1);
+  document.getElementById('mTitle').innerHTML =
+    `<span class="m-emoji">${card.icon}</span>${e(card.title)}`;
+  document.getElementById('mChips').innerHTML = card.chips.map(chipHTML).join('');
+
+  let body = card.brief;
+  if (card.starter) body += codeBlock(card.starterLabel || 'Starter code', card.starter);
+  if (card.example) body += outBlock(card.exampleLabel || 'Example run', card.example);
+  if (card.out)     body += outBlock(card.outLabel || 'Expected output', card.out);
+
+  /* hints */
+  body += `<div class="hints"><div class="hints-h">STUCK? HINTS COST NOTHING BUT PRIDE</div>
+    <div class="hint-btns">
+      <button class="h-btn" data-h="0">HINT 1 · A NUDGE</button>
+      <button class="h-btn" data-h="1" disabled>HINT 2 · THE CODE</button>
+    </div>
+    <div id="hintArea"></div>
+  </div>`;
+
+  /* catch-up code: full program up to the END of the PREVIOUS challenge */
+  if (no >= 2 && CATCHUP[no - 1]){
+    body += `<details class="catchup">
+      <summary>CATCH-UP CODE · the full program up to challenge ${no - 1}</summary>
+      <div class="catchup-inner">
+        <p class="catchup-warn">Missed a lesson, or your code is in a hole? This gets you back on track. Copying it instead of writing your own teaches you precisely nothing. Use it to catch up, not to skip.</p>
+        ${codeBlock('Working program · end of challenge ' + (no - 1), CATCHUP[no - 1])}
+      </div>
+    </details>`;
+  }
+
+  if (card.aside) body += `<div class="aside">${card.aside}</div>`;
+
+  document.getElementById('mBody').innerHTML = body;
+  updateDoneBtn();
+  overlay.classList.add('open');
+  modal.classList.add('open');
+  modal.scrollTop = 0;
+}
+
+function closeModal(){
+  overlay.classList.remove('open');
+  modal.classList.remove('open');
+  currentId = null;
+}
+
+function updateDoneBtn(){
+  const btn = document.getElementById('doneBtn');
+  if (isDone(currentId)){
+    btn.textContent = 'COMPLETED ✓ (TAP TO UNDO)';
+    btn.classList.add('is-done');
+  } else {
+    btn.textContent = 'MARK COMPLETE ✓';
+    btn.classList.remove('is-done');
+  }
+}
+
+/* hint + copy clicks, delegated */
+modal.addEventListener('click', ev => {
+  const copy = ev.target.closest('.copy-btn');
+  if (copy){
+    const code = COPYSTORE[copy.dataset.cid] || '';
+    const flash = () => { copy.textContent = 'COPIED!'; setTimeout(() => copy.textContent = 'COPY', 1400); };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(code).then(flash, flash);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = code; document.body.appendChild(ta);
+      ta.select(); try { document.execCommand('copy'); } catch(err){}
+      document.body.removeChild(ta); flash();
+    }
+    return;
+  }
+  const hb = ev.target.closest('.h-btn');
+  if (hb && !hb.disabled){
+    const card = ALL.find(c => c.id === currentId);
+    const idx = parseInt(hb.dataset.h, 10);
+    const hint = card.hints[idx];
+    if (!hint) return;
+    let html = `<div class="hint-card"><span class="hint-tag">HINT ${idx + 1}</span><div>${hint.p}</div>`;
+    if (hint.code) html += codeBlock('Hint code', hint.code);
+    html += `</div>`;
+    document.getElementById('hintArea').insertAdjacentHTML('beforeend', html);
+    hb.disabled = true;
+    if (idx === 0){
+      const h2 = modal.querySelector('.h-btn[data-h="1"]');
+      if (h2) h2.disabled = false;
+    }
+  }
+});
+
+/* done toggle */
+document.getElementById('doneBtn').addEventListener('click', () => {
+  if (!currentId) return;
+  const before = earnedBadgeIds();
+  if (isDone(currentId)){
+    done = done.filter(x => x !== currentId);
+  } else {
+    done.push(currentId);
+  }
+  saveDone(done);
+  buildBoard();
+  updateProgress();
+  renderBadges();
+  updateDoneBtn();
+  const after = earnedBadgeIds();
+  const fresh = after.filter(id => !before.includes(id));
+  if (fresh.length){
+    const b = BADGES.find(x => x.id === fresh[0]);
+    showToast(b.emoji + ' ACHIEVEMENT: ' + b.name.toUpperCase() + '!');
+  } else if (!isDone(currentId)){
+    /* no toast on undo */
+  } else {
+    showToast('✓ CHALLENGE COMPLETE');
+  }
+});
+
+/* close handlers */
+document.getElementById('xClose').addEventListener('click', closeModal);
+overlay.addEventListener('click', closeModal);
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeModal(); });
+
+/* ---------- device buttons ---------- */
+document.getElementById('btnA').addEventListener('click', () => {
+  const next = ALL.find(c => !isDone(c.id));
+  if (!next){ showToast('👑 ALL 12 COMPLETE. NOTHING LEFT TO TEACH YOU.'); return; }
+  const el = document.querySelector(`.card[data-card-id="${next.id}"]`);
+  if (el){
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.outline = '3px solid var(--shell-deep)';
+    setTimeout(() => { el.style.outline = ''; }, 1600);
+  }
+});
+document.getElementById('btnB').addEventListener('click', () => {
+  document.getElementById('badgesPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+document.getElementById('btnC').addEventListener('click', () => {
+  const stage = document.getElementById('petStage');
+  const h = document.createElement('span');
+  h.className = 'lcd-heart';
+  h.textContent = '♥';
+  h.style.left = (20 + Math.random() * 60) + 'px';
+  h.style.top = '60px';
+  stage.appendChild(h);
+  setTimeout(() => h.remove(), 1200);
+});
+
+/* ---------- reset ---------- */
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Reset ALL progress and achievements? This cannot be undone.')) return;
+  done = [];
+  saveDone(done);
+  buildBoard();
+  updateProgress();
+  renderBadges();
+  showToast('PROGRESS RESET. THE EGG WAITS AGAIN.');
+});
+
+/* ---------- init ---------- */
+buildBoard();
+updateProgress();
+renderBadges();
+</script>
+</body>
+</html>
