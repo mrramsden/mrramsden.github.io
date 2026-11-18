@@ -7,8 +7,8 @@ Pupils only ever see the site. Everything in `src/` is how its pages are made an
 | Path | What it is |
 |---|---|
 | `index.html` | Welcome page with three cards: Key Stage 3, 4 and 5. |
-| `ks3/` | Escape the Dungeon 1 to 3 and Python Rescue (built), plus the HTML setup guide, HTML reference sheet and The Vault Escape (single-file). Section page `ks3/index.html`. |
-| `ks4/` | GCSE (OCR J277): the pseudocode playground, Python challenge boards (Neko Neko Café, Pocket Pet, Station X, Crystal Caves, The Dungeon Architect), the sorting visualiser and Revision Jeopardy. Also links to the procedural Robot Game in `ks5/` and The Vault Escape in `ks3/`. Section page `ks4/index.html`. |
+| `ks3/` | Escape the Dungeon 1 to 3 and Python Rescue (built), plus the HTML setup guide and HTML reference sheet (single-file). Section page `ks3/index.html`. |
+| `ks4/` | GCSE (OCR J277): the pseudocode playground, Python challenge boards (Neko Neko Café, Pocket Pet, Station X, Crystal Caves, The Dungeon Architect), the sorting visualiser and Revision Jeopardy. Also links to the procedural Robot Game in `ks5/`. Section page `ks4/index.html`. |
 | `ks5/` | A Level (OCR H446): algorithms lab, merge sort recursion, Dijkstra and A* table methods, Boolean algebra slips, Python challenge boards (The Robot Game procedural and object-oriented, The Shelter Project, Ashwood Manor, Little Ashford Noticeboard) and Revision Jeopardy. Also links to the playground, sorting visualiser and Crystal Caves in `ks4/`. |
 | `python/` | Redirect stubs only. The Escape the Dungeon pages used to live here, so old links forward to `ks3/`. |
 | `assets/site.css` | Styles for the welcome and section pages. |
