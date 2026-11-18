@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashwood Manor: Year 12 Graph Theory Challenge</title>
+<style>
+:root {
+  --stone:       #161210;
+  --parchment:   #f0e6c4;
+  --parch-mid:   #e0d098;
+  --parch-dark:  #c8b060;
+  --ink:         #1a0e06;
+  --ink-mid:     #3a2010;
+  --ink-light:   #6b4020;
+  --torch:       #c87010;
+  --torch-glow:  #e89030;
+  --danger:      #8b1c1c;
+  --border:      #9a7030;
+  --hint-bg:     #fefadd;
+  --hint-border: #c8a800;
+  --hint-ink:    #5a4200;
+  --code-bg:     #0c0a07;
+  --code-fg:     #e8d8a8;
+  --code-acc:    #c87010;
+  --info-bg:     #edf4f8;
+  --info-border: #4a789a;
+  --info-ink:    #1a3a5a;
+  --warn-bg:     #f8eee8;
+  --warn-border: #9a3020;
+  --warn-ink:    #5a1a10;
+  --ext-bg:      #080f08;
+  --ext-border:  #2a5a2a;
+  --ext-fg:      #a8d8a8;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  background-color: var(--stone);
+  background-image:
+    radial-gradient(ellipse at 10% 8%,  rgba(200,112,16,.08) 0%, transparent 40%),
+    radial-gradient(ellipse at 90% 92%, rgba(0,0,0,.6)        0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Crect width='12' height='12' fill='%23161210'/%3E%3Crect width='6' height='6' fill='%231a1612' opacity='.7'/%3E%3Crect x='6' y='6' width='6' height='6' fill='%23120e0c' opacity='.6'/%3E%3Ccircle cx='3' cy='9' r='1.2' fill='%23100e0a' opacity='.5'/%3E%3Ccircle cx='9' cy='3' r='.9' fill='%231e1a14' opacity='.4'/%3E%3Crect x='5' y='0' width='1' height='12' fill='%23100e0a' opacity='.12'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 20px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--ink);
+}
+
+/* ── HEADER ── */
+.site-header { text-align: center; width: 100%; max-width: 780px; padding: 10px 0 6px; }
+.site-title {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: clamp(2rem, 6vw, 3rem);
+  color: var(--parch-dark); letter-spacing: 2px;
+  text-shadow: 0 0 24px rgba(200,112,16,.5), 0 0 60px rgba(200,112,16,.12), 0 3px 10px rgba(0,0,0,.9);
+  margin-bottom: 4px; line-height: 1.1;
+}
+.site-subtitle {
+  font-family: 'Cinzel', serif; color: rgba(240,230,196,.42);
+  font-size: .7rem; letter-spacing: 3px; text-transform: uppercase;
+}
+
+/* ── PROGRESS ── */
+.progress-row {
+  width: 100%; max-width: 780px;
+  display: flex; align-items: center; gap: 12px; margin: 16px 0 8px;
+}
+.progress-track { flex: 1; height: 2px; background: rgba(0,0,0,.6); border-radius: 2px; overflow: hidden; }
+.progress-fill {
+  height: 100%; background: var(--torch); border-radius: 2px;
+  transition: width .5s ease; box-shadow: 0 0 8px rgba(200,112,16,.7);
+}
+.progress-label { font-family: 'Special Elite', cursive; color: var(--parch-dark); font-size: .75rem; min-width: 90px; text-align: right; opacity: .75; }
+
+/* ── DOTS ── */
+.task-dots { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; max-width: 780px; width: 100%; margin-bottom: 14px; }
+.dot {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1px solid rgba(240,230,196,.16); background: rgba(0,0,0,.5);
+  cursor: pointer; font-family: 'Special Elite', cursive; font-size: .6rem;
+  color: rgba(240,230,196,.28); display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.dot:hover { background: rgba(240,230,196,.1); color: var(--parch-dark); }
+.dot.active { background: var(--torch); color: #1a0e06; border-color: var(--torch-glow); box-shadow: 0 0 10px rgba(200,112,16,.6); }
+
+/* ── CARD ── */
+.card {
+  background: var(--parchment); width: 100%; max-width: 780px; border-radius: 1px;
+  padding: clamp(22px,5vw,44px) clamp(20px,5vw,48px);
+  box-shadow: 0 1px 3px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.6), 0 20px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07);
+  position: relative;
+  background-image: linear-gradient(165deg, rgba(255,255,255,.04) 0%, transparent 55%);
+  min-height: 280px;
+}
+.card::before {
+  content: ''; position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 16px;
+  background: radial-gradient(circle at 33% 28%, #d0d0d0 0%, #707070 40%, #282828 100%);
+  border-radius: 50%;
+  box-shadow: 0 3px 10px rgba(0,0,0,.85), inset 0 1px 3px rgba(255,255,255,.3);
+  z-index: 5;
+}
+
+/* ── BADGE ── */
+.badge {
+  display: inline-block; font-family: 'Cinzel', serif; font-size: .62rem;
+  letter-spacing: 3px; text-transform: uppercase; padding: 3px 11px 2px; border-radius: 1px; margin-bottom: 10px;
+}
+.badge-task  { background: var(--torch);   color: #1a0e06; }
+.badge-intro { background: var(--ink-mid); color: var(--parchment); }
+.badge-bfs   { background: var(--danger);  color: var(--parchment); }
+
+/* ── HEADING / SIG ── */
+.task-heading { font-family: 'Cinzel', serif; font-size: clamp(1.4rem,4vw,1.9rem); font-weight: 700; color: var(--ink); line-height: 1.2; margin-bottom: 5px; }
+.task-sig { font-family: 'Special Elite', cursive; color: var(--ink-light); font-size: .88rem; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--parch-mid); }
+
+/* ── BODY ── */
+.body p  { font-size: .93rem; line-height: 1.84; color: var(--ink-mid); margin-bottom: 12px; }
+.body ul, .body ol { margin: 6px 0 14px 22px; color: var(--ink-mid); }
+.body li { font-size: .91rem; line-height: 1.9; }
+.body strong { color: var(--ink); }
+code { font-family: 'Special Elite', cursive; background: var(--parch-mid); color: var(--danger); padding: 1px 5px; border-radius: 2px; font-size: .87em; }
+
+/* ── CODE BLOCKS ── */
+.cb-wrap { position: relative; margin: 14px 0; }
+.cb-label { display: inline-block; font-family: 'Special Elite', cursive; font-size: .64rem; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(232,216,168,.65); background: var(--code-bg); padding: 3px 10px; border-radius: 2px 2px 0 0; }
+pre.cb { background: var(--code-bg); color: var(--code-fg); font-family: 'Special Elite', cursive; font-size: .83rem; line-height: 1.65; padding: 14px 20px; border-radius: 0 2px 2px 2px; overflow-x: auto; margin: 0; border-left: 3px solid var(--code-acc); white-space: pre; tab-size: 4; }
+.copy-btn { position: absolute; top: 28px; right: 8px; background: rgba(255,255,255,.07); color: rgba(232,216,168,.7); border: 1px solid rgba(255,255,255,.16); padding: 4px 11px; font-family: 'Special Elite', cursive; font-size: .66rem; letter-spacing: 1px; cursor: pointer; border-radius: 2px; transition: all .2s; text-transform: uppercase; }
+.copy-btn:hover { background: rgba(255,255,255,.16); color: white; }
+.copy-btn.ok    { color: #90ee90; border-color: #90ee90; }
+
+/* ── CALLOUTS ── */
+.callout { border-radius: 2px; padding: 11px 15px; margin: 14px 0; font-size: .87rem; line-height: 1.72; }
+.callout.info { background: var(--info-bg); border-left: 3px solid var(--info-border); color: var(--info-ink); }
+.callout.warn { background: var(--warn-bg); border-left: 3px solid var(--warn-border); color: var(--warn-ink); }
+.callout.bfs  { background: #12101a; border-left: 3px solid #5050a0; color: #c0c0e0; }
+
+/* ── EXAMPLE BOXES ── */
+.eg-wrap { margin: 14px 0; }
+.eg-label { font-family: 'Special Elite', cursive; font-size: .66rem; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 6px; }
+.eg-box { background: rgba(139,96,32,.06); border: 1px solid var(--parch-mid); border-radius: 2px; padding: 10px 14px; }
+.eg-box p { margin: 3px 0; font-size: .88rem; }
+
+/* ── BFS TABLE ── */
+.bfs-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: .81rem; }
+.bfs-table th { background: var(--code-bg); color: var(--code-acc); font-family: 'Special Elite', cursive; font-size: .66rem; letter-spacing: 1px; text-transform: uppercase; padding: 7px 10px; text-align: left; }
+.bfs-table td { padding: 7px 10px; border-bottom: 1px solid var(--parch-mid); color: var(--ink-mid); vertical-align: top; }
+.bfs-table tr:last-child td { border-bottom: none; }
+.bfs-table tr.found td { background: rgba(42,90,42,.07); font-weight: 600; color: var(--ink); }
+
+/* ── HINTS ── */
+.hints-section { margin-top: 26px; padding-top: 16px; border-top: 1px dashed var(--parch-mid); }
+.hints-heading { font-family: 'Special Elite', cursive; font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 10px; }
+.hint-btns { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 10px; }
+.h-btn { background: transparent; border: 1px solid var(--border); color: var(--ink-mid); padding: 6px 16px; font-family: 'Lora', serif; font-style: italic; font-size: .82rem; cursor: pointer; border-radius: 2px; transition: all .2s; }
+.h-btn:hover:not(:disabled) { background: var(--hint-bg); border-color: var(--hint-border); }
+.h-btn.shown { background: var(--hint-bg); border-color: var(--hint-border); color: var(--hint-ink); cursor: default; }
+.hint-card { display: none; background: var(--hint-bg); border: 1px solid var(--hint-border); border-radius: 2px; padding: 11px 15px 11px 24px; margin: 7px 0; position: relative; animation: slideIn .25s ease; }
+.hint-card::before { content: '🕯️'; position: absolute; top: -8px; left: 10px; font-size: 13px; }
+.hint-card.visible { display: block; }
+@keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+.hint-num { font-family: 'Special Elite', cursive; font-size: .66rem; letter-spacing: 1px; color: #8a6a00; margin-bottom: 4px; }
+.hint-card p   { font-size: .87rem; color: var(--hint-ink); line-height: 1.65; margin: 0; }
+.hint-card p+p { margin-top: 7px; }
+
+/* ── WAX SEAL ── */
+.seal-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  margin-top: 24px; padding-top: 18px;
+  border-top: 1px dashed var(--parch-mid); gap: 10px;
+}
+.seal-wrap-label {
+  font-family: 'Special Elite', cursive; font-size: .64rem;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light);
+}
+.seal-btn {
+  width: 70px; height: 70px; border: none; cursor: pointer;
+  background: radial-gradient(circle at 38% 32%, #e03030 0%, #9a0e0e 52%, #540606 100%);
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.75),
+    0 0 0 2px rgba(160,10,10,.45),
+    inset 0 2px 5px rgba(255,160,160,.28),
+    inset 0 -3px 5px rgba(0,0,0,.5);
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 1.6rem; color: rgba(255,230,220,.82);
+  text-shadow: 0 1px 3px rgba(0,0,0,.7), 0 0 10px rgba(255,80,80,.25);
+  line-height: 70px; text-align: center;
+  transition: box-shadow .2s, transform .2s;
+  clip-path: polygon(50% 0%, 63% 3%, 74% 0%, 82% 7%, 91% 5%, 97% 13%, 100% 22%, 97% 32%, 100% 41%, 96% 50%, 100% 59%, 96% 68%, 100% 77%, 93% 83%, 97% 92%, 87% 96%, 80% 100%, 69% 97%, 59% 100%, 50% 97%, 41% 100%, 31% 97%, 21% 100%, 13% 96%, 3% 93%, 7% 84%, 0% 78%, 4% 68%, 0% 59%, 4% 50%, 0% 41%, 3% 32%, 0% 23%, 6% 14%, 3% 5%, 13% 3%, 23% 6%, 33% 2%, 43% 4%);
+}
+.seal-btn:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 6px 24px rgba(139,0,0,.75),
+    0 0 0 3px rgba(200,10,10,.55),
+    0 0 22px rgba(200,0,0,.28),
+    inset 0 2px 5px rgba(255,160,160,.28);
+}
+.seal-btn.cracking {
+  animation: sealCrack .38s ease forwards;
+  pointer-events: none;
+}
+@keyframes sealCrack {
+  0%   { transform: scale(1)    rotate(0deg);  opacity: 1; }
+  45%  { transform: scale(1.2)  rotate(-8deg); opacity: 1; }
+  100% { transform: scale(0.08) rotate(50deg); opacity: 0; }
+}
+
+/* ── EXTENSION PANEL ── */
+.ext-section {
+  display: none; margin-top: 22px; padding: 14px 18px 14px 18px;
+  background: var(--ext-bg); border: 1px solid var(--ext-border);
+  border-radius: 2px; animation: slideIn .3s ease;
+  position: relative;
+}
+.ext-section.visible { display: block; }
+.seal-remnant {
+  position: absolute; top: -12px; right: 12px;
+  width: 30px; height: 30px;
+  background: radial-gradient(circle at 40% 35%, #6a1010 0%, #320404 100%);
+  border-radius: 50%; opacity: 0.65;
+  transform: rotate(28deg) scale(0.9);
+  box-shadow: 0 2px 6px rgba(0,0,0,.7);
+  clip-path: polygon(52% 0%, 70% 7%, 82% 2%, 90% 14%, 98% 10%, 100% 24%, 96% 36%, 100% 48%, 92% 56%, 100% 66%, 93% 76%, 100% 86%, 87% 92%, 77% 100%, 60% 94%, 48% 100%, 34% 95%, 20% 100%, 10% 90%, 2% 80%, 8% 68%, 0% 58%, 6% 46%, 0% 36%, 5% 24%, 0% 14%, 12% 8%, 22% 3%, 36% 9%, 44% 2%);
+}
+.ext-label { font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: 3px; text-transform: uppercase; color: #5a9a5a; margin-bottom: 8px; }
+.ext-section p  { font-size: .87rem; line-height: 1.75; color: var(--ext-fg); opacity: .85; margin-bottom: 8px; }
+.ext-section ul { margin: 4px 0 8px 18px; }
+.ext-section li { font-size: .86rem; line-height: 1.82; color: var(--ext-fg); opacity: .82; }
+.ext-section code { background: rgba(255,255,255,.1); color: #80d880; }
+.ext-section strong { color: #c8e8c8; }
+
+/* ── NAV ── */
+.nav-row { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 780px; margin: 18px 0 8px; }
+.nav-btn { background: var(--parch-mid); color: var(--ink); border: none; padding: 10px 26px; font-family: 'Special Elite', cursive; font-size: .8rem; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-radius: 1px; box-shadow: 0 2px 6px rgba(0,0,0,.55); transition: all .2s; }
+.nav-btn:hover:not(:disabled) { background: var(--parchment); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,.55); }
+.nav-btn:disabled { opacity: .28; cursor: not-allowed; transform: none; }
+.page-ind { font-family: 'Special Elite', cursive; color: var(--parch-dark); font-size: .8rem; letter-spacing: 1px; }
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 5</a></nav>
+
+
+<header class="site-header">
+  <div class="site-title">Ashwood Manor</div>
+  <div class="site-subtitle">Year 12 Python &nbsp;·&nbsp; Graph Theory Challenge</div>
+</header>
+
+<div class="progress-row">
+  <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+  <div class="progress-label" id="pLabel"></div>
+</div>
+
+<div class="task-dots" id="dots"></div>
+<div class="card" id="card"></div>
+
+<div class="nav-row">
+  <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>← Previous</button>
+  <span class="page-ind" id="pageInd"></span>
+  <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
+</div>
+
+<script>
+let cur = 0;
+const hintState = {};
+const sealState = {};
+
+const PAGES = [
+
+// ── 0 INTRO ──────────────────────────────────────────────────────────
+{ badge:'intro', badgeText:'Briefing', title:'Ashwood Manor',
+  sig:'Year 12 Python: Graph Theory',
+  body:`
+<p>You are trapped inside Ashwood Manor. The only way out is through the <strong>Garden</strong>, but the manor is a labyrinth of rooms, passages and dead ends. You will write a Python program that maps the manor, analyses its structure, and ultimately finds you an escape route.</p>
+<p>The manor is represented as a <strong>graph</strong>. Each room is a <strong>vertex</strong>. Each door between two rooms is an <strong>edge</strong>. Because doors open both ways, this is an <strong>undirected</strong> graph.</p>
+<p>Your program stores the graph as an <strong>adjacency matrix</strong>: a 2D list where a value of <code>1</code> at position <code>[i][j]</code> means room <code>i</code> connects directly to room <code>j</code>.</p>
+
+<div class="callout info">💡 You have seen adjacency matrices in your notes as a grid with node names on rows and columns. In Python, the names are stored separately in the <code>rooms</code> list, so the matrix holds only the 0s and 1s. So <code>rooms[i]</code> is always the label for row <code>i</code> and column <code>i</code> of the matrix.</div>
+
+<div class="cb-wrap">
+  <span class="cb-label">Starter Data: copy this into your file</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">rooms = [
+    "Entrance Hall",   # index 0
+    "Dark Corridor",   # index 1
+    "Trophy Room",     # index 2
+    "Cellar",          # index 3
+    "Armoury",         # index 4
+    "Library",         # index 5
+    "Secret Passage",  # index 6
+    "Garden"           # index 7  -- the exit
+]
+
+#              EH  DC  TR  Ce  Ar  Li  SP  Ga
+graph = [
+    [0,  1,  1,  0,  0,  0,  0,  0],  # Entrance Hall
+    [1,  0,  0,  1,  1,  0,  0,  0],  # Dark Corridor
+    [1,  0,  0,  0,  0,  1,  0,  0],  # Trophy Room
+    [0,  1,  0,  0,  0,  0,  0,  0],  # Cellar
+    [0,  1,  0,  0,  0,  0,  0,  1],  # Armoury
+    [0,  0,  1,  0,  0,  0,  1,  0],  # Library
+    [0,  0,  0,  0,  0,  1,  0,  1],  # Secret Passage
+    [0,  0,  0,  0,  1,  0,  1,  0],  # Garden (exit)
+]</pre>
+</div>
+
+<p><code>graph[i][j] = 1</code> means room <code>i</code> connects directly to room <code>j</code>. Because the graph is undirected, the matrix is symmetric: if <code>[i][j]</code> is 1, so is <code>[j][i]</code>.</p>
+<div class="callout warn">🗺️ By the end of this challenge, your program will analyse the manor's structure, find the most connected room, identify dead ends, and let you walk room by room until you find the way out.</div>
+`},
+
+// ── 1 display_rooms ───────────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 1', title:'Display the Rooms',
+  sig:'display_rooms(rooms)',
+  body:`
+<p>Write a subroutine called <code>display_rooms(rooms)</code> that prints every room in the manor, numbered from 1.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output</div>
+  <div class="eg-box"><pre class="cb">1. Entrance Hall
+2. Dark Corridor
+3. Trophy Room
+4. Cellar
+5. Armoury
+6. Library
+7. Secret Passage
+8. Garden</pre></div>
+</div>
+<p>Call it at the bottom of your file to test it before moving on.</p>
+`,
+  hints:[
+    `You need to loop through the list and keep track of a counter at the same time. Set a counter variable to 1 before the loop, print it alongside the room name, then increment it at the end of each iteration.`,
+    `<code>counter = 1</code><br><code>for room in rooms:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print(f"{counter}. {room}")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>counter += 1</code>`
+  ],
+  extension:`<p><strong>Extension:</strong> Modify <code>display_rooms</code> to also print the total room count afterwards: <em>The manor contains 8 rooms.</em></p>
+<p>Then write a second subroutine <code>display_matrix(rooms, graph)</code> that prints the full adjacency matrix with room initials as column headers, matching the format from your notes.</p>`
+},
+
+// ── 2 get_room_index ──────────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 2', title:'Find a Room Index',
+  sig:'get_room_index(rooms, room_name)',
+  body:`
+<p>Write a function called <code>get_room_index(rooms, room_name)</code> that returns the position of a room name in the list.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Examples</div>
+  <div class="eg-box">
+    <p><code>get_room_index(rooms, "Cellar")</code> returns <code>3</code></p>
+    <p><code>get_room_index(rooms, "Garden")</code> returns <code>7</code></p>
+  </div>
+</div>
+<p>This is a short function, but you will call it in <strong>every subsequent task</strong>. Think of it as a key that unlocks the rest of the program.</p>
+<div class="callout info">💡 Python lists have a built-in method that does exactly this job. It returns the index of the first matching item. Look it up if you are not sure of the name.</div>
+`,
+  hints:[
+    `Python lists have a method called <code>.index()</code> that returns the position of an item. Try <code>rooms.index("Cellar")</code> in the Python shell and see what comes back.`,
+    `Your function needs two parameters, <code>rooms</code> and <code>room_name</code>. Inside it, call <code>.index()</code> on the rooms list, passing in the name you are looking for, and <code>return</code> whatever comes back. The whole body is one line. It is short on purpose: the point is to give you a named, reusable tool rather than typing <code>rooms.index(...)</code> inline everywhere.`,
+    `Full worked solution:<br><br><code>def get_room_index(rooms, room_name):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>return rooms.index(room_name)</code><br><br>Test it: <code>print(get_room_index(rooms, "Armoury"))</code> should print <code>4</code>.`
+  ],
+  extension:`<p><strong>Extension:</strong> The built-in <code>.index()</code> raises a <code>ValueError</code> if the item does not exist. Modify <code>get_room_index</code> to return <code>-1</code> if the room is not found, without crashing. Think about how you would check whether an item is in a list before calling <code>.index()</code>.</p>`
+},
+
+// ── 3 display_connections ─────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 3', title:'Show Room Connections',
+  sig:'display_connections(rooms, graph, room_name)',
+  body:`
+<p>Write a subroutine called <code>display_connections(rooms, graph, room_name)</code> that prints every room directly connected to the given room.</p>
+<p>Use <code>get_room_index</code> to find the row, then loop over that row looking for 1s.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Example Call</div>
+  <div class="eg-box"><pre class="cb">display_connections(rooms, graph, "Dark Corridor")</pre></div>
+</div>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output</div>
+  <div class="eg-box"><pre class="cb">Dark Corridor connects to:
+  - Entrance Hall
+  - Cellar
+  - Armoury</pre></div>
+</div>
+`,
+  hints:[
+    `First call <code>get_room_index</code> to get the row number. Then loop using <code>for j in range(len(rooms)):</code>. Inside the loop, check whether <code>graph[row][j] == 1</code>. If it is, <code>rooms[j]</code> is a connected room.`,
+    `<code>row = get_room_index(rooms, room_name)</code><br><code>print(room_name + " connects to:")</code><br><code>for j in range(len(rooms)):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if graph[row][j] == 1:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print("  - " + rooms[j])</code>`
+  ],
+  extension:`<p><strong>Extension:</strong> Write <code>display_all_connections(rooms, graph)</code> that calls <code>display_connections</code> for every room, printing the entire layout of the manor in one go. This is the manor's floor plan in text form.</p>`
+},
+
+// ── 4 are_connected ───────────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 4', title:'Are These Rooms Connected?',
+  sig:'are_connected(rooms, graph, room1, room2)',
+  body:`
+<p>Write a function called <code>are_connected(rooms, graph, room1, room2)</code> that returns <code>True</code> if the two rooms are directly connected, and <code>False</code> otherwise.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Examples</div>
+  <div class="eg-box">
+    <p><code>are_connected(rooms, graph, "Entrance Hall", "Dark Corridor")</code> returns <code>True</code></p>
+    <p><code>are_connected(rooms, graph, "Entrance Hall", "Cellar")</code> returns <code>False</code></p>
+  </div>
+</div>
+`,
+  hints:[
+    `Get the index for each room name using <code>get_room_index</code>. You now have two indices: call them <code>i</code> and <code>j</code>. What single value in the matrix tells you whether the rooms are directly connected?`,
+    `<code>i = get_room_index(rooms, room1)</code><br><code>j = get_room_index(rooms, room2)</code><br><code>return graph[i][j] == 1</code><br><br>The comparison <code>== 1</code> produces a boolean directly, so no <code>if</code> statement needed.`
+  ],
+  extension:`<p><strong>Extension:</strong> Because the manor's graph is undirected, <code>graph[i][j]</code> always equals <code>graph[j][i]</code>. Write a function <code>is_symmetric(graph)</code> that checks every pair to confirm this holds. Test it by temporarily changing one entry in the matrix, making one door one-way.</p>`
+},
+
+// ── 5 count_connections ───────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 5', title:'Count the Connections',
+  sig:'count_connections(rooms, graph, room_name)',
+  body:`
+<p>Write a function called <code>count_connections(rooms, graph, room_name)</code> that returns the number of rooms directly connected to the given room.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Examples</div>
+  <div class="eg-box">
+    <p><code>count_connections(rooms, graph, "Dark Corridor")</code> returns <code>3</code></p>
+    <p><code>count_connections(rooms, graph, "Cellar")</code> returns <code>1</code></p>
+  </div>
+</div>
+<p>Tasks 6 and 7 both call this function, so make sure it is correct before moving on.</p>
+`,
+  hints:[
+    `Get the row index using <code>get_room_index</code>. Loop over the row counting how many values equal 1. Start a counter at 0 and increment it each time you find a connection. Return the counter at the end.`,
+    `<code>row = get_room_index(rooms, room_name)</code><br><code>count = 0</code><br><code>for j in range(len(rooms)):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if graph[row][j] == 1:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>count += 1</code><br><code>return count</code>`
+  ],
+  extension:`<p><strong>Extension:</strong> Write <code>find_rooms_with_exactly(rooms, graph, n)</code> that returns a list of all rooms with exactly <code>n</code> connections. For example, <code>find_rooms_with_exactly(rooms, graph, 2)</code> should return all rooms with exactly two doors.</p>`
+},
+
+// ── 6 find_dead_ends ──────────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 6', title:'Find the Dead Ends',
+  sig:'find_dead_ends(rooms, graph)',
+  body:`
+<p>Write a function called <code>find_dead_ends(rooms, graph)</code> that returns a list of every room with only one connection: rooms you can enter but from which there is only one way out: the way you came in.</p>
+<p>Use <code>count_connections</code> for each room. Build a new list and return it.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Return Value</div>
+  <div class="eg-box"><pre class="cb">["Cellar"]</pre></div>
+</div>
+<div class="callout warn">🔍 Only one dead end in the current manor. How many 1s are in the Cellar's row of the matrix?</div>
+`,
+  hints:[
+    `Standard filter pattern: start with an empty list. Loop over every room name. If its connection count equals 1, append it to the list. Return the list after the loop.`,
+    `<code>dead_ends = []</code><br><code>for room in rooms:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if count_connections(rooms, graph, room) == 1:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>dead_ends.append(room)</code><br><code>return dead_ends</code>`
+  ],
+  extension:`<p><strong>Extension:</strong> Generalise this into <code>find_rooms_by_degree(rooms, graph, min_deg, max_deg)</code> that returns all rooms with a connection count between <code>min_deg</code> and <code>max_deg</code> inclusive. Calling it with <code>(1, 1)</code> should give the same result as <code>find_dead_ends</code>.</p>`
+},
+
+// ── 7 most_connected_room ─────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 7', title:'The Most Connected Room',
+  sig:'most_connected_room(rooms, graph)',
+  body:`
+<p>Write a function called <code>most_connected_room(rooms, graph)</code> that returns the name of the room with the highest number of connections.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Return Value</div>
+  <div class="eg-box"><p><code>"Dark Corridor"</code>: connects to Entrance Hall, Cellar, and Armoury.</p></div>
+</div>
+`,
+  hints:[
+    `Before the loop, set two variables: one for the best room found so far (start as <code>None</code>), one for its count (start as <code>0</code>). Each iteration, compare the current room's count to the best. If it is higher, update both variables.`,
+    `<code>best_room = None</code><br><code>best_count = 0</code><br><code>for room in rooms:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>c = count_connections(rooms, graph, room)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if c > best_count:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>best_count = c</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>best_room = room</code><br><code>return best_room</code>`
+  ],
+  extension:`<p><strong>Extension:</strong> Your current function returns one room even if two are tied. Modify it to return a <strong>list</strong> of all rooms sharing the maximum connection count. If only one room has the top count, the list has one item.</p>`
+},
+
+// ── 8 is_reachable ────────────────────────────────────────────────────
+{ badge:'bfs', badgeText:'New Concept', title:'Can You Reach That Room?',
+  sig:'is_reachable(rooms, graph, start, target)',
+  body:`
+<p>The next two tasks use <strong>Breadth-First Search (BFS)</strong>: a way of exploring a graph level by level. Read this carefully before writing any code.</p>
+
+<div class="callout bfs">
+<strong>How BFS works</strong><br><br>
+BFS uses two structures: a <strong>queue</strong> (rooms waiting to be explored) and a <strong>visited list</strong> (rooms already seen, so we do not go in circles).<br><br>
+Add the start room to the queue. Then, while the queue is not empty: take the first room from the front, mark it visited, add all its unvisited neighbours to the back. If you take the target room from the queue, you have found it.<br><br>
+This uses a <code>while</code> loop, not recursion.
+</div>
+
+<p>BFS tracing a path from <strong>Entrance Hall</strong> to <strong>Garden</strong>:</p>
+
+<table class="bfs-table">
+  <thead><tr><th>Step</th><th>Room taken from queue</th><th>Queue after</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Entrance Hall</td><td>Dark Corridor, Trophy Room</td></tr>
+    <tr><td>2</td><td>Dark Corridor</td><td>Trophy Room, Cellar, Armoury</td></tr>
+    <tr><td>3</td><td>Trophy Room</td><td>Cellar, Armoury, Library</td></tr>
+    <tr><td>4</td><td>Cellar</td><td>Armoury, Library</td></tr>
+    <tr><td>5</td><td>Armoury</td><td>Library, Garden</td></tr>
+    <tr><td>6</td><td>Library</td><td>Garden, Secret Passage</td></tr>
+    <tr class="found"><td>7</td><td>Garden: target found!</td><td></td></tr>
+  </tbody>
+</table>
+
+<p>Now write <code>is_reachable(rooms, graph, start, target)</code>. Returns <code>True</code> if the target can be reached from the start, <code>False</code> otherwise.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Examples</div>
+  <div class="eg-box">
+    <p><code>is_reachable(rooms, graph, "Entrance Hall", "Garden")</code> returns <code>True</code></p>
+    <p>To test <code>False</code>: temporarily set <code>graph[1][3] = 0</code> and <code>graph[3][1] = 0</code> to brick up the Cellar door, then check if the Cellar can reach the Garden. (Cutting a single door elsewhere is not enough: the manor has two routes to the Garden, so BFS just finds the other one.)</p>
+  </div>
+</div>
+`,
+  hints:[
+    `Set up: get both indices using <code>get_room_index</code>. Create an empty <code>visited</code> list and a <code>queue</code> list containing just <code>start_index</code>. Then write a <code>while len(queue) > 0</code> loop.`,
+    `Inside the loop: <code>current = queue.pop(0)</code>. If <code>current == target_index</code>, return <code>True</code>. If <code>current</code> not in <code>visited</code>: add it, then loop over all rooms. If <code>graph[current][j] == 1</code> and <code>j</code> not in <code>visited</code>, append <code>j</code> to the queue. After the while loop, return <code>False</code>.`
+  ],
+  extension:`<p><strong>Extension:</strong> Write <code>count_reachable(rooms, graph, start)</code> that returns the <em>number</em> of rooms reachable from the start, including itself. In a fully connected graph this should equal <code>len(rooms)</code>. Use the same BFS logic but count visited rooms rather than looking for a target.</p>`
+},
+
+// ── 9 find_route ──────────────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 9', title:'Find the Escape Route',
+  sig:'find_route(rooms, graph, start, target)',
+  body:`
+<p>Write a function called <code>find_route(rooms, graph, start, target)</code> that returns the shortest path from start to target as a list of room names. Return an empty list if no route exists.</p>
+<p>This is BFS again, but this time you need to remember <em>how you got somewhere</em>. Use a <strong>parent list</strong>: <code>parent[i]</code> stores the index of the room you came from when you first reached room <code>i</code>.</p>
+<div class="callout info">🗺️ When you reach the target, backtrack through the parent list from target to start, collecting room names as you go. Reverse that list and you have the route.</div>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Return Value</div>
+  <div class="eg-box">
+    <p><code>find_route(rooms, graph, "Entrance Hall", "Garden")</code></p>
+    <p>returns <code>["Entrance Hall", "Dark Corridor", "Armoury", "Garden"]</code></p>
+  </div>
+</div>
+`,
+  hints:[
+    `Start the same as <code>is_reachable</code>, but add: <code>parent = [-1] * len(rooms)</code> and set <code>parent[start_index] = start_index</code>. Each time you add a room to the queue, record where it came from: <code>if parent[j] == -1: parent[j] = current</code>.`,
+    `When <code>current == target_index</code>, reconstruct the path. Create an empty <code>path</code> list. Set <code>node = target_index</code>. While <code>node != start_index</code>: append <code>rooms[node]</code> to path, then <code>node = parent[node]</code>. After the loop, append <code>rooms[start_index]</code>, then <code>path.reverse()</code>. Return <code>path</code>.`
+  ],
+  extension:`<p><strong>Extension:</strong> BFS always finds the <em>shortest</em> route (fewest rooms). But there may be others. Write <code>find_all_routes(rooms, graph, start, target)</code> that returns every possible route as a list of lists. Warning: this is significantly harder: you will need to carry a separate visited set with each partial path rather than sharing one across the whole search.</p>`
+},
+
+// ── 10 display_route ──────────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 10', title:'The Escape',
+  sig:'display_route(route)',
+  body:`
+<p>Write a subroutine called <code>display_route(route)</code> that takes the list returned by <code>find_route</code> and prints it as a step-by-step escape sequence. The number of moves is the number of rooms minus one. Print the arrows between rooms, not before the first one.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output</div>
+  <div class="eg-box"><pre class="cb">Escape route found - 3 moves
+
+  Entrance Hall
+    |
+    v
+  Dark Corridor
+    |
+    v
+  Armoury
+    |
+    v
+  Garden
+
+You escaped from Ashwood Manor.</pre></div>
+</div>
+<div class="callout warn">🏰 You are almost out. Task 11 will let you walk the manor yourself, room by room, using every function you have built.</div>
+`,
+  hints:[
+    `You need to treat the first room differently: no arrow before it. Use a counter starting at 0. Inside the loop: if the counter is greater than 0, print the arrow lines first. Then print the room. Increment the counter each iteration.`,
+    `<code>moves = len(route) - 1</code><br><code>print(f"Escape route found - {moves} moves\\n")</code><br><code>counter = 0</code><br><code>for room in route:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if counter > 0:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print("    |")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print("    v")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print("  " + room)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>counter += 1</code><br><code>print("\\nYou escaped from Ashwood Manor.")</code>`
+  ],
+  extension:`<p><strong>Extension:</strong> The Garden has two entrances: from the Armoury and from the Secret Passage, giving two distinct routes. Find and display both. After finding the first route, you could temporarily remove those edges from the graph and search again.</p>`
+},
+
+// ── 11 navigate ───────────────────────────────────────────────────────
+{ badge:'task', badgeText:'Task 11', title:'Navigate the Manor',
+  sig:'navigate(rooms, graph)',
+  body:`
+<p>You have built every tool you need. Now assemble them into a playable program.</p>
+<p>Write a subroutine called <code>navigate(rooms, graph)</code> that lets the player explore Ashwood Manor room by room. It tracks the player's current room and loops until they quit or escape.</p>
+<p>Each loop should:</p>
+<ol>
+  <li>Show which room the player is in and display its exits using <code>display_connections</code></li>
+  <li>Offer a numbered menu of actions</li>
+  <li>Read the player's choice and call the appropriate function</li>
+</ol>
+
+<div class="cb-wrap">
+  <span class="cb-label">Menu skeleton: copy this and fill in the branches</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">def navigate(rooms, graph):
+    current_room = "Entrance Hall"
+    while True:
+        print(f"\\nYou are in: {current_room}")
+        display_connections(rooms, graph, current_room)
+        print("\\n1. Move to another room")
+        print("2. Find escape route from here")
+        print("3. Manor analysis")
+        print("4. Quit")
+        choice = input("\\nChoose: ")</pre>
+</div>
+
+<p>For option 1: get a destination with <code>input()</code>, check it with <code>are_connected</code> before allowing the move.<br>
+For option 2: call <code>find_route</code> and <code>display_route</code>.<br>
+For option 3: call <code>find_dead_ends</code> and <code>most_connected_room</code>.<br>
+For option 4: <code>break</code>.</p>
+
+<div class="eg-wrap">
+  <div class="eg-label">Example interaction</div>
+  <div class="eg-box"><pre class="cb">You are in: Entrance Hall
+Entrance Hall connects to:
+  - Dark Corridor
+  - Trophy Room
+
+1. Move to another room
+2. Find escape route from here
+3. Manor analysis
+4. Quit
+
+Choose: 1
+Where do you want to go? Dark Corridor
+You move to Dark Corridor.</pre></div>
+</div>
+
+<div class="cb-wrap">
+  <span class="cb-label">Start the program like this</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">navigate(rooms, graph)</pre>
+</div>
+`,
+  hints:[
+    `For option 1: <code>destination = input("Where do you want to go? ")</code>. Then check <code>are_connected(rooms, graph, current_room, destination)</code>. If connected, update <code>current_room = destination</code> and confirm the move. If not, print an error. What should you do if the player types a room name that does not exist at all?`,
+    `Option 1 in full:<br><code>destination = input("Where do you want to go? ")</code><br><code>if destination in rooms:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if are_connected(rooms, graph, current_room, destination):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>current_room = destination</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print("You move to " + destination + ".")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>else:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print("There is no passage to that room.")</code><br><code>else:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print("That room does not exist.")</code>`
+  ],
+  extension:`<p><strong>Extension:</strong> Add a <strong>win condition</strong>: at the top of the loop, check whether <code>current_room == "Garden"</code>. If so, print an escape message and break automatically, even if the player did not choose option 2.</p>
+<p>Then add a <strong>move counter</strong>: increment it each time the player successfully moves, and display the total when the program ends. Can you escape in fewer than 5 moves?</p>
+<p>Further challenge: keep a <code>visited</code> list of rooms the player has been in. On quit, tell them which rooms they never found.</p>`
+}
+
+]; // end PAGES
+
+function render(scrollTop = true) {
+  const p = PAGES[cur];
+  const pct = (cur / (PAGES.length - 1)) * 100;
+  document.getElementById('pFill').style.width = pct + '%';
+  document.getElementById('pLabel').textContent = cur === 0 ? 'Briefing' : `Task ${cur} of ${PAGES.length - 1}`;
+  document.getElementById('pageInd').textContent = cur === 0 ? 'Intro' : `${cur} / ${PAGES.length - 1}`;
+  document.getElementById('prevBtn').disabled = cur === 0;
+  document.getElementById('nextBtn').disabled = cur === PAGES.length - 1;
+
+  const dc = document.getElementById('dots');
+  dc.innerHTML = '';
+  PAGES.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.textContent = i === 0 ? '★' : i;
+    d.title = i === 0 ? 'Briefing' : `Task ${i}`;
+    d.onclick = () => { cur = i; render(); };
+    dc.appendChild(d);
+  });
+
+  const shown = hintState[cur] || 0;
+  document.getElementById('card').innerHTML = `
+    <div class="badge badge-${p.badge}">${p.badgeText}</div>
+    <h1 class="task-heading">${p.title}</h1>
+    <p class="task-sig">${p.sig}</p>
+    <div class="body">${p.body}</div>
+    ${p.hints  ? buildHints(p.hints, shown) : ''}
+    ${p.extension ? buildExt(p.extension, cur) : ''}
+  `;
+
+  if (scrollTop) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function buildHints(hints, shown) {
+  const labels = ['gentle nudge', 'more detail', 'worked solution'];
+  let btns = '', cards = '';
+  hints.forEach((h, i) => {
+    const isShown = i < shown;
+    const label = labels[Math.min(i, labels.length - 1)];
+    btns += `<button class="h-btn${isShown ? ' shown' : ''}" onclick="showHint(${i+1})" ${isShown ? 'disabled' : ''}>
+      ${isShown ? '&#10003; Hint ' + (i+1) : 'Hint ' + (i+1) + ' - ' + label}
+    </button>`;
+    cards += `<div class="hint-card${isShown ? ' visible' : ''}">
+      <div class="hint-num">Hint ${i+1}</div>
+      <p>${h}</p>
+    </div>`;
+  });
+  const allShown = shown >= hints.length;
+  return `<div class="hints-section">
+    <div class="hints-heading">Need a hand?</div>
+    <div class="hint-btns">${btns}</div>
+    ${cards}
+    ${allShown ? '<p style="font-style:italic;font-size:.8rem;color:var(--ink-light);margin-top:8px;">All hints shown. If you are still stuck, ask.</p>' : ''}
+  </div>`;
+}
+
+function buildExt(content, pageIndex) {
+  if (sealState[pageIndex]) {
+    return `<div class="ext-section visible">
+      <div class="seal-remnant" title="Seal broken"></div>
+      <div class="ext-label">Advanced Challenge</div>
+      ${content}
+    </div>`;
+  }
+  return `<div class="seal-wrap">
+    <div class="seal-wrap-label">Advanced challenge within</div>
+    <button class="seal-btn" id="sealBtn" onclick="breakSeal()" title="Break the seal to reveal the advanced challenge">A</button>
+  </div>`;
+}
+
+function showHint(n) { hintState[cur] = n; render(); }
+function go(d)       { cur = Math.max(0, Math.min(PAGES.length - 1, cur + d)); render(); }
+
+function breakSeal() {
+  const btn = document.getElementById('sealBtn');
+  if (btn) {
+    btn.classList.add('cracking');
+    setTimeout(() => { sealState[cur] = true; render(false); }, 380);
+  }
+}
+
+function cp(btn) {
+  const pre = btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent.trim()).then(() => {
+    btn.textContent = '✓ Copied'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2200);
+  }).catch(() => {
+    btn.textContent = 'Failed';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+render();
+</script>
+</body>
+</html>

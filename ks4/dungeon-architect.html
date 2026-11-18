@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dungeon Architect: Year 10 Python Challenge</title>
+<style>
+:root {
+  --stone-deep:   #0c1018;
+  --stone:        #131922;
+  --stone-mid:    #1a2230;
+  --stone-light:  #222d3e;
+  --stone-lighter:#2c3a50;
+  --torch:        #d4821a;
+  --torch-bright: #e89a30;
+  --torch-dim:    rgba(212,130,26,.13);
+  --xp:           #4a9060;
+  --text:         #cec4a4;
+  --text-dim:     rgba(206,196,164,.55);
+  --text-bright:  #e4d8bc;
+  --bronze-hi:    #c07838;
+  --silver-hi:    #88aac0;
+  --gold-hi:      #d4a820;
+  --code-bg:      #07090e;
+  --code-fg:      #a8c8a0;
+  --border:       rgba(255,255,255,.06);
+  --border-mid:   rgba(255,255,255,.1);
+  --border-warm:  rgba(212,130,26,.25);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  background-color: var(--stone-deep);
+  background-image:
+    radial-gradient(ellipse at 12% 8%,  rgba(212,130,26,.07) 0%, transparent 48%),
+    radial-gradient(ellipse at 88% 82%, rgba(212,130,26,.05) 0%, transparent 48%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='%230c1018'/%3E%3Crect x='0' y='0' width='30' height='30' fill='none' stroke='%23141c28' stroke-width='1' opacity='.55'/%3E%3Crect x='30' y='30' width='30' height='30' fill='none' stroke='%23141c28' stroke-width='1' opacity='.55'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 22px 16px 64px;
+  display: flex; flex-direction: column; align-items: center;
+  color: var(--text);
+}
+
+/* ── HEADER ── */
+.site-header {
+  width: 100%; max-width: 920px;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 14px 0 10px; text-align: center;
+}
+.torch-row { display: flex; align-items: center; gap: 22px; margin-bottom: 8px; }
+.torch-icon { font-size: 1.55rem; animation: flicker 3.5s ease-in-out infinite; display: inline-block; }
+.torch-icon:last-child { animation-delay: .9s; }
+@keyframes flicker {
+  0%,100% { opacity:1;  transform:scale(1); }
+  20%      { opacity:.8; transform:scale(.95) rotate(-1deg); }
+  55%      { opacity:.93;transform:scale(1.02); }
+  80%      { opacity:.86;transform:scale(.97) rotate(.5deg); }
+}
+.site-title {
+  font-family: 'Cinzel', serif; font-weight: 900;
+  font-size: clamp(1.5rem, 5.5vw, 2.75rem);
+  color: var(--text-bright);
+  letter-spacing: 5px; text-transform: uppercase;
+  text-shadow: 0 0 50px rgba(212,130,26,.22), 0 2px 10px rgba(0,0,0,.7);
+  line-height: 1.1;
+}
+.site-subtitle {
+  font-family: 'Lora', serif; font-style: italic;
+  color: var(--text-dim); font-size: .8rem;
+  letter-spacing: 2px; margin-top: 6px;
+}
+
+/* ── PROGRESS ── */
+.progress-row {
+  width: 100%; max-width: 920px;
+  display: flex; align-items: center; gap: 12px;
+  margin: 18px 0 10px;
+}
+.progress-track { flex:1; height:2px; background:rgba(255,255,255,.06); border-radius:1px; overflow:hidden; }
+.progress-fill {
+  height:100%; border-radius:1px;
+  background: linear-gradient(90deg, var(--torch) 0%, var(--torch-bright) 100%);
+  box-shadow: 0 0 10px rgba(212,130,26,.5);
+  transition: width .5s ease;
+}
+.progress-label {
+  font-family:'Cinzel',serif; color:var(--text-dim);
+  font-size:.62rem; letter-spacing:2px; min-width:88px; text-align:right;
+}
+
+/* ── DOTS ── */
+.task-dots {
+  display:flex; gap:7px; justify-content:center;
+  flex-wrap:wrap; max-width:920px; width:100%; margin-bottom:18px;
+}
+.dot {
+  width:27px; height:27px; border-radius:50%;
+  background:var(--stone-mid); border:1px solid var(--border);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-family:'Cinzel',serif; font-size:.56rem; font-weight:700;
+  color:var(--text-dim); transition:all .2s;
+}
+.dot:hover { background:var(--stone-light); color:var(--text); border-color:var(--border-mid); }
+.dot.active {
+  background:transparent; color:var(--torch); border-color:var(--torch);
+  box-shadow:0 0 12px rgba(212,130,26,.3), inset 0 0 8px rgba(212,130,26,.08);
+}
+
+/* ── CARD ── */
+.page-card {
+  width:100%; max-width:920px;
+  background:var(--stone);
+  border-radius:2px; border:1px solid var(--border);
+  border-top-color:rgba(255,255,255,.09);
+  padding:clamp(22px,5vw,52px) clamp(18px,5vw,52px);
+  box-shadow:0 2px 5px rgba(0,0,0,.45), 0 16px 44px rgba(0,0,0,.65);
+  position:relative; overflow:hidden; min-height:340px;
+}
+.page-card::before {
+  content:''; position:absolute; top:0; right:0;
+  width:180px; height:180px;
+  background:radial-gradient(ellipse at 100% 0%, rgba(212,130,26,.09) 0%, transparent 65%);
+  pointer-events:none;
+}
+.page-card::after {
+  content:''; position:absolute; bottom:0; left:0;
+  width:130px; height:130px;
+  background:radial-gradient(ellipse at 0% 100%, rgba(212,130,26,.05) 0%, transparent 65%);
+  pointer-events:none;
+}
+
+/* ── BADGE ── */
+.page-badge {
+  display:inline-block;
+  font-family:'Cinzel',serif; font-size:.58rem; font-weight:700;
+  letter-spacing:3px; text-transform:uppercase;
+  padding:3px 12px 2px; border-radius:1px; margin-bottom:13px;
+}
+.badge-intro { background:var(--stone-lighter); color:var(--text-dim); border:1px solid var(--border-mid); }
+.badge-task  { background:var(--torch); color:var(--stone-deep); }
+.badge-ext   { background:#b8880a; color:var(--stone-deep); }
+
+/* ── HEADINGS ── */
+.page-title {
+  font-family:'Cinzel',serif; font-weight:700;
+  font-size:clamp(1.35rem,4vw,1.95rem);
+  color:var(--text-bright); line-height:1.2; margin-bottom:6px;
+}
+.page-sig {
+  font-family:'JetBrains Mono',monospace; font-size:.74rem;
+  color:var(--torch); opacity:.8;
+  margin-bottom:20px; padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+
+/* ── BODY ── */
+.page-body p { font-size:.9rem; line-height:1.9; color:var(--text-dim); margin-bottom:11px; }
+.page-body p strong { color:var(--text); }
+.page-body ul, .page-body ol { margin:5px 0 13px 20px; }
+.page-body li { font-size:.88rem; line-height:1.9; color:var(--text-dim); }
+.page-body li strong { color:var(--text); }
+code {
+  font-family:'JetBrains Mono',monospace;
+  background:var(--stone-light); color:var(--torch);
+  padding:1px 5px; border-radius:2px; font-size:.83em;
+}
+
+/* ── CODE BLOCKS ── */
+.cb-wrap { position:relative; margin:15px 0; }
+.cb-label {
+  display:inline-block; font-family:'Cinzel',serif;
+  font-size:.55rem; letter-spacing:2px; text-transform:uppercase;
+  color:rgba(168,200,160,.4); background:var(--code-bg);
+  padding:3px 10px; border-radius:2px 2px 0 0;
+}
+pre.cb {
+  background:var(--code-bg); color:var(--code-fg);
+  font-family:'JetBrains Mono',monospace; font-size:.8rem;
+  line-height:1.68; padding:14px 18px;
+  border-radius:0 2px 2px 2px; overflow-x:auto; margin:0;
+  border-left:3px solid var(--torch); white-space:pre; tab-size:4;
+}
+.copy-btn {
+  position:absolute; top:28px; right:8px;
+  background:rgba(255,255,255,.05); color:rgba(168,200,160,.5);
+  border:1px solid rgba(255,255,255,.1);
+  padding:4px 10px; font-family:'Cinzel',serif;
+  font-size:.55rem; letter-spacing:1px; text-transform:uppercase;
+  cursor:pointer; border-radius:1px; transition:all .2s;
+}
+.copy-btn:hover { background:rgba(255,255,255,.11); color:var(--text-bright); }
+.copy-btn.ok { color:var(--xp); border-color:var(--xp); }
+
+/* ── CALLOUTS ── */
+.callout { border-radius:2px; padding:11px 15px; margin:14px 0; font-size:.86rem; line-height:1.78; }
+.callout.info { background:rgba(212,130,26,.1); border-left:3px solid rgba(212,130,26,.4); color:rgba(218,178,120,.85); }
+.callout.note { background:rgba(74,144,96,.08); border-left:3px solid rgba(74,144,96,.35); color:rgba(130,190,150,.85); }
+.callout.warn { background:rgba(180,80,30,.1); border-left:3px solid rgba(180,80,30,.4); color:rgba(218,148,108,.85); }
+
+/* ── TIER CARDS ── */
+.tier-section { margin:18px 0; }
+.tier-heading {
+  font-family:'Cinzel',serif; font-size:.62rem;
+  letter-spacing:3px; text-transform:uppercase;
+  color:var(--text-dim); margin-bottom:10px;
+}
+.tier-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+@media (max-width:660px) { .tier-cards { grid-template-columns:1fr; } }
+.tier-card { border-radius:2px; border:1px solid; padding:12px 14px; }
+.tier-card.bronze { background:rgba(164,96,32,.08); border-color:rgba(164,96,32,.35); }
+.tier-card.silver { background:rgba(104,136,160,.08); border-color:rgba(104,136,160,.35); }
+.tier-card.gold   { background:rgba(184,136,10,.08); border-color:rgba(184,136,10,.35); }
+.tier-label {
+  font-family:'Cinzel',serif; font-size:.6rem; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase;
+  margin-bottom:8px; display:block;
+}
+.bronze .tier-label { color:var(--bronze-hi); }
+.silver .tier-label { color:var(--silver-hi); }
+.gold   .tier-label { color:var(--gold-hi); }
+.tier-card ul { margin-left:14px; }
+.tier-card li { font-size:.81rem; line-height:1.82; color:var(--text-dim); }
+
+/* ── EXPECTED OUTPUT ── */
+.expected-wrap { margin:16px 0; }
+.expected-label {
+  font-family:'Cinzel',serif; font-size:.58rem;
+  letter-spacing:2px; text-transform:uppercase;
+  color:var(--text-dim); margin-bottom:6px;
+}
+.expected-box {
+  background:var(--stone-mid); border:1px solid var(--border-mid);
+  border-left:3px solid var(--xp);
+  border-radius:0 2px 2px 2px; padding:12px 16px;
+}
+.expected-box pre {
+  font-family:'JetBrains Mono',monospace; font-size:.78rem;
+  line-height:1.65; color:rgba(130,190,150,.85); margin:0;
+  white-space:pre; overflow-x:auto;
+}
+
+/* ── HINTS ── */
+.hints-section {
+  margin-top:24px; padding-top:18px;
+  border-top:1px dashed rgba(212,130,26,.22);
+}
+.hints-heading {
+  font-family:'Cinzel',serif; font-size:.62rem;
+  letter-spacing:2.5px; text-transform:uppercase;
+  color:var(--text-dim); margin-bottom:10px;
+}
+.hint-btns { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:10px; }
+.h-btn {
+  background:transparent; border:1px solid var(--border-warm);
+  color:rgba(212,130,26,.7);
+  padding:6px 16px; font-family:'Cinzel',serif;
+  font-size:.6rem; letter-spacing:1.5px; text-transform:uppercase;
+  cursor:pointer; border-radius:1px; transition:all .2s;
+}
+.h-btn:hover:not(:disabled) { background:rgba(212,130,26,.1); color:var(--torch-bright); border-color:var(--torch); }
+.h-btn.shown { color:rgba(74,144,96,.65); border-color:rgba(74,144,96,.3); cursor:default; }
+.hint-card {
+  display:none; background:rgba(212,130,26,.06); border:1px solid rgba(212,130,26,.25);
+  border-radius:2px; padding:13px 15px; margin-bottom:8px;
+  animation:fadeUp .2s ease;
+}
+.hint-card.visible { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
+.hint-num {
+  font-family:'Cinzel',serif; font-size:.58rem;
+  letter-spacing:2px; text-transform:uppercase;
+  color:var(--torch); margin-bottom:8px;
+}
+.hint-card p { font-size:.84rem; color:rgba(218,185,130,.84); line-height:1.74; margin:0; }
+.hint-card p + p { margin-top:6px; }
+.hint-card code { color:var(--torch-bright); background:rgba(0,0,0,.25); }
+.hint-card pre.cb { margin-top:10px; font-size:.76rem; border-radius:2px; }
+
+/* ── CHECKLIST ── */
+.checklist { list-style:none !important; margin:8px 0 14px 0 !important; padding:0; }
+.checklist li {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:.88rem; color:var(--text-dim);
+  line-height:1.78; margin-bottom:5px; list-style:none;
+}
+.checklist li::before {
+  content:'\25A1'; font-size:1rem; color:var(--torch);
+  flex-shrink:0; margin-top:1px;
+}
+
+/* ── QUESTION LIST ── */
+.q-list {
+  background:var(--stone-mid); border:1px solid var(--border);
+  border-left:3px solid rgba(212,130,26,.3);
+  border-radius:0 2px 2px 2px; padding:13px 16px; margin:12px 0;
+}
+.q-list p { font-size:.85rem; color:var(--text-dim); line-height:1.75; margin:3px 0; }
+.q-list p strong { color:var(--text); }
+.q-list p.q-head { color:var(--text); font-size:.87rem; margin-bottom:8px; }
+
+/* ── EXTENSION SECTIONS ── */
+.ext-section { margin-top:22px; padding-top:18px; border-top:1px solid var(--border-mid); }
+.ext-label {
+  font-family:'Cinzel',serif; font-size:.62rem;
+  letter-spacing:3px; text-transform:uppercase;
+  color:var(--gold-hi); margin-bottom:10px; display:block;
+}
+
+/* ── NAV ── */
+.nav-row {
+  display:flex; justify-content:space-between; align-items:center;
+  width:100%; max-width:920px; margin:18px 0 8px;
+}
+.nav-btn {
+  background:var(--stone-mid); color:var(--text);
+  border:1px solid var(--border-mid);
+  padding:10px 26px; font-family:'Cinzel',serif;
+  font-size:.66rem; letter-spacing:2.5px; text-transform:uppercase;
+  cursor:pointer; border-radius:1px;
+  box-shadow:0 2px 8px rgba(0,0,0,.4); transition:all .2s;
+}
+.nav-btn:hover:not(:disabled) {
+  background:var(--stone-light); border-color:var(--border-warm);
+  transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,.5);
+}
+.nav-btn:disabled { opacity:.22; cursor:not-allowed; transform:none; }
+.page-ind { font-family:'Cinzel',serif; color:var(--text-dim); font-size:.66rem; letter-spacing:2px; }
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 4</a></nav>
+
+
+<header class="site-header">
+  <div class="torch-row">
+    <span class="torch-icon">&#128293;</span>
+    <div class="site-title">The Dungeon Architect</div>
+    <span class="torch-icon">&#128293;</span>
+  </div>
+  <div class="site-subtitle">Year 10 Python Challenge</div>
+</header>
+
+<div class="progress-row">
+  <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+  <div class="progress-label" id="pLabel"></div>
+</div>
+<div class="task-dots" id="dots"></div>
+<div class="page-card" id="card"></div>
+<div class="nav-row">
+  <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>&#8592; Prev</button>
+  <span class="page-ind" id="pageInd"></span>
+  <button class="nav-btn" id="nextBtn" onclick="go(1)">Next &#8594;</button>
+</div>
+
+<script>
+const PAGES = [
+
+// ════════════════════════ 0  INTRO ════════════════════════
+{
+  badge:'intro', badgeText:'The Brief',
+  title:'The Dungeon Architect',
+  sig:'Year 10 Python Challenge',
+  body:`
+<p>You have been commissioned to build a revision dungeon for Computer Science students. Adventurers enter the dungeon and move through chambers. Each chamber is dedicated to a different topic. The player answers questions, and the accuracy of their answers determines how many diamonds and XP they earn at the end of each chamber.</p>
+<p>Your job is to build the whole thing in Python, one room at a time.</p>
+<div class="callout info">&#127984; <strong>In this challenge,</strong> you will build the CPU Chamber. But the dungeon will eventually have many rooms: Memory, Storage, Networks, and anything else you choose to add. Every new chamber you build later follows exactly the same pattern as the one you build here. You are not just building one room, you are building the engine that drives the whole game.</div>
+<p><strong>Before you open your editor, draw your dungeon on paper.</strong></p>
+<p>This is a real developer skill. Planning a program before writing it means you understand the structure before you start, which leads to cleaner, faster code. Your map is your design document. Show it to your teacher before you begin.</p>
+<ul class="checklist">
+  <li>Draw at least four chambers connected by tunnels</li>
+  <li>Label each chamber with its topic (CPU, Memory, Storage, Networks...)</li>
+  <li>Mark the starting chamber and draw arrows showing where each tunnel leads</li>
+  <li>Every chamber should offer a choice of two exits to different chambers</li>
+  <li>Write five or six questions and answers for the CPU Chamber</li>
+  <li>Mark the base diamond reward for each chamber (10 is a good starting point)</li>
+</ul>
+<div class="callout note">&#128203; Show your map to your teacher before you start coding. It is worth taking the time to get this right before a single line is written.</div>
+<p>Once your map is drawn and approved, start Task 1.</p>
+`,
+  hints:null
+},
+
+// ════════════════════════ 1  MAIN MENU ═══════════════════
+{
+  badge:'task', badgeText:'Task 1',
+  title:'The Entrance Hall',
+  sig:'def main_menu():',
+  body:`
+<p>Every dungeon needs an entrance. Build the main menu that appears when the program runs. The player should be able to choose which chamber to enter, or quit the game.</p>
+
+<div class="tier-section">
+  <div class="tier-heading">Choose your target</div>
+  <div class="tier-cards">
+    <div class="tier-card bronze">
+      <span class="tier-label">Bronze</span>
+      <ul>
+        <li>Print a title and a welcome message</li>
+        <li>Show at least one room option and a Quit option</li>
+        <li>Use <code>input()</code> to collect the player's choice</li>
+        <li>Use <code>if</code>/<code>elif</code> to call <code>cpu_room()</code> or end the game</li>
+      </ul>
+    </div>
+    <div class="tier-card silver">
+      <span class="tier-label">Silver</span>
+      <ul>
+        <li>Everything in Bronze</li>
+        <li>Wrap the menu in a <code>while</code> loop so the player can keep choosing</li>
+        <li>Show a short description alongside each room name</li>
+        <li>Show "Coming soon" for rooms you have not yet built</li>
+      </ul>
+    </div>
+    <div class="tier-card gold">
+      <span class="tier-label">Gold</span>
+      <ul>
+        <li>Everything in Silver</li>
+        <li>Add ASCII art to the entrance title</li>
+        <li>Display current diamonds and XP in a header line</li>
+        <li>Add an Instructions option that explains how the game works</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="expected-wrap">
+  <div class="expected-label">Expected Output (Bronze)</div>
+  <div class="expected-box"><pre>=== THE REVISION MAZE ===
+
+Where would you like to go?
+
+1. Enter the CPU Chamber
+2. Quit
+
+Choose: </pre></div>
+</div>
+`,
+  hints:[
+    `<p>Your <code>main_menu</code> function needs three things: print the options, collect the player's choice with <code>input()</code>, and respond to it. Which Python statement lets you run different code depending on the value of a variable? Write out what you need to do in plain English before you type any code.</p>`,
+    `<p>Here is the structure to follow:</p>
+<pre class="cb">def main_menu():
+    print("=== THE REVISION MAZE ===")
+    print("")
+    print("1. Enter the CPU Chamber")
+    print("2. Quit")
+    print("")
+    choice = input("Choose: ")
+    if choice == "1":
+        cpu_room()   # you will write this next
+    elif choice == "2":
+        print("Farewell, adventurer.")
+
+main_menu()</pre>`
+  ]
+},
+
+// ════════════════════════ 2  CPU ROOM ════════════════════
+{
+  badge:'task', badgeText:'Task 2',
+  title:'The CPU Chamber',
+  sig:'def cpu_room():',
+  body:`
+<p>Build the first chamber of your dungeon. It asks five or six questions on the CPU topic, counts how many the player gets wrong, and returns that count so the reward can be calculated later.</p>
+<div class="callout info">&#127959; <strong>This is your template room.</strong> Every other chamber you build, Memory, Storage, Networks, and any others from your map, follows exactly the same pattern: a function, some questions, a wrong-answer counter, and a return value. Build this one carefully and adding new rooms later is straightforward.</div>
+
+<div class="q-list">
+  <p class="q-head"><strong>Suggested questions for the CPU Chamber</strong> (or use your own from your paper plan):</p>
+  <p>What does CPU stand for? &#8594; <strong>central processing unit</strong></p>
+  <p>What does ALU stand for? &#8594; <strong>arithmetic logic unit</strong></p>
+  <p>What does CU stand for? &#8594; <strong>control unit</strong></p>
+  <p>What unit is clock speed measured in? &#8594; <strong>ghz</strong></p>
+  <p>What is a register? &#8594; <strong>temporary storage</strong></p>
+  <p>Name one factor that affects CPU performance. &#8594; <strong>clock speed</strong></p>
+</div>
+
+<div class="tier-section">
+  <div class="tier-heading">Choose your target</div>
+  <div class="tier-cards">
+    <div class="tier-card bronze">
+      <span class="tier-label">Bronze</span>
+      <ul>
+        <li>Start with <code>wrong = 0</code> before the questions</li>
+        <li>For each question: use <code>input()</code>, compare the answer with <code>if</code>, print feedback</li>
+        <li>Add 1 to <code>wrong</code> each time the answer is incorrect</li>
+        <li>Return <code>wrong</code> at the end of the function</li>
+      </ul>
+    </div>
+    <div class="tier-card silver">
+      <span class="tier-label">Silver</span>
+      <ul>
+        <li>Everything in Bronze, but cleaner: write a separate <code>ask_question(question, correct_answer)</code> function</li>
+        <li>It takes the question and answer as parameters, prints feedback, and returns <code>True</code> or <code>False</code></li>
+        <li>Use <code>.lower()</code> on both sides so capitalisation does not matter</li>
+        <li>Rewrite <code>cpu_room()</code> to call <code>ask_question()</code> for each question</li>
+      </ul>
+    </div>
+    <div class="tier-card gold">
+      <span class="tier-label">Gold</span>
+      <ul>
+        <li>Everything in Silver</li>
+        <li>Store all questions in a list (each item: <code>[question, answer]</code>)</li>
+        <li>Pass the list into <code>cpu_room(questions)</code> as a parameter</li>
+        <li>Use a <code>for</code> loop to work through the list, calling <code>ask_question()</code> each time</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="expected-wrap">
+  <div class="expected-label">Expected Output (Bronze)</div>
+  <div class="expected-box"><pre>=== THE CPU CHAMBER ===
+Answer the questions to earn diamonds.
+
+What does CPU stand for? central processing unit
+Correct! Well done.
+What does ALU stand for? blender
+Not quite. The answer was: arithmetic logic unit
+...
+Room complete! You answered 4 out of 5 correctly.</pre></div>
+</div>
+`,
+  hints:[
+    `<p>Start simply. Inside <code>cpu_room()</code>, write <code>wrong = 0</code>. Then for each question, use <code>input()</code> to get the answer and an <code>if</code> statement to check it. If the answer is wrong, add 1 to <code>wrong</code> and print what the correct answer was. Do all five questions the same way. At the very end, <code>return wrong</code>. Once that works, try Silver.</p>`,
+    `<p>Bronze structure to follow:</p>
+<pre class="cb">def cpu_room():
+    print("=== THE CPU CHAMBER ===")
+    print("Answer the questions to earn diamonds.")
+    print("")
+    wrong = 0
+
+    answer = input("What does CPU stand for? ")
+    if answer == "central processing unit":
+        print("Correct! Well done.")
+    else:
+        print("Not quite. The answer was: central processing unit")
+        wrong = wrong + 1
+
+    answer = input("What does ALU stand for? ")
+    if answer == "arithmetic logic unit":
+        print("Correct! Well done.")
+    else:
+        print("Not quite. The answer was: arithmetic logic unit")
+        wrong = wrong + 1
+
+    # add the rest of your questions the same way
+
+    correct = 5 - wrong
+    print("Room complete! You answered " + str(correct) + " out of 5 correctly.")
+    return wrong</pre>
+<p>For Silver, notice how much code repeats. That repeated pattern is exactly what <code>ask_question(question, correct_answer)</code> is designed to replace.</p>`
+  ]
+},
+
+// ════════════════════════ 3  QUESTION ENGINE ═════════════
+{
+  badge:'task', badgeText:'Task 3',
+  title:'The Question Engine',
+  sig:'def ask_question(question, correct_answer):',
+  body:`
+<p>If you completed Task 2 at Bronze, look at your code. The same pattern appears five or six times: ask, compare, print, count. That repetition is a signal. This task is about fixing it.</p>
+<p>Write one function that handles any question, then rewrite your CPU room to call it. Every other room you build later will use the same function too.</p>
+<div class="callout info">&#128161; <strong>This is a core programming principle:</strong> write the logic once and reuse it. Your <code>ask_question</code> function will be called across many different rooms, all from one place. Change it once and every room benefits.</div>
+
+<div class="tier-section">
+  <div class="tier-heading">Choose your target</div>
+  <div class="tier-cards">
+    <div class="tier-card bronze">
+      <span class="tier-label">Bronze</span>
+      <ul>
+        <li>Write <code>ask_question(question, correct_answer)</code></li>
+        <li>It displays the question, gets input, compares the answer</li>
+        <li>Prints feedback and returns <code>True</code> or <code>False</code></li>
+        <li>Update <code>cpu_room()</code> to call it instead of repeating the pattern</li>
+      </ul>
+    </div>
+    <div class="tier-card silver">
+      <span class="tier-label">Silver</span>
+      <ul>
+        <li>Everything in Bronze</li>
+        <li>Use <code>.lower()</code> on both answers so capitalisation does not matter</li>
+        <li>If wrong, also print what the correct answer was</li>
+        <li>Add a question number parameter so questions are numbered on screen</li>
+      </ul>
+    </div>
+    <div class="tier-card gold">
+      <span class="tier-label">Gold</span>
+      <ul>
+        <li>Everything in Silver</li>
+        <li>Add an optional <code>hint</code> parameter (default value <code>""</code>)</li>
+        <li>After a wrong answer, offer to reveal the hint if one exists</li>
+        <li>This is the hook for the diamond shop later: hints will cost diamonds</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="expected-wrap">
+  <div class="expected-label">Expected Output (Bronze)</div>
+  <div class="expected-box"><pre>What does CPU stand for? central processing unit
+Correct! Well done.
+
+What does ALU stand for? blender
+Not quite. The answer was: arithmetic logic unit</pre></div>
+</div>
+`,
+  hints:[
+    `<p>Your function takes two parameters: the question text and the correct answer. Inside, call <code>input()</code> to get the player's response. Compare it to <code>correct_answer</code> with an <code>if</code> statement. If it matches, print "Correct!" and <code>return True</code>. If not, print a message and <code>return False</code>. Then go back to <code>cpu_room()</code> and replace each repeated block with a single call: <code>if not ask_question("What does CPU stand for?", "central processing unit"): wrong = wrong + 1</code>.</p>`,
+    `<p>Here is the structure to follow:</p>
+<pre class="cb">def ask_question(question, correct_answer):
+    answer = input(question + " ")
+    if answer.lower() == correct_answer.lower():
+        print("Correct! Well done.")
+        return True
+    else:
+        print("Not quite. The answer was: " + correct_answer)
+        return False
+
+# Your updated cpu_room calls it like this:
+def cpu_room():
+    print("=== THE CPU CHAMBER ===")
+    print("Answer the questions to earn diamonds.")
+    print("")
+    wrong = 0
+
+    if not ask_question("What does CPU stand for?", "central processing unit"):
+        wrong = wrong + 1
+
+    if not ask_question("What does ALU stand for?", "arithmetic logic unit"):
+        wrong = wrong + 1
+
+    # same pattern for remaining questions
+
+    correct = 5 - wrong
+    print("Room complete! You answered " + str(correct) + " out of 5 correctly.")
+    return wrong</pre>`
+  ]
+},
+
+// ════════════════════════ 4  REWARD ══════════════════════
+{
+  badge:'task', badgeText:'Task 4',
+
+  title:'Counting the Reward',
+  sig:'def calculate_reward(wrong_answers, base_diamonds):',
+  body:`
+<p>The player has answered all the questions. Now work out what they earned. The reward depends on accuracy: every wrong answer reduces the percentage, and that percentage is applied to the base diamond value of the chamber.</p>
+<div class="callout info">&#128142; <strong>The formula:</strong> percentage = 100 minus (wrong answers multiplied by 10). Cap it at zero so it cannot go negative. Then: diamonds = base diamonds multiplied by percentage, divided by 100. Use <code>int()</code> to give a whole number.</div>
+
+<div class="tier-section">
+  <div class="tier-heading">Choose your target</div>
+  <div class="tier-cards">
+    <div class="tier-card bronze">
+      <span class="tier-label">Bronze</span>
+      <ul>
+        <li>Calculate <code>percentage</code> from the wrong answer count</li>
+        <li>Use <code>if</code> to prevent it going below 0</li>
+        <li>Calculate the final diamond total and return it</li>
+        <li>Call the function and print the result after <code>cpu_room()</code></li>
+      </ul>
+    </div>
+    <div class="tier-card silver">
+      <span class="tier-label">Silver</span>
+      <ul>
+        <li>Everything in Bronze</li>
+        <li>Also calculate XP earned (choose your own formula)</li>
+        <li>Return both values as a list: <code>[diamonds, xp]</code></li>
+        <li>Print a clear summary: percentage achieved, diamonds, and XP</li>
+      </ul>
+    </div>
+    <div class="tier-card gold">
+      <span class="tier-label">Gold</span>
+      <ul>
+        <li>Everything in Silver</li>
+        <li>Add a perfect-score bonus: 2 extra diamonds for zero wrong answers</li>
+        <li>Return a dictionary with keys: <code>diamonds</code>, <code>xp</code>, <code>bonus</code></li>
+        <li>Print a congratulations message for 100% accuracy</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="expected-wrap">
+  <div class="expected-label">Example Values (base = 10 diamonds)</div>
+  <div class="expected-box"><pre>0 wrong  =  100%  =  10 diamonds
+1 wrong  =   90%  =   9 diamonds
+3 wrong  =   70%  =   7 diamonds
+7 wrong  =   30%  =   3 diamonds
+11 wrong =    0%  =   0 diamonds  (capped at 0)</pre></div>
+</div>
+`,
+  hints:[
+    `<p>Work through it step by step. First calculate <code>percentage = 100 - (wrong_answers * 10)</code>. Then check: if <code>percentage</code> is less than 0, set it to 0. Then calculate diamonds from that percentage. Use <code>int()</code> to make sure you return a whole number rather than a decimal. Keep each step on its own line until you are confident it works.</p>`,
+    `<p>Here is the structure to follow:</p>
+<pre class="cb">def calculate_reward(wrong_answers, base_diamonds):
+    percentage = 100 - (wrong_answers * 10)
+    if percentage &lt; 0:
+        percentage = 0
+    diamonds = int(base_diamonds * percentage / 100)
+    return diamonds
+
+# Call it like this after cpu_room():
+wrong = cpu_room()
+diamonds = calculate_reward(wrong, 10)
+print("You earned " + str(diamonds) + " diamonds!")</pre>`
+  ]
+},
+
+// ════════════════════════ 5  EXIT HALL ═══════════════════
+{
+  badge:'task', badgeText:'Task 5',
+  title:'The Exit Hall',
+  sig:'def exit_hall(diamonds):',
+  body:`
+<p>The player has finished the CPU Chamber and collected their reward. Now show them what they earned and let them choose where to go next. You will also write stub functions for the other chambers so the program does not crash when those options are chosen.</p>
+<div class="callout note">&#128506; <strong>Stub functions are placeholders.</strong> Write <code>memory_room()</code> and <code>storage_room()</code> now, even though they just print "Coming soon!" When you build each room in the coming weeks, you replace the stub with the real code. Your paper map tells you which rooms connect to which.</div>
+
+<div class="tier-section">
+  <div class="tier-heading">Choose your target</div>
+  <div class="tier-cards">
+    <div class="tier-card bronze">
+      <span class="tier-label">Bronze</span>
+      <ul>
+        <li>Print a clear completion message showing diamonds earned</li>
+        <li>Offer two room choices using <code>print()</code> and <code>input()</code></li>
+        <li>Use <code>if</code>/<code>elif</code> to call the right stub function</li>
+        <li>Write stub functions for at least two next rooms</li>
+      </ul>
+    </div>
+    <div class="tier-card silver">
+      <span class="tier-label">Silver</span>
+      <ul>
+        <li>Everything in Bronze</li>
+        <li>Show XP as well as diamonds in the summary</li>
+        <li>Add a "Return to entrance" option alongside the two room choices</li>
+        <li>Pass the diamond total into the next room as a parameter</li>
+      </ul>
+    </div>
+    <div class="tier-card gold">
+      <span class="tier-label">Gold</span>
+      <ul>
+        <li>Everything in Silver</li>
+        <li>Add a short atmospheric description of the tunnel to each next room</li>
+        <li>Show a simple ASCII map of the dungeon marking which rooms are complete</li>
+        <li>Add a "Rest" option as a placeholder hook for a health mechanic later</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="expected-wrap">
+  <div class="expected-label">Expected Output (Bronze)</div>
+  <div class="expected-box"><pre>==============================
+     CPU CHAMBER COMPLETE
+==============================
+Diamonds earned:  8
+==============================
+
+Where would you like to go?
+
+1. Memory Chamber
+2. Storage Vault
+
+Choose: </pre></div>
+</div>
+`,
+  hints:[
+    `<p>Write your stub functions first. Python will throw an error if you call a function that does not exist yet. Once they are in place, write <code>exit_hall</code>: print the reward summary, print the room options, get the player's choice with <code>input()</code>, and use <code>if</code>/<code>elif</code> to call the right stub. The stubs do not need to do anything yet.</p>`,
+    `<p>Here is the structure to follow:</p>
+<pre class="cb">def memory_room():
+    print("The Memory Chamber... coming soon!")
+
+def storage_room():
+    print("The Storage Vault... coming soon!")
+
+def exit_hall(diamonds):
+    print("")
+    print("==============================")
+    print("     CPU CHAMBER COMPLETE")
+    print("==============================")
+    print("Diamonds earned:  " + str(diamonds))
+    print("==============================")
+    print("")
+    print("Where would you like to go?")
+    print("")
+    print("1. Memory Chamber")
+    print("2. Storage Vault")
+    print("")
+    choice = input("Choose: ")
+    if choice == "1":
+        memory_room()
+    elif choice == "2":
+        storage_room()
+
+# Call it like this at the end of your game:
+wrong = cpu_room()
+diamonds = calculate_reward(wrong, 10)
+exit_hall(diamonds)</pre>`
+  ]
+},
+
+// ════════════════════════ 6  FILE I/O ════════════════════
+{
+  badge:'task', badgeText:'Task 6',
+  title:'The Archive Stone',
+  sig:'open() / read() / write() / close()',
+  body:`
+<p>Your dungeon runs, but every time you restart it the score resets to zero. Use a file to save progress between sessions so a returning player can see what they achieved last time.</p>
+
+<div class="cb-wrap">
+  <span class="cb-label">File I/O syntax to know</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb"># Writing to a file (creates it if it does not exist, overwrites if it does)
+f = open("filename.txt", "w")
+f.write("some text")
+f.close()
+
+# Reading from a file
+f = open("filename.txt", "r")
+content = f.read()
+f.close()
+
+# Appending to a file (adds to the end, does not delete existing content)
+f = open("filename.txt", "a")
+f.write("a new line\\n")
+f.close()</pre>
+</div>
+
+<div class="tier-section">
+  <div class="tier-heading">Choose your target</div>
+  <div class="tier-cards">
+    <div class="tier-card bronze">
+      <span class="tier-label">Bronze</span>
+      <ul>
+        <li>Write <code>save_score(score)</code>: open in write mode, write the score as a string, close</li>
+        <li>Write <code>load_score()</code>: open, read, close, return as an integer</li>
+        <li>Use <code>try</code>/<code>except FileNotFoundError</code> to handle a missing file (return 0)</li>
+        <li>At game end, compare to stored high score and save if beaten</li>
+      </ul>
+    </div>
+    <div class="tier-card silver">
+      <span class="tier-label">Silver</span>
+      <ul>
+        <li>Everything in Bronze</li>
+        <li>Also save the player's name and total diamonds, separated by commas</li>
+        <li>Load this at startup and greet a returning player by name</li>
+        <li>Use <code>.split(",")</code> to read the values back out</li>
+      </ul>
+    </div>
+    <div class="tier-card gold">
+      <span class="tier-label">Gold</span>
+      <ul>
+        <li>Everything in Silver</li>
+        <li>Use append mode to add a record of each session to a log file</li>
+        <li>Each line records: name, diamonds, XP, and rooms completed</li>
+        <li>Write a function that reads and displays the full history log</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="expected-wrap">
+  <div class="expected-label">Expected Output (Bronze)</div>
+  <div class="expected-box"><pre>Welcome back! Your high score is: 8 diamonds.
+
+... game plays ...
+
+You earned 6 diamonds!
+No new high score this time. Keep trying!</pre></div>
+</div>
+
+<div class="callout warn">&#9888; The file will be saved in the same folder as your Python script. If the file does not exist yet, opening it in read mode will throw an error. That is exactly what <code>try</code>/<code>except</code> is designed to handle.</div>
+`,
+  hints:[
+    `<p>Your <code>save_score</code> function opens a file in write mode <code>"w"</code>, calls <code>f.write()</code> with the score converted to a string using <code>str()</code>, then closes it. Your <code>load_score</code> function opens the same file in read mode <code>"r"</code>, reads the contents, closes it, and returns the result converted back to an integer using <code>int()</code>. The tricky part: what if the file does not exist yet on the very first run? A <code>try</code>/<code>except</code> block catches that error.</p>`,
+    `<p>Here is the structure to follow:</p>
+<pre class="cb">def save_score(score):
+    f = open("highscore.txt", "w")
+    f.write(str(score))
+    f.close()
+
+def load_score():
+    try:
+        f = open("highscore.txt", "r")
+        score = int(f.read())
+        f.close()
+        return score
+    except (FileNotFoundError, ValueError):
+        # no file yet on the first run, or the file is empty
+        return 0
+
+# At the start of main_menu, show the high score:
+high = load_score()
+print("Welcome back! Your high score is: " + str(high) + " diamonds.")
+
+# At the end of a game, check and save if beaten:
+if diamonds > high:
+    save_score(diamonds)
+    print("New high score!")
+else:
+    print("No new high score this time. Keep trying!")</pre>`
+  ]
+},
+
+// ════════════════════════ 7  WHAT'S NEXT ═════════════════
+{
+  badge:'ext', badgeText:"What's Next",
+  title:'Building the Dungeon',
+  sig:'Adding rooms, challenge features, and extending the game',
+  body:`
+<p>You have built the foundations of your dungeon. Here is how to keep going.</p>
+
+<div class="ext-section">
+  <span class="ext-label">Adding Your Next Room</span>
+  <p>Pick any chamber from your paper plan: Memory, Storage, Networks, or anything else. Write a new function following exactly the same pattern as <code>cpu_room()</code>. Then replace the stub function in your code with the real one.</p>
+  <div class="cb-wrap">
+    <span class="cb-label">Pattern to follow for every new room</span>
+    <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">def memory_room():
+    print("")
+    print("=== THE MEMORY CHAMBER ===")
+    print("Answer the questions to earn diamonds.")
+    print("")
+    wrong = 0
+
+    if not ask_question("What type of memory is RAM?", "volatile"):
+        wrong = wrong + 1
+
+    if not ask_question("What does ROM stand for?", "read only memory"):
+        wrong = wrong + 1
+
+    # add the rest of your questions here
+
+    correct = 5 - wrong
+    print("Room complete! You answered " + str(correct) + " out of 5 correctly.")
+    return wrong</pre>
+  </div>
+  <p>That is genuinely all it takes. Every room you add is the same shape. Your game grows one function at a time.</p>
+</div>
+
+<div class="ext-section">
+  <span class="ext-label">The Diamond Shop</span>
+  <p>Between rooms, let the player spend diamonds on useful items. Build a <code>shop()</code> function that displays a menu of items with prices, checks the player has enough diamonds, and deducts the cost. A hint potion could reveal the hint for the next question. A second chance could let a player retry one wrong answer without losing reward percentage.</p>
+  <p>This connects naturally to the <code>hint</code> parameter you added in Task 3 Gold.</p>
+</div>
+
+<div class="ext-section">
+  <span class="ext-label">Monster Encounters</span>
+  <p>Add a monster that blocks the tunnel between rooms. The monster asks a question and the player must answer correctly to pass. A wrong answer costs health (which you will need to add as a variable alongside diamonds and XP).</p>
+  <p>The monster is just another call to <code>ask_question()</code>, but with different consequences for a wrong answer. Most of the logic is already written.</p>
+</div>
+
+<div class="ext-section">
+  <span class="ext-label">Full Save and Load</span>
+  <p>Extend Task 6 to save the full game state: player name, total diamonds, XP, and which rooms have been completed. Load this at startup so a returning player continues from where they left off.</p>
+  <p>Comma-separated values work well for a small number of fields. Store each piece of data separated by a comma, then use <code>.split(",")</code> to read them back as a list.</p>
+</div>
+
+<div class="ext-section">
+  <span class="ext-label">Answer Duel (Challenge)</span>
+  <p>A monster presents two possible answers and the player chooses which is correct. Run several rounds and the player who wins the most rounds wins the duel. This is a loop around a modified version of <code>ask_question()</code> and a great use of a <code>for</code> loop and a score counter.</p>
+</div>
+
+<div class="callout info">&#128161; Every feature listed here builds directly on the code you already have. You are not starting again, you are extending. That is exactly how real software development works.</div>
+`,
+  hints:null
+}
+
+]; // end PAGES
+
+let cur = 0;
+const hintState = {};
+
+function render(scroll = true) {
+  const p = PAGES[cur];
+  const total = PAGES.length;
+  const pct = (cur / (total - 1)) * 100;
+
+  document.getElementById('pFill').style.width = pct + '%';
+  if (cur === 0) {
+    document.getElementById('pLabel').textContent = 'Introduction';
+    document.getElementById('pageInd').textContent = 'Introduction';
+  } else if (cur === total - 1) {
+    document.getElementById('pLabel').textContent = "What's Next";
+    document.getElementById('pageInd').textContent = "What's Next";
+  } else {
+    document.getElementById('pLabel').textContent = 'Task ' + cur + ' of ' + (total - 2);
+    document.getElementById('pageInd').textContent = 'Task ' + cur + ' of ' + (total - 2);
+  }
+
+  document.getElementById('prevBtn').disabled = cur === 0;
+  document.getElementById('nextBtn').disabled = cur === total - 1;
+
+  const dc = document.getElementById('dots');
+  dc.innerHTML = '';
+  PAGES.forEach(function(_, i) {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    if (i === 0) { d.textContent = '\u2605'; d.title = 'Introduction'; }
+    else if (i === total - 1) { d.textContent = '\u2192'; d.title = "What's Next"; }
+    else { d.textContent = String(i); d.title = 'Task ' + i; }
+    d.onclick = (function(n){ return function(){ cur = n; render(); }; })(i);
+    dc.appendChild(d);
+  });
+
+  const shown = hintState[cur] || 0;
+  document.getElementById('card').innerHTML =
+    '<div class="page-badge badge-' + p.badge + '">' + p.badgeText + '</div>' +
+    '<h1 class="page-title">' + p.title + '</h1>' +
+    '<p class="page-sig">' + p.sig + '</p>' +
+    '<div class="page-body">' + p.body + '</div>' +
+    (p.hints ? buildHints(p.hints, shown) : '');
+
+  if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function buildHints(hints, shown) {
+  var btns = '', cards = '';
+  hints.forEach(function(h, i) {
+    var isShown = i < shown;
+    var label = isShown
+      ? '&#10003; Hint ' + (i + 1)
+      : 'Hint ' + (i + 1) + (i === 0 ? ': gentle nudge' : ': structure');
+    btns += '<button class="h-btn' + (isShown ? ' shown' : '') + '" ' +
+      'onclick="showHint(' + (i + 1) + ')" ' +
+      (isShown ? 'disabled' : '') + '>' + label + '</button>';
+    cards += '<div class="hint-card' + (isShown ? ' visible' : '') + '">' +
+      '<div class="hint-num">Hint ' + (i + 1) + '</div>' +
+      h +
+      '</div>';
+  });
+  var all = shown >= hints.length;
+  return '<div class="hints-section">' +
+    '<div class="hints-heading">Need a hand?</div>' +
+    '<div class="hint-btns">' + btns + '</div>' +
+    cards +
+    (all ? '<p style="font-style:italic;font-size:.8rem;color:var(--text-dim);margin-top:8px;">All hints shown. If you are still stuck, ask your teacher.</p>' : '') +
+    '</div>';
+}
+
+function showHint(n) { hintState[cur] = n; render(false); }
+function go(d) { cur = Math.max(0, Math.min(PAGES.length - 1, cur + d)); render(); }
+
+function cp(btn) {
+  var pre = btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent.trim()).then(function() {
+    btn.textContent = 'Copied';
+    btn.classList.add('ok');
+    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2200);
+  }).catch(function() {
+    btn.textContent = 'Error';
+    setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
