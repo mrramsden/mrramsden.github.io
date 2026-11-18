@@ -1,0 +1,4 @@
+__pycache__/
+node_modules
+*.png
+src/tests/package*.json
