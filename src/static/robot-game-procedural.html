@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Robot Game - Year 12 Python Procedural Mission Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ground:      #101318;
+  --ground-2:    #171b22;
+  --steel:       #1d222b;
+  --steel-2:     #252b36;
+  --plate:       #2f3643;
+  --line:        #3a4252;
+  --text:        #e7eaf0;
+  --text-soft:   #9aa3b2;
+  --hazard:      #f5c518;
+  --hazard-deep: #c99a00;
+  --hazard-soft: rgba(245,197,24,.12);
+  --laser:       #ff4d5e;
+  --laser-soft:  rgba(255,77,94,.13);
+  --shield:      #3fc8f0;
+  --shield-soft: rgba(63,200,240,.12);
+  --prince:      #6fdc8c;
+  --prince-soft: rgba(111,220,140,.12);
+  --violet:      #a98bff;
+  --violet-soft: rgba(169,139,255,.13);
+  --code-bg:     #0b0d11;
+  --code-fg:     #dfe4ec;
+  --code-acc:    #3fc8f0;
+  --stripe: repeating-linear-gradient(-45deg, var(--hazard) 0 10px, #15171c 10px 20px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Barlow', system-ui, sans-serif;
+  color: var(--text);
+  background-color: var(--ground);
+  background-image:
+    radial-gradient(ellipse at 12% -6%, rgba(255,77,94,.14) 0%, transparent 42%),
+    radial-gradient(ellipse at 90% 0%, rgba(63,200,240,.14) 0%, transparent 44%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='1' fill='%23ffffff' opacity='0.05'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 0 16px 80px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1060px; margin: 0 auto; }
+code { font-family: 'JetBrains Mono', monospace; font-size: .85em; background: var(--hazard-soft); color: var(--hazard); padding: 1px 6px; border-radius: 4px; }
+
+/* ---------- Header ---------- */
+.topbar { text-align: center; padding: 36px 0 6px; }
+.hero-bot { width: 120px; height: 120px; margin: 0 auto 8px; display: block; filter: drop-shadow(0 8px 18px rgba(0,0,0,.5)); }
+.hero-eye { fill: var(--laser); transition: fill .6s; }
+.all-done .hero-eye { fill: var(--prince); }
+.title {
+  font-family: 'Russo One', sans-serif;
+  font-size: clamp(2.1rem, 7vw, 3.5rem);
+  letter-spacing: 3px; line-height: 1.05; text-transform: uppercase;
+}
+.title .hl { color: var(--hazard); }
+.tagline a { color: var(--hazard); }
+.sub {
+  font-family: 'JetBrains Mono', monospace; color: var(--text-soft);
+  font-size: .8rem; letter-spacing: 2px; margin-top: 10px; text-transform: uppercase;
+}
+.tagline {
+  display: inline-block; margin-top: 16px; max-width: 640px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--line);
+  border-radius: 6px; padding: 10px 18px; font-size: 1rem; color: #cfd5df;
+}
+
+/* ---------- Panels ---------- */
+.panel {
+  background: var(--steel); border: 1px solid var(--line); border-radius: 8px;
+  margin: 26px auto 0; max-width: 860px; overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
+}
+.panel::before { content: ''; display: block; height: 6px; background: var(--stripe); }
+.panel-inner { padding: 20px 24px 22px; }
+.panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.panel-title { font-family: 'Russo One', sans-serif; font-size: 1.05rem; letter-spacing: 1px; text-transform: uppercase; color: var(--hazard); }
+.panel-note { font-size: .88rem; color: var(--text-soft); font-style: italic; }
+
+/* ---------- Simulator ---------- */
+.hud { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center; margin-bottom: 16px; }
+.hud-item { display: flex; align-items: center; gap: 9px; }
+.hud-label { font-family: 'JetBrains Mono', monospace; font-size: .7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-soft); }
+.pips { display: flex; gap: 4px; }
+.pip { width: 13px; height: 13px; border-radius: 3px; background: var(--plate); border: 1px solid var(--line); transition: background .3s, box-shadow .3s; }
+.pip.on.time   { background: var(--hazard); box-shadow: 0 0 8px rgba(245,197,24,.5); }
+.pip.on.shield { background: var(--shield); box-shadow: 0 0 8px rgba(63,200,240,.5); }
+.pip.on.life   { background: var(--laser); border-radius: 50%; box-shadow: 0 0 8px rgba(255,77,94,.5); }
+.bar { width: 110px; height: 10px; border-radius: 5px; background: var(--plate); overflow: hidden; border: 1px solid var(--line); }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--laser), #ff8a5c); transition: width .4s; }
+.hud-num { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: .9rem; min-width: 2.2em; }
+
+.doors { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.door {
+  position: relative; aspect-ratio: 6 / 5; border-radius: 6px; overflow: hidden;
+  border: 1px solid var(--line); background: #0c0e12; cursor: pointer; padding: 0;
+  font: inherit; color: inherit;
+}
+.door:disabled { cursor: default; }
+.door-inside { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.door-inside svg { width: 46%; max-width: 46px; height: auto; }
+.door-tag { font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-soft); }
+.door-panel {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 9px 6px 0;
+  background: linear-gradient(180deg, #353d4b 0%, #262c37 100%);
+  transition: transform .55s cubic-bezier(.6,0,.3,1);
+}
+.door-panel::after { content: ''; display: block; width: 100%; height: 8px; background: var(--stripe); margin: 0 -6px; width: calc(100% + 12px); }
+.door-num { font-family: 'Russo One', sans-serif; font-size: clamp(.95rem, 3.4vw, 1.4rem); color: #c9d0db; letter-spacing: 1px; }
+.door-led { position: absolute; top: 8px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--hazard); box-shadow: 0 0 6px var(--hazard); }
+.door:not(:disabled):hover .door-panel { transform: translateY(-6%); }
+.door.open .door-panel, .door.revealed .door-panel { transform: translateY(-101%); }
+.door.revealed .door-inside { opacity: .4; }
+.door.c-robot  { border-color: var(--laser); box-shadow: inset 0 0 22px rgba(255,77,94,.35); }
+.door.c-prince { border-color: var(--prince); box-shadow: inset 0 0 22px rgba(111,220,140,.35); }
+.door.c-robot .door-tag { color: var(--laser); }
+.door.c-prince .door-tag { color: var(--prince); }
+@media (max-width: 520px) { .doors { gap: 6px; } .door { aspect-ratio: 4 / 5; } .door-tag { font-size: .5rem; } .door-led { width: 5px; height: 5px; top: 5px; right: 5px; } }
+
+.combat {
+  margin-top: 16px; border: 1.5px solid var(--laser); border-radius: 8px; background: var(--laser-soft);
+  padding: 14px 16px; animation: slide .3s ease;
+}
+.combat[hidden] { display: none; }
+.combat-title { font-family: 'Russo One', sans-serif; color: var(--laser); letter-spacing: 1px; text-transform: uppercase; font-size: .98rem; }
+.combat-sub { font-size: .9rem; color: #e6c9cd; margin: 2px 0 10px; }
+.combat-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.combat-row input[type=range] { flex: 1; min-width: 150px; accent-color: var(--laser); }
+.combat-row output { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.1rem; min-width: 2.4em; text-align: right; }
+.fire-btn {
+  font-family: 'Russo One', sans-serif; letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--laser); color: #1a0508; border: none; border-radius: 6px; padding: 10px 22px; cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.fire-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(255,77,94,.35); }
+
+.log {
+  margin-top: 16px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: .8rem; line-height: 1.6;
+  padding: 10px 14px; height: 140px; overflow-y: auto; color: var(--code-fg);
+}
+.log div { animation: slide .25s ease; }
+.log .l-bad  { color: var(--laser); }
+.log .l-good { color: var(--prince); }
+.log .l-info { color: var(--shield); }
+.log .l-dim  { color: var(--text-soft); }
+.sim-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.sim-foot .panel-note { font-size: .82rem; }
+.ghost-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: .76rem; letter-spacing: 1px; text-transform: uppercase;
+  background: transparent; color: var(--hazard); border: 1.5px solid var(--hazard); border-radius: 6px; padding: 7px 14px; cursor: pointer;
+}
+.ghost-btn:hover { background: var(--hazard-soft); }
+
+/* ---------- Mission file ---------- */
+.story { font-size: 1rem; color: #d4d9e2; line-height: 1.75; margin-bottom: 16px; }
+.rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 780px) { .rules { grid-template-columns: 1fr; } }
+.rule { background: var(--steel-2); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; border-top: 3px solid var(--hazard); }
+.rule.r-combat { border-top-color: var(--laser); }
+.rule.r-end { border-top-color: var(--prince); }
+.rule h3 { font-family: 'Russo One', sans-serif; font-size: .82rem; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+.rule ul { list-style: none; }
+.rule li { font-size: .88rem; color: #cfd5df; line-height: 1.55; padding-left: 14px; position: relative; margin-bottom: 4px; }
+.rule li::before { content: '\25B8'; position: absolute; left: 0; color: var(--text-soft); }
+
+/* ---------- Progress ---------- */
+.progress-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; gap: 12px; flex-wrap: wrap; }
+.progress-track { height: 14px; background: var(--plate); border-radius: 7px; overflow: hidden; border: 1px solid var(--line); }
+.progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--shield) 0%, var(--prince) 100%); border-radius: 7px; transition: width .5s cubic-bezier(.34,1.4,.64,1); }
+.progress-count { text-align: right; font-size: .8rem; color: var(--text-soft); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+.progress-count b { color: var(--prince); font-size: 1rem; }
+
+/* ---------- Sectors ---------- */
+.sector { margin-top: 42px; }
+.sector-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.sector-sign {
+  background: var(--hazard); color: #15171c;
+  font-family: 'Russo One', sans-serif; letter-spacing: 1px;
+  padding: 8px 16px; border-radius: 4px; text-transform: uppercase; font-size: 1rem;
+  display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 0 var(--hazard-deep);
+}
+.sector-sign .num { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: .78rem; opacity: .75; }
+.sector-when { font-size: .86rem; color: var(--text-soft); font-style: italic; }
+.sector-line { flex: 1; min-width: 40px; height: 2px; background: repeating-linear-gradient(90deg, var(--line) 0 10px, transparent 10px 20px); }
+.sector-done { display: none; align-items: center; gap: 6px; background: var(--prince-soft); color: var(--prince); border: 1px solid var(--prince); border-radius: 4px; padding: 4px 11px; font-size: .74rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; animation: pop .4s cubic-bezier(.34,1.56,.64,1); }
+.sector.complete .sector-done { display: inline-flex; }
+
+/* ---------- Cards ---------- */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.grid.four { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 960px) { .grid.four { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 780px) { .grid, .grid.four { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--steel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 24px 20px 18px; cursor: pointer; position: relative;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transition: transform .2s cubic-bezier(.34,1.4,.64,1), box-shadow .2s, border-color .2s;
+  opacity: 0; transform: translateY(14px); animation: rise .5s forwards;
+}
+.card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--stripe); opacity: .85; }
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+.card:hover { transform: translateY(-5px); box-shadow: 0 16px 30px rgba(0,0,0,.45); border-color: var(--hazard); }
+.card-icon { width: 62px; height: 62px; margin: 2px auto 12px; }
+.card-no { position: absolute; top: 14px; left: 16px; font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--text-soft); }
+.card-title { font-family: 'Russo One', sans-serif; font-size: 1.08rem; text-align: center; letter-spacing: .5px; margin-bottom: 7px; line-height: 1.2; text-transform: uppercase; }
+.card-summary { font-size: .92rem; color: var(--text-soft); text-align: center; line-height: 1.55; margin-bottom: 14px; flex: 1; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.chip { font-family: 'JetBrains Mono', monospace; font-size: .64rem; padding: 3px 9px; border-radius: 4px; white-space: nowrap; background: var(--shield-soft); color: var(--shield); border: 1px solid rgba(63,200,240,.3); }
+.chip.c-oop  { background: var(--hazard-soft); color: var(--hazard); border-color: rgba(245,197,24,.3); }
+.chip.c-data { background: var(--prince-soft); color: var(--prince); border-color: rgba(111,220,140,.3); }
+.chip.c-risk { background: var(--laser-soft); color: #ff8592; border-color: rgba(255,77,94,.3); }
+.chip.c-star { background: var(--violet-soft); color: var(--violet); border-color: rgba(169,139,255,.3); }
+
+.card .tick {
+  position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--prince); color: #0d2414; display: none; align-items: center; justify-content: center;
+  font-size: .9rem; font-weight: 800; animation: pop .35s cubic-bezier(.34,1.56,.64,1);
+}
+.card.done { border-color: var(--prince); background: linear-gradient(180deg, #1d2a24 0%, var(--steel) 70%); }
+.card.done .tick { display: flex; }
+
+/* ---------- Modal ---------- */
+.overlay { position: fixed; inset: 0; z-index: 50; background: rgba(5,7,10,.7); backdrop-filter: blur(3px); display: none; align-items: flex-start; justify-content: center; padding: 26px 14px; overflow-y: auto; }
+.overlay.open { display: flex; }
+.modal { background: var(--ground-2); border-radius: 10px; max-width: 700px; width: 100%; box-shadow: 0 30px 70px rgba(0,0,0,.7); border: 1px solid var(--line); animation: modalPop .3s cubic-bezier(.34,1.5,.64,1); margin: auto 0; overflow: hidden; }
+@keyframes modalPop { from { opacity: 0; transform: translateY(20px) scale(.98); } to { opacity: 1; transform: none; } }
+.modal-head { background: var(--steel-2); padding: 24px 26px 20px; position: relative; border-bottom: 1px solid var(--line); }
+.modal-head::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--stripe); }
+.modal-head .m-icon { width: 54px; height: 54px; float: left; margin: 4px 14px 4px 0; background: var(--ground); border: 1px solid var(--line); border-radius: 8px; padding: 5px; }
+.modal-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--hazard); letter-spacing: 2px; text-transform: uppercase; }
+.modal-title { font-family: 'Russo One', sans-serif; font-size: 1.5rem; letter-spacing: .5px; line-height: 1.15; margin: 2px 0 4px; text-transform: uppercase; }
+.modal-sum { font-size: .95rem; color: var(--text-soft); font-style: italic; }
+.modal-chips { clear: both; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.x-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.06); border: 1.5px solid var(--line); color: var(--text); font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.x-close:hover { background: rgba(255,255,255,.14); transform: rotate(90deg); }
+
+.modal-body { padding: 22px 26px 26px; }
+.modal-body p { font-size: .98rem; line-height: 1.75; margin-bottom: 12px; color: #d9dee6; }
+.modal-body strong { color: var(--hazard); }
+.modal-body ul { margin: 4px 0 14px 20px; }
+.modal-body li { font-size: .96rem; line-height: 1.7; margin-bottom: 4px; color: #d9dee6; }
+
+.field-label { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: .72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-soft); margin: 18px 0 7px; display: flex; align-items: center; gap: 8px; }
+.field-label::before { content: ''; width: 14px; height: 3px; border-radius: 2px; background: var(--hazard); }
+
+.cb-wrap { position: relative; margin-bottom: 6px; }
+pre.cb { background: var(--code-bg); color: var(--code-fg); font-family: 'JetBrains Mono', monospace; font-size: .82rem; line-height: 1.6; padding: 16px 18px; border-radius: 6px; overflow-x: auto; white-space: pre; tab-size: 4; border-left: 4px solid var(--code-acc); }
+.copy-btn { position: absolute; top: 9px; right: 9px; background: rgba(255,255,255,.08); color: var(--code-fg); border: 1px solid rgba(255,255,255,.2); border-radius: 5px; font-family: 'JetBrains Mono', monospace; font-size: .68rem; padding: 4px 10px; cursor: pointer; transition: all .2s; }
+.copy-btn:hover { background: rgba(255,255,255,.18); }
+.copy-btn.ok { color: var(--prince); border-color: var(--prince); }
+
+.out-box { background: #07090c; border: 1px dashed var(--line); border-radius: 6px; padding: 13px 16px; }
+.out-box pre { font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: #b9f0c8; white-space: pre-wrap; line-height: 1.65; }
+
+.callout { border-radius: 6px; padding: 12px 16px; margin: 14px 0; font-size: .92rem; line-height: 1.68; }
+.callout.tip      { background: var(--prince-soft); border-left: 4px solid var(--prince); color: #cdeed6; }
+.callout.note     { background: var(--shield-soft); border-left: 4px solid var(--shield); color: #cdebf5; }
+.callout.research { background: var(--violet-soft); border-left: 4px solid var(--violet); color: #ddd3ff; }
+.callout b { color: inherit; }
+.callout code { background: rgba(0,0,0,.3); color: inherit; }
+
+.test-table { width: 100%; border-collapse: collapse; font-size: .86rem; margin: 6px 0 12px; }
+.test-table th { text-align: left; font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-soft); border-bottom: 1px solid var(--line); padding: 6px 8px; }
+.test-table td { border-bottom: 1px solid var(--plate); padding: 7px 8px; color: #d9dee6; vertical-align: top; }
+.test-table td:nth-child(2) { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--hazard); }
+.table-scroll { overflow-x: auto; }
+
+.hints { margin-top: 22px; padding-top: 16px; border-top: 1px dashed var(--line); }
+.hints-h { font-family: 'Russo One', sans-serif; letter-spacing: .5px; font-size: .84rem; color: var(--hazard); margin-bottom: 10px; text-transform: uppercase; }
+.hint-btns { display: flex; gap: 9px; flex-wrap: wrap; }
+.h-btn { background: var(--steel-2); border: 1.5px solid var(--line); color: var(--text); font-family: 'Barlow', sans-serif; font-weight: 600; font-size: .9rem; padding: 8px 16px; border-radius: 30px; cursor: pointer; transition: all .2s; }
+.h-btn:hover:not(:disabled) { border-color: var(--hazard); color: var(--hazard); }
+.h-btn:disabled { opacity: .65; cursor: default; border-color: var(--prince); color: var(--prince); }
+.hint-card { background: var(--steel); border: 1px solid var(--hazard-deep); border-radius: 6px; padding: 13px 16px; margin-top: 11px; animation: slide .3s ease; }
+@keyframes slide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.hint-tag { font-family: 'JetBrains Mono', monospace; font-size: .66rem; color: var(--hazard); letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
+.hint-card p { font-size: .94rem; line-height: 1.7; margin: 0; }
+.hint-card pre.cb { margin-top: 9px; }
+
+.done-row { margin-top: 24px; text-align: center; }
+.done-btn { font-family: 'Russo One', sans-serif; letter-spacing: 1px; font-size: .9rem; padding: 12px 26px; border-radius: 6px; cursor: pointer; transition: all .2s; text-transform: uppercase; border: 2px solid var(--prince); background: var(--prince-soft); color: var(--prince); }
+.done-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+.done-btn.is-done { background: var(--prince); color: #0d2414; }
+
+.footer { text-align: center; margin-top: 54px; color: var(--text-soft); font-size: .84rem; }
+.reset-btn { background: none; border: none; color: var(--text-soft); text-decoration: underline; cursor: pointer; font-family: inherit; font-size: .8rem; margin-top: 6px; }
+.reset-btn:hover { color: var(--hazard); }
+
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--prince); color: #0d2414; padding: 12px 22px; border-radius: 6px; font-family: 'Russo One', sans-serif; letter-spacing: 1px; font-size: .88rem; text-transform: uppercase; box-shadow: 0 12px 30px rgba(0,0,0,.5); z-index: 80; opacity: 0; transition: all .4s cubic-bezier(.34,1.5,.64,1); pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="topbar">
+    <svg class="hero-bot" viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="56" fill="#171b22" stroke="#f5c518" stroke-width="2.5"/>
+      <line x1="60" y1="18" x2="60" y2="30" stroke="#9aa3b2" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="60" cy="16" r="4.5" class="hero-eye"/>
+      <rect x="32" y="30" width="56" height="40" rx="9" fill="#2f3643" stroke="#e7eaf0" stroke-width="2.5"/>
+      <rect x="40" y="40" width="40" height="15" rx="7" fill="#0b0d11"/>
+      <circle cx="51" cy="47.5" r="4.5" class="hero-eye"/>
+      <circle cx="69" cy="47.5" r="4.5" class="hero-eye"/>
+      <path d="M46 62h28" stroke="#9aa3b2" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 4"/>
+      <rect x="40" y="74" width="40" height="24" rx="5" fill="#252b36" stroke="#e7eaf0" stroke-width="2.5"/>
+      <rect x="48" y="80" width="24" height="6" fill="#f5c518"/>
+      <path d="M40 80l-12 10M80 80l12 10" stroke="#e7eaf0" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <h1 class="title">The <span class="hl">Robot</span> Game</h1>
+    <div class="sub">A rescue mission in fifteen rooms &middot; Year 12 Python &middot; procedural</div>
+    <div class="tagline">Fifteen rooms. Six chances. Seven killer robots. One very helpless prince. Play the prototype, read the mission file, then build it one function at a time. <a href="robot_game.html">Prefer classes? Try the OOP version.</a></div>
+  </header>
+
+  <!-- Playable prototype -->
+  <section class="panel" aria-label="Playable prototype">
+    <div class="panel-inner">
+      <div class="panel-head">
+        <span class="panel-title">Simulation &middot; play it before you build it</span>
+        <span class="panel-note">Click a door to open it.</span>
+      </div>
+      <div class="hud">
+        <div class="hud-item"><span class="hud-label">Rooms left</span><span class="pips" id="hudChecks"></span></div>
+        <div class="hud-item"><span class="hud-label">Shield</span><span class="pips" id="hudShield"></span></div>
+        <div class="hud-item"><span class="hud-label">Laser</span><span class="bar"><span class="bar-fill" id="hudPowerFill" style="display:block;width:100%"></span></span><span class="hud-num" id="hudPower">100</span></div>
+      </div>
+      <div class="doors" id="doors"></div>
+      <div class="combat" id="combat" hidden>
+        <div class="combat-title">&#9888; Killer robot in room <span id="cRoom"></span></div>
+        <div class="combat-sub">Its shield is somewhere from 5 to 30. You fire first. How much laser power will you use?</div>
+        <div class="combat-row">
+          <input type="range" id="cPower" min="1" max="100" value="20" aria-label="Laser power">
+          <output id="cPowerOut">20</output>
+          <button class="fire-btn" id="cFire">Fire</button>
+        </div>
+      </div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="sim-foot">
+        <span class="panel-note">This is what you are building. Play a few rounds and notice every rule in action.</span>
+        <button class="ghost-btn" id="simRestart">New mission</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission file -->
+  <section class="panel" aria-label="Mission file">
+    <div class="panel-inner">
+      <div class="panel-head"><span class="panel-title">Mission file</span><span class="panel-note">Every rule here must end up in your code.</span></div>
+      <p class="story">The prince has been captured by an evil madman and only our daring heroine can save him. He is locked in one of 15 rooms and is rapidly running out of oxygen: the princess has time to check just <b>6 rooms</b> before it is too late. Armed with a <b>shield (3 charges)</b> and a <b>laser pistol (100 power)</b>, she sets out to rescue him.</p>
+      <div class="rules">
+        <div class="rule">
+          <h3>The rooms</h3>
+          <ul>
+            <li>15 rooms in total</li>
+            <li>7 are empty</li>
+            <li>7 hold a killer robot</li>
+            <li>1 holds the prince</li>
+          </ul>
+        </div>
+        <div class="rule r-combat">
+          <h3>Combat</h3>
+          <ul>
+            <li>Robots have a shield of 5 to 30</li>
+            <li>The princess shoots first, using as much energy as the gun has left</li>
+            <li>If her shot uses more energy than the robot's shield, it is destroyed</li>
+            <li>If not, the robot fires back and she loses a shield charge</li>
+          </ul>
+        </div>
+        <div class="rule r-end">
+          <h3>Win or lose</h3>
+          <ul>
+            <li>Win: she finds the prince in time</li>
+            <li>Lose: she opens 6 rooms without finding him</li>
+            <li>Lose: she is shot 4 times (3 shields plus 1 life)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Progress -->
+  <section class="panel" aria-label="Progress">
+    <div class="panel-inner">
+      <div class="progress-top">
+        <span class="panel-title">Mission progress</span>
+        <span class="panel-note" id="progMsg"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+      <div class="progress-count"><b id="progNum">0</b> / <span id="progTotal">13</span> missions complete</div>
+    </div>
+  </section>
+
+  <div id="board"></div>
+
+  <div class="footer">
+    <div>Your progress is saved on this computer only.</div>
+    <button class="reset-btn" id="resetBtn">Clear my progress and start again</button>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- helpers ---------------- */
+function e(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function codeBlock(lines){
+  return '<div class="cb-wrap"><button class="copy-btn" onclick="cp(this)">copy</button>'
+    + '<pre class="cb">' + e(lines) + '</pre></div>';
+}
+function outBox(text){ return '<div class="out-box"><pre>' + e(text) + '</pre></div>'; }
+
+/* ---------------- icons ---------------- */
+const IK = 'stroke="#e7eaf0" stroke-width="2.4" fill="none" stroke-linejoin="round" stroke-linecap="round"';
+const I = {
+  doors:`<svg viewBox="0 0 64 64"><rect x="7" y="16" width="14" height="36" rx="1.5" ${IK}/><rect x="25" y="16" width="14" height="36" rx="1.5" fill="#f5c518" fill-opacity=".25" stroke="#f5c518" stroke-width="2.4"/><rect x="43" y="16" width="14" height="36" rx="1.5" ${IK}/><circle cx="18" cy="35" r="1.4" fill="#e7eaf0"/><circle cx="36" cy="35" r="1.4" fill="#f5c518"/><circle cx="54" cy="35" r="1.4" fill="#e7eaf0"/><path d="M4 52h56" ${IK}/></svg>`,
+  keypad:`<svg viewBox="0 0 64 64"><rect x="16" y="8" width="32" height="48" rx="4" ${IK}/><rect x="21" y="13" width="22" height="9" rx="1.5" fill="#3fc8f0" fill-opacity=".3" stroke="#3fc8f0" stroke-width="2"/><g fill="#e7eaf0"><circle cx="24" cy="30" r="2.2"/><circle cx="32" cy="30" r="2.2"/><circle cx="40" cy="30" r="2.2"/><circle cx="24" cy="38" r="2.2"/><circle cx="32" cy="38" r="2.2"/><circle cx="40" cy="38" r="2.2"/><circle cx="24" cy="46" r="2.2"/><circle cx="32" cy="46" r="2.2"/></g><circle cx="40" cy="46" r="2.6" fill="#ff4d5e"/></svg>`,
+  eye:`<svg viewBox="0 0 64 64"><rect x="16" y="10" width="32" height="44" rx="1.5" ${IK}/><path d="M16 10l14 5v44l-14-5z" fill="#2f3643" stroke="#e7eaf0" stroke-width="2.4" stroke-linejoin="round"/><path d="M34 28q6-6 10 0" stroke="#f5c518" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="39" cy="38" r="2.2" fill="#f5c518"/><path d="M39 33v-1" stroke="#f5c518" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+  robot:`<svg viewBox="0 0 64 64"><path d="M32 8v8" ${IK}/><circle cx="32" cy="7" r="2.6" fill="#ff4d5e"/><rect x="14" y="16" width="36" height="26" rx="6" ${IK}/><circle cx="25" cy="28" r="3.6" fill="#ff4d5e"/><circle cx="39" cy="28" r="3.6" fill="#ff4d5e"/><path d="M24 36h16" stroke="#9aa3b2" stroke-width="2.2" stroke-dasharray="2 3" stroke-linecap="round"/><rect x="20" y="45" width="24" height="12" rx="3" ${IK}/></svg>`,
+  princess:`<svg viewBox="0 0 64 64"><path d="M12 40V20l10 10 10-16 10 16 10-10v20z" fill="#f5c518" fill-opacity=".25" stroke="#f5c518" stroke-width="2.4" stroke-linejoin="round"/><path d="M12 46h40" ${IK}/><path d="M16 52h32" stroke="#3fc8f0" stroke-width="2.4" stroke-linecap="round"/><circle cx="32" cy="32" r="2.6" fill="#ff4d5e"/></svg>`,
+  blueprint:`<svg viewBox="0 0 64 64"><rect x="21" y="7" width="22" height="16" rx="2" fill="#f5c518" fill-opacity=".2" stroke="#f5c518" stroke-width="2.4"/><rect x="6" y="41" width="22" height="16" rx="2" ${IK}/><rect x="36" y="41" width="22" height="16" rx="2" ${IK}/><path d="M32 23v9M17 32h30M17 32v9M47 32v9" ${IK}/><path d="M21 13h22M6 47h22M36 47h22" stroke="#9aa3b2" stroke-width="1.6"/></svg>`,
+  laser:`<svg viewBox="0 0 64 64"><path d="M8 24h26v10H24l-3 12h-8l3-12H8z" fill="#2f3643" stroke="#e7eaf0" stroke-width="2.4" stroke-linejoin="round"/><path d="M38 29h20" stroke="#ff4d5e" stroke-width="3.2" stroke-linecap="round"/><path d="M44 21l4 4M44 37l4-4" stroke="#ff4d5e" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+  loop:`<svg viewBox="0 0 64 64"><path d="M48 24a18 18 0 0 0-31-4" ${IK}/><path d="M16 12v9h9" ${IK}/><path d="M16 40a18 18 0 0 0 31 4" stroke="#3fc8f0" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M48 52v-9h-9" stroke="#3fc8f0" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="32" r="4" fill="#f5c518"/></svg>`,
+  bug:`<svg viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="11" ry="15" fill="#ff4d5e" fill-opacity=".2" stroke="#ff4d5e" stroke-width="2.4"/><circle cx="32" cy="17" r="5" ${IK}/><path d="M32 22v29M21 30l-9-4M21 38H10M21 46l-8 5M43 30l9-4M43 38h11M43 46l8 5M29 13l-4-5M35 13l4-5" ${IK}/></svg>`,
+  star:`<svg viewBox="0 0 64 64"><path d="M32 8l7 15 16 2-12 11 3 16-14-8-14 8 3-16L9 25l16-2z" fill="#f5c518" fill-opacity=".25" stroke="#f5c518" stroke-width="2.4" stroke-linejoin="round"/><path d="M26 56h12" ${IK}/></svg>`,
+  trophy:`<svg viewBox="0 0 64 64"><path d="M20 10h24v14a12 12 0 0 1-24 0z" fill="#f5c518" fill-opacity=".25" stroke="#f5c518" stroke-width="2.4" stroke-linejoin="round"/><path d="M20 15h-8v4a8 8 0 0 0 8 8M44 15h8v4a8 8 0 0 1-8 8M32 36v8M22 54h20l-2-10H24z" ${IK}/></svg>`,
+  dial:`<svg viewBox="0 0 64 64"><path d="M10 44a22 22 0 0 1 44 0" ${IK}/><path d="M10 44a22 22 0 0 1 9-17.8" stroke="#6fdc8c" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M45 26.2A22 22 0 0 1 54 44" stroke="#ff4d5e" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M32 44l10-14" stroke="#f5c518" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="44" r="3.5" fill="#f5c518"/><path d="M14 52h36" ${IK}/></svg>`,
+  disk:`<svg viewBox="0 0 64 64"><path d="M10 12h36l8 8v32H10z" ${IK}/><rect x="18" y="12" width="22" height="13" fill="#3fc8f0" fill-opacity=".25" stroke="#3fc8f0" stroke-width="2.2"/><rect x="33" y="15" width="4" height="7" fill="#3fc8f0"/><rect x="17" y="34" width="30" height="18" rx="1.5" ${IK}/><path d="M22 40h20M22 46h14" stroke="#9aa3b2" stroke-width="2" stroke-linecap="round"/></svg>`
+};
+
+/* ---------------- board data ---------------- */
+I.boom = `<svg viewBox="0 0 64 64"><path d="M32 6l5 13 12-7-4 14 13 3-12 7 8 12-14-3-2 14-6-12-8 10 0-14-13 1 10-10L8 26l14-1-4-13 10 7z" fill="#ff4d5e" fill-opacity=".22" stroke="#ff4d5e" stroke-width="2.2" stroke-linejoin="round"/><circle cx="32" cy="32" r="6" fill="#f5c518"/></svg>`;
+
+const SECTORS = [
+  {
+    name: 'The Facility', num: 'SECTOR 1', when: 'lists, input and random',
+    cards: [
+      {
+        id:'rooms', icon:'doors', title:'Build the Facility',
+        summary:'Create the 15 rooms (7 empty, 7 robots, 1 prince) and shuffle them into a random order.',
+        chips:[['lists','c-data'],['for loops'],['random','c-data']],
+        brief:`<p>Every game starts with the map. Write a function called <code>setup_rooms()</code> that builds a list of 15 rooms: 7 holding <code>"empty"</code>, 7 holding <code>"robot"</code> and exactly 1 holding <code>"prince"</code>. It should <strong>shuffle</strong> the list so the prince is somewhere different every game, then <code>return</code> it.</p><p>Print the list while you are building, so you can check the split is right. You will delete that line before anybody plays it, or the game is very short.</p>`,
+        exampleLabel:'Example output', example:`['robot', 'empty', 'robot', 'prince', 'empty', 'empty', 'robot', 'empty', 'robot', 'robot', 'empty', 'empty', 'robot', 'robot', 'empty']\n7 empty, 7 robots, 1 prince`,
+        hints:[
+          {p:`Don't type out 15 items by hand. Use a loop to <code>append</code> seven of each, then add the prince on the end. The <code>random</code> module has a function that shuffles a list for you. Finish the function with <code>return rooms</code>.`},
+          {p:`Two loops, one append, one shuffle, one return. The last line checks the split:`, code:`import random\n\ndef setup_rooms():\n    rooms = []\n    for i in range(7):\n        rooms.append("empty")\n    for i in range(7):\n        rooms.append("robot")\n    rooms.append("prince")\n    random.shuffle(rooms)\n    return rooms\n\nrooms = setup_rooms()\nprint(rooms)\nprint(rooms.count("empty"), "empty,", rooms.count("robot"), "robots,", rooms.count("prince"), "prince")`}
+        ],
+        aside:`<b>Write your own shuffle.</b> <code>random.shuffle</code> is doing the clever bit for you. Can you shuffle the list yourself by working backwards through it and swapping each room with a randomly chosen room at or before it? That is the Fisher&ndash;Yates shuffle, and it is a lovely algorithm to trace by hand.`
+      },
+      {
+        id:'door', icon:'keypad', title:'Pick a Door',
+        summary:'Write a function that keeps asking until it gets a room number from 1 to 15.',
+        chips:[['input','c-data'],['validation','c-risk'],['while loop']],
+        brief:`<p>The player chooses a room by number. People type all sorts of things, so write a function <code>get_room_number()</code> that keeps asking until it gets a whole number from <strong>1 to 15</strong>, and then returns it. Use it to show what is in the chosen room.</p><div class="callout note">Humans count rooms from 1. Python counts list positions from 0. Room 1 is <code>rooms[0]</code> and room 15 is <code>rooms[14]</code>. Off-by-one errors live here.</div>`,
+        exampleLabel:'Example run', example:`Which room will you open (1-15)? 0\nThere is no room with that number.\nWhich room will you open (1-15)? twelve\nThere is no room with that number.\nWhich room will you open (1-15)? 12\nRoom 12 contains: robot`,
+        hints:[
+          {p:`Use a <code>while True:</code> loop and only <code>return</code> when the input is valid. Check the text is all digits with <code>.isdigit()</code> <em>before</em> you call <code>int()</code>, or <code>int("twelve")</code> will crash the program.`},
+          {p:`Validate first, convert second, and subtract 1 when you look in the list:`, code:`def get_room_number():\n    while True:\n        choice = input("Which room will you open (1-15)? ")\n        if choice.isdigit() and 1 <= int(choice) <= 15:\n            return int(choice)\n        print("There is no room with that number.")\n\nnumber = get_room_number()\nprint("Room " + str(number) + " contains: " + rooms[number - 1])`}
+        ],
+        aside:`<b>The professional way.</b> Instead of <code>.isdigit()</code>, wrap <code>int(choice)</code> in <code>try</code> / <code>except ValueError</code>. Write both versions. Which one copes with <code>-3</code>? Which one is easier to read?`
+      },
+      {
+        id:'behind', icon:'eye', title:"What's Behind the Door",
+        summary:'React to empty rooms, robots and the prince, and remember which rooms have been searched.',
+        chips:[['selection'],['lists','c-data'],['flag variable','c-oop']],
+        brief:`<p>Now the game reacts. Every room she opens uses up one of the princess's <strong>6 checks</strong>. Print a different message for an empty room, a robot (just a warning for now, the fight comes later) and the prince.</p><p>Then make the game <strong>remember</strong>: when she searches an empty room, change that slot in the list to <code>"searched"</code>. If she opens it again, tell her.</p><div class="callout note"><b>Design decision:</b> should opening a room she has already searched still cost a check? The prince is running out of oxygen whatever she does. The worked solution says yes. Decide, and be ready to justify it.</div>`,
+        exampleLabel:'Example run', example:`Rooms left: 6\nWhich room will you open (1-15)? 4\nNothing here. Just dust and silence.\nRooms left: 5\nWhich room will you open (1-15)? 4\nYou've searched this room already. Still empty.\nRooms left: 4`,
+        hints:[
+          {p:`Loop while <code>checks_left</code> is above 0 and the prince hasn't been found. Inside the loop: get a room, take one off the checks, then look at <code>rooms[number - 1]</code> with <code>if</code> / <code>elif</code>. To remember a search, overwrite that slot in the list.`},
+          {p:`A flag variable, <code>found</code>, lets the loop stop early when she finds him:`, code:`rooms = setup_rooms()\nchecks_left = 6\nfound = False\n\nwhile checks_left > 0 and not found:\n    print("Rooms left: " + str(checks_left))\n    number = get_room_number()\n    checks_left = checks_left - 1\n    contents = rooms[number - 1]\n    if contents == "empty":\n        print("Nothing here. Just dust and silence.")\n        rooms[number - 1] = "searched"\n    elif contents == "searched":\n        print("You've searched this room already. Still empty.")\n    elif contents == "robot":\n        print("A killer robot! (Combat coming soon...)")\n    elif contents == "prince":\n        print("You found the prince!")\n        found = True`}
+        ],
+        aside:`<b>Rub it in.</b> If she runs out of checks, tell the player which room the prince was in all along. <code>rooms.index("prince")</code> finds his position. Don't forget to add 1.`
+      }
+    ]
+  },
+  {
+    name: 'The Arsenal', num: 'SECTOR 2', when: 'one small job per subroutine',
+    cards: [
+      {
+        id:'robot', icon:'robot', title:'The Robot',
+        summary:'Two small functions: one makes a robot shield, the other decides whether a shot destroys it.',
+        chips:[['subroutines','c-oop'],['random','c-data'],['return values','c-oop']],
+        brief:`<p>As far as the game is concerned, a robot is really just one number: its <strong>shield</strong>, a random whole number from <strong>5 to 30</strong>. Write two functions:</p><ul><li><code>make_robot()</code> returns a brand new robot shield value.</li><li><code>shot_destroys(power, robot_shield)</code> returns <code>True</code> if a shot of that power destroys the robot, and <code>False</code> if it doesn't.</li></ul><div class="callout note">Read the rule carefully: the shot must use <b>more</b> energy than the shield. A 20-power shot against a shield of 20 does <b>not</b> destroy it.</div>`,
+        exampleLabel:'Example test and output', example:`robot_shield = make_robot()\nprint(robot_shield)\nprint(shot_destroys(4, robot_shield))\nprint(shot_destroys(31, robot_shield))\n\n17\nFalse\nTrue`,
+        hints:[
+          {p:`<code>random.randint(5, 30)</code> includes both 5 and 30. For <code>shot_destroys</code>, the comparison <code>power &gt; robot_shield</code> is already <code>True</code> or <code>False</code>, so you can return it directly. No <code>if</code> needed.`},
+          {p:`Two one-line functions. Small subroutines like these are easy to test on their own:`, code:`def make_robot():\n    return random.randint(5, 30)\n\ndef shot_destroys(power, robot_shield):\n    return power > robot_shield`}
+        ],
+        aside:`<b>Make robots wear down.</b> In this version a weak shot does nothing at all. Change the rules so that a failed shot knocks that much off the robot's shield, meaning lots of small shots can still win. Which function needs to change? Does it make the game too easy?`
+      },
+      {
+        id:'aim', icon:'laser', title:'Aim and Fire',
+        summary:'Ask how much laser power to use, never allowing more than she has left.',
+        chips:[['validation','c-risk'],['parameters','c-oop'],['while loop']],
+        brief:`<p>Before each shot the princess chooses how much laser power to use. It must be a whole number from 1 up to whatever is left in her laser. Write <code>get_shot_power(laser)</code>: it takes the laser energy left as a <strong>parameter</strong>, keeps asking until the answer is valid, and returns it.</p><div class="callout note">This is your <code>get_room_number()</code> again, with one difference: the top of the range changes every shot. That is exactly what the parameter is for.</div>`,
+        exampleLabel:'Example: print(get_shot_power(85))', example:`Laser power to use (1-85): 90\nYour laser can't do that.\nLaser power to use (1-85): 0\nYour laser can't do that.\nLaser power to use (1-85): 25\n25`,
+        hints:[
+          {p:`Copy <code>get_room_number()</code> and swap the 15 for <code>laser</code>. The prompt has to show the number too, so build it by joining strings with <code>str(laser)</code>.`},
+          {p:`Same shape as before, with the parameter doing the work:`, code:`def get_shot_power(laser):\n    while True:\n        choice = input("Laser power to use (1-" + str(laser) + "): ")\n        if choice.isdigit() and 1 <= int(choice) <= laser:\n            return int(choice)\n        print("Your laser can't do that.")`}
+        ],
+        aside:`<b>Spot the pattern.</b> <code>get_room_number()</code> and <code>get_shot_power()</code> are nearly identical. Write one function, <code>get_number(prompt, lowest, highest)</code>, that both could use instead. Fewer lines, and one place to fix bugs.`
+      },
+      {
+        id:'hits', icon:'princess', title:'Taking Hits',
+        summary:'Knock a charge off the shield, and spot the moment a hit becomes fatal.',
+        chips:[['subroutines','c-oop'],['return values','c-oop'],['boundary data','c-data']],
+        brief:`<p>The princess has <strong>3 shield charges</strong>. Each time a robot hits her, she loses one. Write <code>take_hit(shield)</code> that takes one off, prints a message, and returns the new value.</p><p>Here is a neat trick: if her shield is already 0 when she is hit, it drops to <strong>-1</strong>. So "still alive" simply means <code>shield &gt;= 0</code>, and you don't need a separate variable for it.</p><div class="callout note">Count carefully: 3 charges plus 1 life means the <b>4th</b> hit is fatal, not the 3rd.</div>`,
+        exampleLabel:'Example test and output', example:`shield = 3\nfor i in range(4):\n    shield = take_hit(shield)\nprint(shield >= 0)\n\nZAP! Shield down to 2.\nZAP! Shield down to 1.\nZAP! Shield down to 0.\nZAP! No shield left. That one was fatal.\nFalse`,
+        hints:[
+          {p:`A function can't change the caller's variable by itself. It <code>return</code>s the new value, and the caller stores it: <code>shield = take_hit(shield)</code>. Inside, take one off first, then choose the message.`},
+          {p:`Subtract, pick a message, hand the new value back:`, code:`def take_hit(shield):\n    shield = shield - 1\n    if shield >= 0:\n        print("ZAP! Shield down to " + str(shield) + ".")\n    else:\n        print("ZAP! No shield left. That one was fatal.")\n    return shield`}
+        ],
+        aside:`<b>Why -1?</b> Using -1 to mean "dead" is a <b>sentinel value</b>: a value that can't happen normally, used as a signal. It saves a variable, but what could go wrong? Imagine someone later adds a "repair shield" power-up that adds 1.`
+      }
+    ]
+  },
+  {
+    name: 'The Mission', num: 'SECTOR 3', when: 'bringing it to life',
+    cards: [
+      {
+        id:'battle', icon:'boom', title:'Robot Battle',
+        summary:'Run the fight: the princess fires first, then the robot shoots back, until one of them goes down.',
+        chips:[['while loop'],['subroutines','c-oop'],['edge cases','c-risk']],
+        brief:`<p>Time to use your arsenal. Write <code>battle(shield, laser)</code>. It makes a robot, then fights it in a loop:</p><ul><li>She chooses how much laser power to use, and it comes out of her laser.</li><li>If her shot destroys the robot, the fight is over.</li><li>If not, the robot fires back and she takes a hit.</li><li>Keep going until the robot is destroyed, or she is.</li></ul><p>Both her shield and her laser may have changed, so the function must hand <strong>both</strong> back.</p><div class="callout note"><b>Two return values:</b> Python lets a function return two things at once with <code>return shield, laser</code>. The caller catches both: <code>shield, laser = battle(shield, laser)</code>.</div><div class="callout note"><b>Edge case:</b> what happens when her laser reaches 0? She can't fire, but the robot can. Make sure your loop can never get stuck asking for a shot she can't take.</div>`,
+        exampleLabel:'Example run', example:`A killer robot whirs into life!\nLaser power to use (1-100): 15\nYour shot fizzles against its shield.\nZAP! Shield down to 2.\nLaser power to use (1-85): 25\nBOOM! The robot is destroyed.`,
+        hints:[
+          {p:`Loop <code>while shield &gt;= 0</code>. Inside: if the laser is 0 she can't fire. Otherwise get the power with <code>get_shot_power(laser)</code>, take it off the laser, and if <code>shot_destroys</code> says yes, <code>return</code> straight away. If the robot survives, she takes a hit.`},
+          {p:`The battle function, then the change to the robot branch of your main loop:`, code:`def battle(shield, laser):\n    robot_shield = make_robot()\n    print("A killer robot whirs into life!")\n    while shield >= 0:\n        if laser == 0:\n            print("Click. Your laser is empty!")\n        else:\n            power = get_shot_power(laser)\n            laser = laser - power\n            if shot_destroys(power, robot_shield):\n                print("BOOM! The robot is destroyed.")\n                return shield, laser\n            print("Your shot fizzles against its shield.")\n        shield = take_hit(shield)\n    return shield, laser\n\n# ...and in your main loop:\n    elif contents == "robot":\n        shield, laser = battle(shield, laser)\n        if shield >= 0:\n            rooms[number - 1] = "wreck"\n    elif contents == "wreck":\n        print("A smoking robot lies on the floor. You've been here before.")`}
+        ],
+        aside:`<b>Think like a player.</b> A shield is never more than 30, so a 31-power shot <em>always</em> wins. How many robots can she then beat for certain? Roughly how many robots will she meet in 6 rooms? Use your answers to decide whether the game is too easy, and what you would change.`
+      },
+      {
+        id:'loop', icon:'loop', title:'The Game Loop',
+        summary:'Keep the mission running until the prince is found, time runs out or the princess falls.',
+        chips:[['while loop'],['boolean logic','c-data'],['selection']],
+        brief:`<p>Bring it all together in the main program. Set up the rooms, the checks, the shield and the laser, then show the princess's status each turn, ask for a room and check it. The game can end in <strong>three</strong> ways, and each one needs its own message:</p><ul><li>She finds the prince: <strong>win</strong>.</li><li>She opens 6 rooms without finding him: <strong>lose</strong>, out of time.</li><li>She takes a 4th hit: <strong>lose</strong>, game over.</li></ul>`,
+        exampleLabel:'Example run', example:`THE ROBOT GAME\nThe prince is locked in one of 15 rooms. You have time to check 6.\n\nRooms left: 6   Shield: 3   Laser: 100\nWhich room will you open (1-15)? 9\nNothing here. Just dust and silence.\n\nRooms left: 5   Shield: 3   Laser: 100\nWhich room will you open (1-15)? 3\nYou found the prince!\nThe prince is saved. You win!`,
+        hints:[
+          {p:`The loop has to stop for any of three reasons, so its condition joins three tests: <code>while checks_left &gt; 0 and shield &gt;= 0 and not found:</code>. After the loop, work out which ending happened. Check for the prince <em>first</em>: finding him on the very last check should still be a win.`},
+          {p:`The whole main program, below your functions:`, code:`rooms = setup_rooms()\nchecks_left = 6\nshield = 3\nlaser = 100\nfound = False\n\nprint("THE ROBOT GAME")\nprint("The prince is locked in one of 15 rooms. You have time to check 6.")\n\nwhile checks_left > 0 and shield >= 0 and not found:\n    print()\n    print("Rooms left: " + str(checks_left) + "   Shield: " + str(shield) + "   Laser: " + str(laser))\n    number = get_room_number()\n    checks_left = checks_left - 1\n    contents = rooms[number - 1]\n    if contents == "empty":\n        print("Nothing here. Just dust and silence.")\n        rooms[number - 1] = "searched"\n    elif contents == "searched":\n        print("You've searched this room already. Still empty.")\n    elif contents == "robot":\n        shield, laser = battle(shield, laser)\n        if shield >= 0:\n            rooms[number - 1] = "wreck"\n    elif contents == "wreck":\n        print("A smoking robot lies on the floor. You've been here before.")\n    elif contents == "prince":\n        print("You found the prince!")\n        found = True\n\nif found:\n    print("The prince is saved. You win!")\nelif shield < 0:\n    print("The princess has fallen. Game over.")\nelse:\n    print("Out of time. The prince's oxygen has run out. Game over.")`}
+        ],
+        aside:`<b>Boolean logic.</b> Write the opposite condition, "the game is over", using <code>or</code> instead of <code>and</code>, then use <code>while not (...)</code>. That swap is De Morgan's law. Which version reads more clearly to you?`
+      },
+      {
+        id:'test', icon:'bug', title:'Bug Hunt',
+        summary:'Test the finished game against the mission file with normal, boundary and erroneous data.',
+        chips:[['testing','c-risk'],['test plan','c-risk'],['boundary data','c-data']],
+        brief:`<p>A game that works when <em>you</em> play it isn't finished. Write a test plan with at least <strong>eight tests</strong>, run each one and record what actually happened. Cover normal, boundary and erroneous data, and make sure every rule in the mission file is checked by at least one test.</p><div class="field-label">Some tests to get you started</div><div class="table-scroll"><table class="test-table"><tr><th>What it tests</th><th>Data</th><th>Expected result</th></tr><tr><td>Room number too low</td><td>0</td><td>"There is no room with that number."</td></tr><tr><td>Top room</td><td>15</td><td>Room 15 opens</td></tr><tr><td>Not a number</td><td>twelve</td><td>Asked again, no crash</td></tr><tr><td>Shot equal to the shield</td><td>20 v shield 20</td><td>Robot is <b>not</b> destroyed</td></tr><tr><td>Fourth hit</td><td>4 failed shots</td><td>Princess dies, game over</td></tr><tr><td>Prince on the 6th check</td><td>5 misses, then him</td><td>Win, not "out of time"</td></tr></table></div><div class="callout note"><b>Testing trick:</b> you can't wait for the dice to give you the room you need. Straight after <code>rooms = setup_rooms()</code>, temporarily overwrite the list: <code>rooms = ["prince"] + ["empty"] * 14</code></div>`,
+        hints:[
+          {p:`Bugs live at the edges. Think about room 1 and room 15, a shot exactly equal to the shield, her last shield charge, her last check, and a completely empty laser.`},
+          {p:`Rig the game so you can test combat on demand. To test the "equal to the shield" rule, temporarily add <code>print(robot_shield)</code> at the start of <code>battle()</code>, and remove it when you are done.`, code:`rooms = setup_rooms()\nrooms = ["robot"] * 14 + ["prince"]   # TEMPORARY: delete after testing\n\n# Open room 1, then fire 1 power four times.\n# Expect: three "Shield down" messages, then\n# "That one was fatal." and "The princess has fallen. Game over."`}
+        ],
+        aside:`<b>Automate it.</b> Small functions can be tested without playing at all. Try <code>assert shot_destroys(20, 20) == False</code>, <code>assert shot_destroys(21, 20) == True</code> and <code>assert take_hit(0) == -1</code>. Write asserts for every function, so one run checks the lot in a second.`
+      }
+    ]
+  },
+  {
+    name: 'Bonus Missions', num: 'SECTOR 4', when: 'the extension tasks', four: true,
+    cards: [
+      {
+        id:'score', icon:'star', title:'Score It',
+        summary:'Turn a win into a score based on the rooms left and the energy and shield she has saved.',
+        chips:[['arithmetic'],['parameters','c-oop'],['design','c-data']],
+        brief:`<p>The brief asks for a score based on the <strong>number of rooms</strong> and the princess's <strong>remaining energy and shield</strong>. A quick rescue with plenty left in the tank should score high. Design your own formula, write a <code>score()</code> function that takes everything it needs as parameters, and show the score when she wins.</p>`,
+        exampleLabel:'Example output', example:`The prince is saved. You win!\nRooms left: 4   Laser: 60   Shield: 2\nScore: 560`,
+        hints:[
+          {p:`Decide what each thing is worth. One unused check should be worth far more than a single point of laser energy. A loss scores 0, so pass <code>found</code> in too.`},
+          {p:`With this formula, 4 rooms &times; 100, plus 60 laser, plus 2 shields &times; 50, gives 560:`, code:`def score(found, checks_left, laser, shield):\n    if not found:\n        return 0\n    return checks_left * 100 + laser + shield * 50\n\n\nfinal_score = score(found, checks_left, laser, shield)\nprint("Score: " + str(final_score))`}
+        ],
+        aside:`<b>Balance it.</b> What is the highest possible score with your formula? The lowest winning score? Does your formula reward fighting robots carefully, or does rushing always win?`
+      },
+      {
+        id:'fame', icon:'trophy', title:'Hall of Fame',
+        summary:'Save the best score to a file so it survives after the program closes.',
+        chips:[['file handling','c-data'],['exceptions','c-risk'],['subroutines','c-oop']],
+        brief:`<p>A high score that vanishes when the program closes isn't much of a record. Store the best score in a text file. At the end of each game, load the high score and compare. If the player has beaten it, save the new one and celebrate.</p><div class="callout note">The first time the game runs, the file won't exist yet. Your code must cope with that without crashing.</div>`,
+        exampleLabel:'Example output', example:`Score: 560\nNEW HIGH SCORE! (previous best: 410)`,
+        hints:[
+          {p:`<code>open(name, "r")</code> reads a file, and <code>open(name, "w")</code> writes one, replacing what was there. Opening a file that doesn't exist raises a <code>FileNotFoundError</code>. Catch it with <code>try</code> / <code>except</code> and treat it as a high score of 0.`},
+          {p:`Two functions, then a few lines at the end of the game:`, code:`def load_high_score():\n    try:\n        file = open("highscore.txt", "r")\n        best = int(file.read())\n        file.close()\n        return best\n    except FileNotFoundError:\n        return 0\n\ndef save_high_score(new_score):\n    file = open("highscore.txt", "w")\n    file.write(str(new_score))\n    file.close()\n\n\nbest = load_high_score()\nif final_score > best:\n    print("NEW HIGH SCORE! (previous best: " + str(best) + ")")\n    save_high_score(final_score)`}
+        ],
+        aside:`<b>Top five.</b> Ask for the player's name and keep a proper leaderboard: one <code>name,score</code> per line, sorted, with only the best five kept. You will need to split each line and sort the scores yourself. A bubble sort would do nicely.`
+      },
+      {
+        id:'levels', icon:'dial', title:'Difficulty Levels',
+        summary:'Let the player choose easy, normal or hard, changing the rooms, robots, energy and shield.',
+        chips:[['parameters','c-oop'],['selection'],['magic numbers','c-risk']],
+        brief:`<p>The brief wants a difficulty system that changes the <strong>split, energy, shield and number of rooms</strong>. Ask for a level at the start, set your variables from it, and pass the room settings into <code>setup_rooms()</code> and <code>get_room_number()</code> as parameters instead of having them fixed inside.</p><div class="callout note">Every <code>15</code> or <code>7</code> you typed must now come from the settings instead. Hunt down those magic numbers, including the ones inside your <code>print</code> messages.</div>`,
+        exampleLabel:'Example run', example:`Choose a difficulty (easy / normal / hard): hard\nTHE ROBOT GAME\nThe prince is locked in one of 20 rooms. You have time to check 6.`,
+        hints:[
+          {p:`Start with the normal values in variables, then change only the ones a level needs. The number of empty rooms is no longer fixed: it is the total, minus the robots, minus 1 for the prince.`},
+          {p:`Parameters in, settings chosen by a menu:`, code:`def setup_rooms(total, robots):\n    rooms = []\n    for i in range(total - robots - 1):\n        rooms.append("empty")\n    for i in range(robots):\n        rooms.append("robot")\n    rooms.append("prince")\n    random.shuffle(rooms)\n    return rooms\n\ndef get_room_number(total):\n    while True:\n        choice = input("Which room will you open (1-" + str(total) + ")? ")\n        if choice.isdigit() and 1 <= int(choice) <= total:\n            return int(choice)\n        print("There is no room with that number.")\n\n\nlevel = input("Choose a difficulty (easy / normal / hard): ").lower()\ntotal = 15\nrobots = 7\nlaser = 100\nshield = 3\nif level == "easy":\n    total = 12\n    robots = 4\n    laser = 120\nelif level == "hard":\n    total = 20\n    robots = 12\n    laser = 80\n    shield = 2\nrooms = setup_rooms(total, robots)`}
+        ],
+        aside:`<b>Make it adaptive.</b> Each time the player wins, start a new mission that is a little harder: one more robot, a bit less laser. Keep going until they lose, and report how far they got.`
+      },
+      {
+        id:'save', icon:'disk', title:'Save and Continue',
+        summary:'Let the player save mid-mission and pick up exactly where they left off.',
+        chips:[['file handling','c-data'],['multiple returns','c-oop'],['toughest','c-star']],
+        brief:`<p>The toughest bonus. At any room prompt the player can type <code>S</code> to save and quit. Next time, the game offers to carry on. To do that you must write the <strong>whole state</strong> of the game to a file: every room, the checks left, the shield and the laser. Then you read it back into your variables.</p>`,
+        exampleLabel:'Example run', example:`Which room will you open (1-15)? S\nGame saved. See you soon.\n\n(later...)\nFound a saved mission. Continue? (y/n) y\n\nRooms left: 3   Shield: 1   Laser: 42`,
+        hints:[
+          {p:`You can't write a list straight to a text file. Join it into one comma-separated line with <code>",".join(...)</code>, and turn it back into a list with <code>.split(",")</code>. The numbers come back as text, so convert them with <code>int()</code>. Two lines in the file is plenty.`},
+          {p:`A save function and a load function that returns four values. You will still need to let <code>get_room_number()</code> accept <code>S</code>, and end the loop when the player saves:`, code:`def save_game(rooms, checks_left, shield, laser):\n    file = open("savegame.txt", "w")\n    file.write(",".join(rooms) + "\\n")\n    file.write(str(checks_left) + "," + str(shield) + "," + str(laser) + "\\n")\n    file.close()\n    print("Game saved. See you soon.")\n\ndef load_game():\n    file = open("savegame.txt", "r")\n    rooms = file.readline().strip().split(",")\n    numbers = file.readline().strip().split(",")\n    file.close()\n    return rooms, int(numbers[0]), int(numbers[1]), int(numbers[2])\n\n\nrooms, checks_left, shield, laser = load_game()`}
+        ],
+        asideType:'research',
+        aside:`<b>Extended research &middot; the cheat sheet problem.</b> Open your save file in Notepad. It tells you exactly where the prince is. Find a way to stop players cheating: you could encrypt the file with a Caesar shift, or research how real games use a <b>checksum</b> to spot a save file that has been tampered with. Build it and demo it.`
+      }
+    ]
+  }
+];
+
+/* flatten for lookups */
+const ALL = [];
+SECTORS.forEach(s => s.cards.forEach(c => ALL.push(c)));
+document.getElementById('progTotal').textContent = ALL.length;
+
+/* ---------------- progress storage ---------------- */
+const KEY = 'robotGameProcDone_v1';
+function loadDone(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(err){ return []; } }
+function saveDone(arr){ try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(err){} }
+let done = loadDone();
+function isDone(id){ return done.includes(id); }
+
+/* ---------------- build the board ---------------- */
+function chipHTML(ch){ return `<span class="chip ${ch[1] || ''}">${ch[0]}</span>`; }
+
+function buildBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  let n = 0;
+  SECTORS.forEach((sector, si) => {
+    const sec = document.createElement('section');
+    sec.className = 'sector';
+    sec.dataset.sector = si;
+    sec.innerHTML = `
+      <div class="sector-head">
+        <span class="sector-sign"><span class="num">${sector.num}</span>${sector.name}</span>
+        <span class="sector-when">${sector.when}</span>
+        <span class="sector-line"></span>
+        <span class="sector-done">&#10003; Sector clear</span>
+      </div>`;
+    const grid = document.createElement('div');
+    grid.className = 'grid' + (sector.four ? ' four' : '');
+    sector.cards.forEach(card => {
+      n++;
+      const el = document.createElement('div');
+      el.className = 'card' + (isDone(card.id) ? ' done' : '');
+      el.style.animationDelay = (n * 0.05) + 's';
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
+      el.innerHTML = `
+        <span class="card-no">M-${String(n).padStart(2,'0')}</span>
+        <span class="tick">&#10003;</span>
+        <div class="card-icon">${I[card.icon]}</div>
+        <div class="card-title">${card.title}</div>
+        <div class="card-summary">${card.summary}</div>
+        <div class="chips">${card.chips.map(chipHTML).join('')}</div>`;
+      el.onclick = () => openCard(card.id);
+      el.onkeydown = ev => { if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); openCard(card.id); } };
+      grid.appendChild(el);
+    });
+    sec.appendChild(grid);
+    board.appendChild(sec);
+  });
+  refreshState();
+}
+
+/* ---------------- modal ---------------- */
+let currentId = null;
+const hintShown = {};
+
+function openCard(id){
+  currentId = id;
+  if(!hintShown[id]) hintShown[id] = 0;
+  renderModal(ALL.find(x => x.id === id));
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCard(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentId = null;
+}
+
+function renderModal(c){
+  let html = `<div class="modal-head">
+    <button class="x-close" onclick="closeCard()" aria-label="Close">&#10005;</button>
+    <div class="m-icon">${I[c.icon]}</div>
+    <div class="modal-eyebrow">Mission</div>
+    <div class="modal-title">${c.title}</div>
+    <div class="modal-sum">${c.summary}</div>
+    <div class="modal-chips">${c.chips.map(chipHTML).join('')}</div>
+  </div>`;
+
+  html += `<div class="modal-body"><div class="field-label">The job</div>${c.brief}`;
+  if(c.example) html += `<div class="field-label">${c.exampleLabel || 'Example'}</div>` + outBox(c.example);
+  if(c.aside)   html += `<div class="callout ${c.asideType || 'tip'}">${c.aside}</div>`;
+
+  const shown = hintShown[c.id] || 0;
+  html += `<div class="hints"><div class="hints-h">Stuck? Two hints, whenever you need them.</div><div class="hint-btns">`;
+  c.hints.forEach((h, i) => {
+    const isOut = i < shown;
+    const label = i === 0 ? 'Hint 1 &middot; gentle nudge' : 'Hint 2 &middot; the structure';
+    html += `<button class="h-btn" onclick="reveal(${i+1})" ${isOut ? 'disabled' : ''}>${isOut ? '&#10003; Hint ' + (i+1) : label}</button>`;
+  });
+  html += `</div>`;
+  c.hints.forEach((h, i) => {
+    if(i < shown) html += `<div class="hint-card"><div class="hint-tag">Hint ${i+1}</div><p>${h.p}</p>${h.code ? codeBlock(h.code) : ''}</div>`;
+  });
+  html += `</div>`;
+
+  const d = isDone(c.id);
+  html += `<div class="done-row"><button class="done-btn ${d ? 'is-done' : ''}" onclick="toggleDone()">${d ? '&#10003; Complete &middot; tap to undo' : 'Mark mission complete'}</button></div>`;
+  html += `</div>`;
+  document.getElementById('modal').innerHTML = html;
+}
+
+function reveal(n){
+  hintShown[currentId] = n;
+  renderModal(ALL.find(x => x.id === currentId));
+}
+
+function toggleDone(){
+  if(isDone(currentId)){
+    done = done.filter(x => x !== currentId);
+  } else {
+    done.push(currentId);
+    toast(pickPraise());
+  }
+  saveDone(done);
+  renderModal(ALL.find(x => x.id === currentId));
+  buildBoard();
+}
+
+/* ---------------- progress + sector state ---------------- */
+function refreshState(){
+  const num = done.filter(id => ALL.some(c => c.id === id)).length;
+  document.getElementById('progNum').textContent = num;
+  document.getElementById('progFill').style.width = (num / ALL.length * 100) + '%';
+  document.getElementById('progMsg').textContent = progressMessage(num);
+  SECTORS.forEach((sector, si) => {
+    const sec = document.querySelector(`.sector[data-sector="${si}"]`);
+    if(sec) sec.classList.toggle('complete', sector.cards.every(c => isDone(c.id)));
+  });
+  document.body.classList.toggle('all-done', num === ALL.length);
+}
+
+function progressMessage(n){
+  if(n === 0) return 'New recruit. Pick any mission to begin.';
+  if(n < 3)  return 'Building the facility. Mind the robots.';
+  if(n < 6)  return 'The arsenal is stocked.';
+  if(n < 9)  return 'Lasers charged. The mission is live.';
+  if(n < 12) return 'Bonus missions now. Showing off.';
+  if(n < 13) return 'One mission left. The prince is waiting.';
+  return 'Prince rescued. Every mission complete.';
+}
+const PRAISE = ['Mission complete.', 'Robot down.', 'Nice shooting.', 'The prince approves.', 'Shields holding.', 'Another door opened.'];
+function pickPraise(){ return PRAISE[Math.floor(Math.random() * PRAISE.length)]; }
+
+/* ---------------- playable prototype ---------------- */
+const G = {
+  robot:`<svg viewBox="0 0 40 40"><path d="M20 4v5" stroke="#9aa3b2" stroke-width="2" stroke-linecap="round"/><rect x="8" y="9" width="24" height="17" rx="4" fill="#2f3643" stroke="#ff4d5e" stroke-width="2"/><circle cx="15" cy="17" r="2.6" fill="#ff4d5e"/><circle cx="25" cy="17" r="2.6" fill="#ff4d5e"/><rect x="12" y="28" width="16" height="8" rx="2" fill="#2f3643" stroke="#ff4d5e" stroke-width="2"/></svg>`,
+  wreck:`<svg viewBox="0 0 40 40"><g transform="rotate(-14 20 24)"><rect x="8" y="14" width="24" height="15" rx="4" fill="#2f3643" stroke="#6b7486" stroke-width="2"/><path d="M13 19l4 4M17 19l-4 4M23 19l4 4M27 19l-4 4" stroke="#6b7486" stroke-width="1.8" stroke-linecap="round"/></g><path d="M14 9q-3-3 0-6M21 10q-3-3 0-6M28 9q-3-3 0-6" stroke="#6b7486" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M6 36h28" stroke="#6b7486" stroke-width="2" stroke-linecap="round"/></svg>`,
+  prince:`<svg viewBox="0 0 40 40"><path d="M7 28V12l7 7 6-11 6 11 7-7v16z" fill="#6fdc8c" fill-opacity=".25" stroke="#6fdc8c" stroke-width="2.2" stroke-linejoin="round"/><path d="M7 33h26" stroke="#6fdc8c" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+  empty:`<svg viewBox="0 0 40 40"><path d="M8 32h24" stroke="#6b7486" stroke-width="2" stroke-linecap="round"/><g fill="#6b7486"><circle cx="13" cy="28" r="1.2"/><circle cx="19" cy="29" r="1"/><circle cx="26" cy="27.5" r="1.3"/><circle cx="22" cy="24" r=".9"/></g></svg>`
+};
+const TAG = { robot:'Robot', wreck:'Wreck', prince:'Prince', empty:'Empty' };
+
+let sim;
+function simNew(){
+  const rooms = [];
+  for(let i = 0; i < 7; i++) rooms.push('empty');
+  for(let i = 0; i < 7; i++) rooms.push('robot');
+  rooms.push('prince');
+  for(let i = rooms.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [rooms[i], rooms[j]] = [rooms[j], rooms[i]];
+  }
+  sim = { rooms, opened: Array(15).fill(false), checks: 6, shield: 3, power: 100, alive: true, found: false, over: false, battle: null };
+  const wrap = document.getElementById('doors');
+  wrap.innerHTML = '';
+  rooms.forEach((r, i) => {
+    const b = document.createElement('button');
+    b.className = 'door';
+    b.setAttribute('aria-label', 'Room ' + (i + 1));
+    b.innerHTML = `<span class="door-inside"></span><span class="door-panel"><span class="door-num">${String(i + 1).padStart(2,'0')}</span><span class="door-led"></span></span>`;
+    b.onclick = () => simOpen(i);
+    wrap.appendChild(b);
+  });
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('combat').hidden = true;
+  simLog('The prince is locked in one of 15 rooms. You have time to check 6.', 'l-info');
+  simHud();
+}
+
+function simShow(i, state){
+  const d = document.getElementById('doors').children[i];
+  d.querySelector('.door-inside').innerHTML = G[state] + `<span class="door-tag">${TAG[state]}</span>`;
+  d.classList.remove('c-robot', 'c-prince');
+  if(state === 'robot') d.classList.add('c-robot');
+  if(state === 'prince') d.classList.add('c-prince');
+}
+
+function simOpen(i){
+  if(sim.over || sim.battle !== null || sim.opened[i]) return;
+  sim.opened[i] = true;
+  sim.checks--;
+  const d = document.getElementById('doors').children[i];
+  d.classList.add('open'); d.disabled = true;
+  const what = sim.rooms[i];
+  simShow(i, what);
+  if(what === 'empty'){
+    simLog(`Room ${i + 1}: nothing here. Just dust and silence.`, 'l-dim');
+  } else if(what === 'prince'){
+    sim.found = true;
+    simLog(`Room ${i + 1}: you found the prince!`, 'l-good');
+  } else {
+    sim.battle = { room: i, shield: 5 + Math.floor(Math.random() * 26) };
+    simLog(`Room ${i + 1}: a killer robot whirs into life!`, 'l-bad');
+    simCombatShow();
+  }
+  simHud();
+  simCheckEnd();
+}
+
+function simCombatShow(){
+  const c = document.getElementById('combat');
+  const slider = document.getElementById('cPower');
+  const fire = document.getElementById('cFire');
+  document.getElementById('cRoom').textContent = sim.battle.room + 1;
+  if(sim.power > 0){
+    slider.disabled = false;
+    slider.max = sim.power;
+    slider.value = Math.min(Number(slider.value) || 20, sim.power);
+    fire.textContent = 'Fire';
+  } else {
+    slider.disabled = true;
+    slider.max = 1; slider.value = 1;
+    fire.textContent = 'Pull trigger';
+  }
+  document.getElementById('cPowerOut').textContent = sim.power > 0 ? slider.value : 0;
+  c.hidden = false;
+}
+
+function simFire(){
+  if(!sim.battle) return;
+  const b = sim.battle;
+  if(sim.power === 0){
+    simLog('Click. Your laser is empty!', 'l-bad');
+  } else {
+    const amount = Number(document.getElementById('cPower').value);
+    sim.power -= amount;
+    if(amount > b.shield){
+      simLog(`You fire ${amount}. BOOM! The robot is destroyed. (Its shield was ${b.shield}.)`, 'l-good');
+      sim.rooms[b.room] = 'wreck';
+      simShow(b.room, 'wreck');
+      sim.battle = null;
+      document.getElementById('combat').hidden = true;
+      simHud();
+      simCheckEnd();
+      return;
+    }
+    simLog(`You fire ${amount}. It fizzles against the robot's shield.`, 'l-dim');
+  }
+  if(sim.shield > 0){
+    sim.shield--;
+    simLog(`ZAP! The robot fires back. Shield down to ${sim.shield}.`, 'l-bad');
+  } else {
+    sim.alive = false;
+    simLog('ZAP! No shield left. That one was fatal.', 'l-bad');
+  }
+  simHud();
+  if(!sim.alive){
+    sim.battle = null;
+    document.getElementById('combat').hidden = true;
+    simCheckEnd();
+  } else {
+    simCombatShow();
+  }
+}
+
+function simCheckEnd(){
+  if(sim.over || sim.battle !== null) return;
+  let msg = null, cls = 'l-bad';
+  if(sim.found){ msg = 'The prince is saved. You win!'; cls = 'l-good'; }
+  else if(!sim.alive){ msg = 'The princess has fallen. Game over.'; }
+  else if(sim.checks === 0){ msg = "Out of time. The prince's oxygen has run out. Game over."; }
+  if(!msg) return;
+  sim.over = true;
+  simLog(msg, cls);
+  const doors = document.getElementById('doors').children;
+  sim.rooms.forEach((r, i) => {
+    doors[i].disabled = true;
+    if(!sim.opened[i]){ simShow(i, r); doors[i].classList.add('revealed'); }
+  });
+}
+
+function simHud(){
+  const pips = (n, total, cls) => Array.from({length: total}, (_, i) => `<span class="pip ${cls} ${i < n ? 'on' : ''}"></span>`).join('');
+  document.getElementById('hudChecks').innerHTML = pips(sim.checks, 6, 'time');
+  document.getElementById('hudShield').innerHTML = pips(sim.shield, 3, 'shield') + `<span class="pip life ${sim.alive ? 'on' : ''}" title="Life"></span>`;
+  document.getElementById('hudPower').textContent = sim.power;
+  document.getElementById('hudPowerFill').style.width = sim.power + '%';
+}
+
+function simLog(text, cls){
+  const log = document.getElementById('log');
+  const line = document.createElement('div');
+  line.className = cls || '';
+  line.textContent = '> ' + text;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+document.getElementById('cPower').addEventListener('input', ev => { document.getElementById('cPowerOut').textContent = ev.target.value; });
+document.getElementById('cFire').addEventListener('click', simFire);
+document.getElementById('simRestart').addEventListener('click', simNew);
+
+/* ---------------- bits and bobs ---------------- */
+function cp(btn){
+  const pre = btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = '\u2713 copied'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('ok'); }, 1800);
+  }).catch(() => { btn.textContent = 'select & copy'; });
+}
+
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+document.getElementById('overlay').addEventListener('click', ev => { if(ev.target.id === 'overlay') closeCard(); });
+document.addEventListener('keydown', ev => { if(ev.key === 'Escape') closeCard(); });
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if(confirm('Clear all your progress and start again?')){ done = []; saveDone(done); buildBoard(); }
+});
+
+simNew();
+buildBoard();
+</script>
+</body>
+</html>

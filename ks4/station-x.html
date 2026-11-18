@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Station X - Year 10 Python Cypher Board</title>
+<style>
+:root {
+  --ground:     #15202b;
+  --ground-2:   #1b2935;
+  --panel:      #f3e9cf;
+  --manila:     #efe3c4;
+  --manila-2:   #f6eed8;
+  --ink:        #2a2722;
+  --ink-soft:   #6a6253;
+  --line:       #d8c69c;
+  --green:      #3c6e57;
+  --green-deep: #285541;
+  --green-soft: #dde9d8;
+  --brass:      #b8862f;
+  --brass-soft: #f0e3c2;
+  --red:        #9e2b25;
+  --red-soft:   #f3d9d2;
+  --blue:       #3b5e74;
+  --blue-soft:  #dde8ee;
+  --violet:     #6a5a86;
+  --violet-soft:#e6e0ef;
+  --code-bg:    #20282d;
+  --code-fg:    #e7e2cf;
+  --code-acc:   #6aa583;
+  --code-com:   #8f9a84;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Spectral', Georgia, serif;
+  color: var(--ink);
+  background-color: var(--ground);
+  background-image:
+    radial-gradient(ellipse at 10% -4%, rgba(184,134,47,.18) 0%, transparent 42%),
+    radial-gradient(ellipse at 92% 2%, rgba(60,110,87,.20) 0%, transparent 44%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46'%3E%3Cpath d='M0 23h46M23 0v46' stroke='%23ffffff' stroke-width='0.5' opacity='0.03'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 0 16px 80px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1060px; margin: 0 auto; }
+
+/* ---------- Header ---------- */
+.topbar { text-align: center; padding: 36px 0 6px; }
+.station-mark { width: 116px; height: 116px; margin: 0 auto 10px; display: block; filter: drop-shadow(0 6px 14px rgba(0,0,0,.4)); }
+.station-name {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.1rem, 7vw, 3.4rem);
+  color: var(--manila-2);
+  letter-spacing: 6px;
+  line-height: 1.02;
+  text-transform: uppercase;
+}
+.station-name .x { color: var(--brass); }
+.station-sub {
+  font-family: 'Special Elite', monospace;
+  color: #c9bfa4;
+  font-size: .82rem;
+  letter-spacing: 2px;
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+.station-tag {
+  display: inline-block;
+  margin-top: 16px;
+  background: rgba(243,233,207,.08);
+  border: 1px dashed rgba(216,198,156,.5);
+  border-radius: 4px;
+  padding: 9px 18px;
+  font-size: .94rem;
+  color: #ddd3b9;
+  font-family: 'Spectral', serif;
+}
+
+/* ---------- Intercept ---------- */
+.intercept {
+  position: relative;
+  max-width: 700px;
+  margin: 28px auto 6px;
+  background: var(--manila-2);
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 26px, rgba(42,39,34,.05) 26px 27px);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 22px 26px 20px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.4), inset 0 0 0 6px rgba(255,255,255,.25);
+}
+.intercept::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 22px;
+  background: radial-gradient(circle at 11px 14px, var(--ground) 3.2px, transparent 3.6px);
+  background-size: 22px 28px; opacity: .5;
+}
+.intercept-label {
+  font-family: 'Special Elite', monospace;
+  font-size: .72rem; letter-spacing: 1.5px; color: var(--ink-soft);
+  text-transform: uppercase; margin: 0 0 12px 14px;
+}
+.intercept-stamp {
+  position: absolute; top: 14px; right: 16px;
+  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 2px;
+  color: var(--red); border: 3px solid var(--red); border-radius: 4px;
+  padding: 4px 10px; font-size: .82rem; text-transform: uppercase;
+  transform: rotate(8deg); opacity: .82;
+}
+.intercept-tape {
+  font-family: 'JetBrains Mono', monospace; font-weight: 500;
+  font-size: clamp(.95rem, 3.4vw, 1.45rem); letter-spacing: 2px;
+  color: var(--ink); margin-left: 14px; word-spacing: 6px; line-height: 1.5;
+}
+.intercept-tape.struck { text-decoration: line-through; text-decoration-color: var(--red); opacity: .55; }
+.intercept-plain {
+  display: none; margin: 12px 0 0 14px;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700;
+  font-size: clamp(1rem, 3.6vw, 1.5rem); letter-spacing: 2px; color: var(--green-deep);
+  word-spacing: 6px;
+}
+.intercept-foot {
+  margin: 14px 0 0 14px; font-size: .82rem; color: var(--ink-soft);
+}
+.intercept-reveal { display: none; margin: 12px 14px 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: .9rem; color: var(--ink); line-height: 1.7; }
+.intercept.cracked .intercept-tape { text-decoration: line-through; text-decoration-color: var(--red); opacity: .5; }
+.intercept.cracked .intercept-plain { display: block; animation: slide .5s ease; }
+.intercept.cracked .intercept-foot { display: none; }
+.intercept.cracked .intercept-reveal { display: block; animation: slide .6s ease; }
+.intercept.cracked .intercept-stamp { color: var(--green-deep); border-color: var(--green-deep); }
+.intercept.cracked .intercept-stamp::after { content: 'DECODED'; }
+.intercept.cracked .intercept-stamp .secret { display: none; }
+
+/* ---------- Progress ---------- */
+.progress-card {
+  background: rgba(243,233,207,.95);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 16px 22px;
+  margin: 22px auto 8px;
+  max-width: 700px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.28);
+}
+.progress-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; gap: 12px; flex-wrap: wrap; }
+.progress-title { font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 1px; color: var(--green-deep); font-size: 1rem; text-transform: uppercase; }
+.progress-msg { font-size: .86rem; color: var(--ink-soft); font-style: italic; }
+.progress-track { height: 14px; background: #e4d6b2; border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+.progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--green) 0%, var(--brass) 100%); border-radius: 3px; transition: width .5s cubic-bezier(.34,1.4,.64,1); }
+.progress-count { text-align: right; font-size: .82rem; color: var(--ink-soft); margin-top: 6px; font-family: 'Special Elite', monospace; }
+.progress-count b { color: var(--green-deep); font-size: 1rem; }
+
+/* ---------- Hut sections ---------- */
+.hut { margin-top: 40px; }
+.hut-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.hut-sign {
+  background: var(--green-deep); color: var(--manila-2);
+  font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 1px;
+  padding: 9px 18px; border-radius: 3px; text-transform: uppercase;
+  box-shadow: 0 5px 0 rgba(0,0,0,.35); font-size: 1.02rem;
+  display: flex; align-items: center; gap: 10px; position: relative;
+}
+.hut-sign .num { font-family: 'Special Elite', monospace; color: var(--brass); font-size: .9rem; }
+.hut-line { flex: 1; height: 2px; border-radius: 2px; background: repeating-linear-gradient(90deg, rgba(216,198,156,.7) 0 10px, transparent 10px 20px); }
+.hut-when { font-size: .82rem; color: #c2b89d; white-space: nowrap; font-style: italic; }
+.hut-done-pill {
+  display: none; align-items: center; gap: 6px;
+  background: var(--green-soft); color: var(--green-deep);
+  border: 1px solid var(--green); border-radius: 4px;
+  padding: 5px 12px; font-size: .78rem; font-weight: 700; white-space: nowrap;
+  font-family: 'Special Elite', monospace; animation: pop .4s cubic-bezier(.34,1.56,.64,1);
+}
+.hut.complete .hut-done-pill { display: inline-flex; }
+
+/* ---------- Card grid ---------- */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--manila);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 20px 20px 18px;
+  cursor: pointer; position: relative;
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 18px rgba(0,0,0,.26);
+  transition: transform .2s cubic-bezier(.34,1.4,.64,1), box-shadow .2s, border-color .2s;
+  overflow: hidden;
+  opacity: 0; transform: translateY(14px); animation: rise .5s forwards;
+}
+.card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 16px;
+  background: radial-gradient(circle at 8px 12px, var(--manila-2) 2.4px, transparent 2.8px) ,
+              radial-gradient(circle at 8px 12px, rgba(42,39,34,.18) 2.6px, transparent 3px);
+  background-size: 16px 24px; opacity: .7;
+}
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+.card:hover { transform: translateY(-5px) rotate(-.3deg); box-shadow: 0 16px 30px rgba(0,0,0,.34); border-color: var(--brass); }
+.card-icon { width: 64px; height: 64px; margin: 2px auto 12px; }
+.card-no { position: absolute; top: 12px; left: 22px; font-family: 'Special Elite', monospace; font-size: .72rem; color: var(--ink-soft); }
+.card-title { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 1.16rem; color: var(--green-deep); text-align: center; letter-spacing: .5px; margin-bottom: 7px; line-height: 1.2; text-transform: uppercase; }
+.card-summary { font-size: .9rem; color: var(--ink-soft); text-align: center; line-height: 1.55; margin-bottom: 14px; flex: 1; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.chip { font-family: 'JetBrains Mono', monospace; font-size: .66rem; padding: 3px 9px; border-radius: 3px; white-space: nowrap; background: var(--green-soft); color: var(--green-deep); border: 1px solid #c2d6bb; }
+.chip.c-str  { background: var(--brass-soft); color: #8a6418; border-color:#e4d2a6; }
+.chip.c-loop { background: var(--blue-soft);  color: var(--blue);  border-color:#c6d8e2; }
+.chip.c-func { background: #e7ddd0;           color: #6a4f33;      border-color:#d8c9b6; }
+.chip.c-star { background: var(--violet-soft); color: var(--violet); border-color:#d6cce8; }
+
+.card .tick {
+  position: absolute; top: 12px; right: 13px; width: 30px; height: 30px; border-radius: 50%;
+  border: 2.5px solid var(--red); color: var(--red);
+  display: none; align-items: center; justify-content: center;
+  font-size: .95rem; font-weight: 800; transform: rotate(-12deg); opacity: .85;
+  font-family: 'Oswald', sans-serif;
+  animation: pop .35s cubic-bezier(.34,1.56,.64,1);
+}
+.card.done { border-color: var(--green); background: #eef0dd; }
+.card.done .tick { display: flex; }
+
+/* ---------- Modal ---------- */
+.overlay { position: fixed; inset: 0; z-index: 50; background: rgba(10,16,22,.6); backdrop-filter: blur(3px); display: none; align-items: flex-start; justify-content: center; padding: 26px 14px; overflow-y: auto; }
+.overlay.open { display: flex; }
+.modal { background: var(--manila-2); border-radius: 5px; max-width: 680px; width: 100%; box-shadow: 0 30px 70px rgba(0,0,0,.6); border: 1px solid var(--line); animation: modalPop .3s cubic-bezier(.34,1.5,.64,1); margin: auto 0; overflow: hidden; }
+@keyframes modalPop { from { opacity: 0; transform: translateY(20px) scale(.98); } to { opacity: 1; transform: none; } }
+.modal-head { background: var(--green-deep); color: var(--manila-2); padding: 22px 26px 20px; position: relative; }
+.modal-head .m-icon { width: 52px; height: 52px; float: left; margin: 0 14px 4px 0; background: var(--manila-2); border-radius: 4px; padding: 4px; }
+.modal-eyebrow { font-family: 'Special Elite', monospace; font-size: .72rem; color: var(--brass); letter-spacing: 2px; text-transform: uppercase; }
+.modal-title { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.55rem; letter-spacing: .5px; line-height: 1.12; margin: 2px 0 4px; text-transform: uppercase; }
+.modal-sum { font-size: .92rem; color: #e4dcc6; font-style: italic; }
+.modal-chips { clear: both; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.x-close { position: absolute; top: 14px; right: 16px; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.4); color: var(--manila-2); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.x-close:hover { background: rgba(255,255,255,.28); transform: rotate(90deg); }
+
+.modal-body { padding: 22px 26px 26px; }
+.modal-body p { font-size: .96rem; line-height: 1.78; margin-bottom: 12px; }
+.modal-body strong { color: var(--green-deep); }
+.modal-body ul { margin: 4px 0 14px 20px; }
+.modal-body li { font-size: .94rem; line-height: 1.7; margin-bottom: 4px; }
+code { font-family: 'JetBrains Mono', monospace; font-size: .85em; background: var(--brass-soft); color: #8a6418; padding: 1px 6px; border-radius: 4px; }
+
+.field-label { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: .76rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-soft); margin: 18px 0 6px; display: flex; align-items: center; gap: 7px; }
+.field-label::before { content: ''; width: 14px; height: 3px; border-radius: 2px; background: var(--brass); }
+
+.cb-wrap { position: relative; margin-bottom: 6px; }
+pre.cb { background: var(--code-bg); color: var(--code-fg); font-family: 'JetBrains Mono', monospace; font-size: .84rem; line-height: 1.6; padding: 16px 18px; border-radius: 6px; overflow-x: auto; white-space: pre; tab-size: 4; border-left: 4px solid var(--code-acc); }
+pre.cb .com { color: var(--code-com); font-style: italic; }
+.copy-btn { position: absolute; top: 9px; right: 9px; background: rgba(255,255,255,.1); color: #e7e2cf; border: 1px solid rgba(255,255,255,.22); border-radius: 5px; font-family: 'JetBrains Mono', monospace; font-size: .68rem; padding: 4px 10px; cursor: pointer; transition: all .2s; }
+.copy-btn:hover { background: rgba(255,255,255,.22); }
+.copy-btn.ok { color: #9fd9a8; border-color: #9fd9a8; }
+
+.out-box { background: #fff; border: 1px dashed var(--line); border-radius: 5px; padding: 13px 16px; }
+.out-box pre { font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: var(--ink); white-space: pre-wrap; line-height: 1.65; }
+
+.callout { border-radius: 5px; padding: 12px 16px; margin: 14px 0; font-size: .89rem; line-height: 1.68; }
+.callout.tip   { background: var(--green-soft); border-left: 4px solid var(--green); color: #2c4a39; }
+.callout.note  { background: var(--blue-soft);  border-left: 4px solid var(--blue);  color: #2c4658; }
+.callout.stretch { background: var(--brass-soft); border-left: 4px solid var(--brass); color: #6f5117; }
+.callout.research { background: var(--violet-soft); border-left: 4px solid var(--violet); color: #4a3f63; }
+.callout b { color: inherit; }
+
+.hints { margin-top: 22px; padding-top: 16px; border-top: 1px dashed var(--line); }
+.hints-h { font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: .5px; font-size: .84rem; color: var(--green-deep); margin-bottom: 10px; text-transform: uppercase; }
+.hint-btns { display: flex; gap: 9px; flex-wrap: wrap; }
+.h-btn { background: var(--manila); border: 1.5px solid var(--line); color: var(--green-deep); font-family: 'Spectral', serif; font-weight: 600; font-size: .86rem; padding: 8px 16px; border-radius: 30px; cursor: pointer; transition: all .2s; }
+.h-btn:hover:not(:disabled) { background: var(--green-soft); border-color: var(--green); }
+.h-btn:disabled { opacity: .6; cursor: default; background: var(--green-soft); border-color: var(--green); }
+.hint-card { background: var(--manila); border: 1px solid var(--brass); border-radius: 5px; padding: 13px 16px; margin-top: 11px; animation: slide .3s ease; position: relative; }
+@keyframes slide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.hint-tag { font-family: 'Special Elite', monospace; font-size: .68rem; color: var(--brass); letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
+.hint-card p { font-size: .91rem; line-height: 1.7; margin: 0; }
+.hint-card pre.cb { margin-top: 9px; }
+
+.done-row { margin-top: 24px; text-align: center; }
+.done-btn { font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 1px; font-size: .92rem; padding: 12px 26px; border-radius: 3px; cursor: pointer; transition: all .2s; text-transform: uppercase; border: 2px solid var(--green-deep); background: var(--green-soft); color: var(--green-deep); }
+.done-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.2); }
+.done-btn.is-done { background: var(--green-deep); color: var(--manila-2); }
+
+.footer { text-align: center; margin-top: 54px; color: #b7ad94; font-size: .82rem; }
+.reset-btn { background: none; border: none; color: #b7ad94; text-decoration: underline; cursor: pointer; font-family: inherit; font-size: .8rem; margin-top: 6px; }
+.reset-btn:hover { color: var(--brass); }
+
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green-deep); color: var(--manila-2); padding: 12px 22px; border-radius: 4px; font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 1px; font-size: .9rem; text-transform: uppercase; box-shadow: 0 12px 30px rgba(0,0,0,.5); z-index: 80; opacity: 0; transition: all .4s cubic-bezier(.34,1.5,.64,1); pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 4</a></nav>
+
+<div class="wrap">
+
+  <header class="topbar">
+    <svg class="station-mark" viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="54" fill="#1b2935" stroke="#b8862f" stroke-width="2.5"/>
+      <circle cx="60" cy="60" r="44" fill="none" stroke="#3c6e57" stroke-width="2"/>
+      <g stroke="#c9bfa4" stroke-width="1.6">
+        <line x1="60" y1="16" x2="60" y2="24"/><line x1="60" y1="96" x2="60" y2="104"/>
+        <line x1="16" y1="60" x2="24" y2="60"/><line x1="96" y1="60" x2="104" y2="60"/>
+        <line x1="29" y1="29" x2="35" y2="35"/><line x1="85" y1="85" x2="91" y2="91"/>
+        <line x1="91" y1="29" x2="85" y2="35"/><line x1="35" y1="85" x2="29" y2="91"/>
+      </g>
+      <circle cx="60" cy="60" r="30" fill="none" stroke="#c9bfa4" stroke-width="1.2" opacity=".5"/>
+      <text x="60" y="74" text-anchor="middle" font-family="Oswald, sans-serif" font-weight="700" font-size="42" fill="#b8862f">X</text>
+    </svg>
+    <h1 class="station-name">Station <span class="x">X</span></h1>
+    <div class="station-sub">Government Code &amp; Cypher School &middot; Year 10 Python</div>
+    <div class="station-tag">Twelve assignments. One sealed signal. Build the tools, card by card, until you can read it.</div>
+  </header>
+
+  <section class="intercept" id="intercept" aria-label="Intercepted signal">
+    <div class="intercept-stamp"><span class="secret">MOST SECRET</span></div>
+    <div class="intercept-label">Intercepted signal &middot; source unknown &middot; shift unknown</div>
+    <div class="intercept-tape">BSAYH AOL NLLZL DOV ULCLY JHJRSLK</div>
+    <div class="intercept-plain">ULTRA THE GEESE WHO NEVER CACKLED</div>
+    <div class="intercept-foot">Finish all twelve assignments to break it. (Or build the <b>Crack the Signal</b> tool in Hut 8 and read it yourself.)</div>
+    <div class="intercept-reveal">
+      <b>Decoded.</b> Winston Churchill called the people who did this work
+      &ldquo;the geese that laid the golden eggs and never cackled&rdquo;. Their secret held until 1974.
+      Now you know what they did, and how. Well done, codebreaker.
+    </div>
+  </section>
+
+  <section class="progress-card">
+    <div class="progress-top">
+      <span class="progress-title">Decryption progress</span>
+      <span class="progress-msg" id="progMsg">New recruit. Pick any card to report for duty.</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+    <div class="progress-count"><b id="progNum">0</b> / 12 assignments filed</div>
+  </section>
+
+  <div id="board"></div>
+
+  <div class="footer">
+    <div>Prepared for the Station X training intake. Your progress is saved on this computer only.</div>
+    <button class="reset-btn" id="resetBtn">Clear my record and start fresh</button>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- helpers ---------------- */
+function e(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function codeBlock(lines){
+  return '<div class="cb-wrap"><button class="copy-btn" onclick="cp(this)">copy</button>'
+    + '<pre class="cb">' + e(lines) + '</pre></div>';
+}
+function outBox(text){ return '<div class="out-box"><pre>' + e(text) + '</pre></div>'; }
+
+/* ---------------- icons ---------------- */
+const IK = 'stroke="#2a2722" stroke-width="2.4" fill="none" stroke-linejoin="round" stroke-linecap="round"';
+const I = {
+  intercept:`<svg viewBox="0 0 64 64"><rect x="10" y="20" width="44" height="28" rx="3" fill="#efe3c4" ${IK}/><path d="M10 23l22 15 22-15" ${IK}/><path d="M44 12l4 4 4-4M48 16v-8" stroke="#3c6e57" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`,
+  count:`<svg viewBox="0 0 64 64"><path d="M18 16v32M26 16v32M34 16v32M42 16v32" ${IK}/><path d="M14 40l34-10" stroke="#9e2b25" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>`,
+  reverse:`<svg viewBox="0 0 64 64"><path d="M44 24a16 16 0 1 0 0 16" ${IK}/><path d="M44 16v10h-10" ${IK}/><path d="M30 32h-2" stroke="#3c6e57" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+  find:`<svg viewBox="0 0 64 64"><circle cx="28" cy="28" r="15" fill="#efe3c4" ${IK}/><path d="M39 39l12 12" ${IK}/><path d="M22 28h12M28 22v12" stroke="#3c6e57" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+  slot:`<svg viewBox="0 0 64 64"><rect x="10" y="22" width="44" height="20" rx="2" fill="#efe3c4" ${IK}/><path d="M22 22v20M34 22v20M46 22v20" ${IK}/><rect x="34" y="22" width="12" height="20" fill="#3c6e57" opacity=".25"/></svg>`,
+  nudge:`<svg viewBox="0 0 64 64"><rect x="12" y="24" width="16" height="16" rx="2" fill="#efe3c4" ${IK}/><rect x="36" y="24" width="16" height="16" rx="2" fill="#3c6e57" opacity=".22" stroke="#2a2722" stroke-width="2.4"/><path d="M28 32h8M34 28l4 4-4 4" stroke="#9e2b25" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  rotor:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="18" fill="#efe3c4" ${IK}/><circle cx="32" cy="32" r="6" fill="#3c6e57" opacity=".3" stroke="#2a2722" stroke-width="2.2"/><path d="M32 14v6M32 44v6M14 32h6M44 32h6" ${IK}/></svg>`,
+  signal:`<svg viewBox="0 0 64 64"><rect x="14" y="12" width="36" height="40" rx="3" fill="#efe3c4" ${IK}/><path d="M20 22q6-4 12 0t12 0M20 32q6-4 12 0t12 0M20 42h16" stroke="#3c6e57" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`,
+  unlock:`<svg viewBox="0 0 64 64"><rect x="16" y="30" width="32" height="22" rx="3" fill="#efe3c4" ${IK}/><path d="M22 30v-6a10 10 0 0 1 19-3" ${IK}/><circle cx="32" cy="40" r="3.2" fill="#3c6e57"/></svg>`,
+  toolkit:`<svg viewBox="0 0 64 64"><rect x="12" y="24" width="40" height="24" rx="3" fill="#efe3c4" ${IK}/><path d="M24 24v-4a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v4M12 34h40" ${IK}/><rect x="29" y="31" width="6" height="6" rx="1" fill="#3c6e57" opacity=".3"/></svg>`,
+  crack:`<svg viewBox="0 0 64 64"><rect x="16" y="30" width="32" height="22" rx="3" fill="#efe3c4" ${IK}/><path d="M22 30v-6a10 10 0 0 1 20 0v6" ${IK}/><path d="M32 36l-3 6h6l-3 6" stroke="#9e2b25" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  console:`<svg viewBox="0 0 64 64"><rect x="10" y="16" width="44" height="26" rx="3" fill="#efe3c4" ${IK}/><path d="M18 48h28M32 42v6" ${IK}/><path d="M18 24h8M30 24h4M38 24h8M18 32h12M34 32h12" stroke="#3c6e57" stroke-width="2.4" stroke-linecap="round"/></svg>`
+};
+
+const LETTERS_LINE = 'letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]';
+
+/* ---------------- board data ---------------- */
+const HUTS = [
+  {
+    name: 'The Intercept Room', num: 'HUT 1', when: 'raw traffic comes in',
+    cards: [
+      {
+        id:'tidy', icon:'intercept', title:'Tidy the Intercept',
+        summary:'Strip a raw signal down to clean capitals with the spaces taken out.',
+        chips:[['input','c-str'],['strings','c-str'],['loops','c-loop']],
+        brief:`<p>A raw intercept comes in messy: mixed case, spaces everywhere. The cypher wheel only carries the 26 letters, so spaces and punctuation would jam it. The Intercept Room strips every signal down to bare <strong>capitals</strong> first. Ask the operator to type a message, turn it into capitals and remove the spaces, building a brand new string one character at a time. Print the cleaned signal.</p>`,
+        exampleLabel:'Example run', example:`Enter the intercept: meet at dawn\nMEETATDAWN`,
+        hints:[
+          {p:`Walk through the message one character at a time. If a character is a space, skip it. Anything else gets added on to a new string in capitals. Which string method turns a letter into a capital?`},
+          {p:`Build up a fresh string, adding each non-space character in upper case:`, code:`message = input("Enter the intercept: ")\nclean = ""\nfor ch in message:\n    if ch != " ":\n        clean = clean + ch.upper()\nprint(clean)`}
+        ],
+        aside:`Want it stricter? Keep only the letters A to Z and drop punctuation too. You can test a character with <code>if ch.upper() in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":</code> before adding it on.`
+      },
+      {
+        id:'count', icon:'count', title:'Count the Characters',
+        summary:'Run a tally of how many real letters a signal carries, ignoring spaces.',
+        chips:[['iteration','c-loop'],['running total','c-loop']],
+        brief:`<p>Intelligence wants the true length of each signal. Ask for a message and count how many letters it contains, <strong>ignoring spaces</strong>. Print the total.</p>`,
+        exampleLabel:'Example run', example:`Enter the intercept: meet at dawn\nThat signal carries 10 letters.`,
+        hints:[
+          {p:`Keep a counter that starts at 0. Walk through the message one character at a time, and only add one to the counter when the character is not a space.`},
+          {p:`Add to the counter for every non-space character:`, code:`message = input("Enter the intercept: ")\ncount = 0\nfor ch in message:\n    if ch != " ":\n        count = count + 1\nprint("That signal carries " + str(count) + " letters.")`}
+        ],
+        aside:`Push on by counting vowels and consonants separately. Keep two counters, and test whether each letter is one of <code>"AEIOU"</code>.`
+      },
+      {
+        id:'reverse', icon:'reverse', title:'Read it Backwards',
+        summary:'Reverse a signal by stacking each new character in front of the last.',
+        chips:[['iteration','c-loop'],['strings','c-str']],
+        brief:`<p>Some signals were sent back to front to slow down prying eyes. Reverse a message by building a new string, putting each character <strong>in front of</strong> the ones you have so far. Print the reversed signal.</p>`,
+        exampleLabel:'Example run', example:`Enter the intercept: STATION\nNOITATS`,
+        hints:[
+          {p:`If you add each new character to the front of your growing string instead of the end, the whole thing comes out reversed. How would you put <code>ch</code> before everything you have built so far?`},
+          {p:`Put the new character first, then the rest:`, code:`message = input("Enter the intercept: ")\nreversed_message = ""\nfor ch in message:\n    reversed_message = ch + reversed_message\nprint(reversed_message)`}
+        ],
+        aside:`Turn this into a reusable subroutine: <code>def reverse_message(message):</code> that takes the text in and <code>return</code>s the reversed string, so you can call it whenever you like.`
+      }
+    ]
+  },
+  {
+    name: 'The Index Room', num: 'HUT 2', when: 'cataloguing the alphabet',
+    cards: [
+      {
+        id:'find', icon:'find', title:'Find the Position',
+        summary:'Search the alphabet by hand to find where a letter sits, 0 to 25.',
+        chips:[['lists','c-loop'],['linear search','c-loop']],
+        brief:`<p>Every cypher in this hut rests on knowing a letter's number in the alphabet, counting from 0. No Python shortcuts here: the Index Room does it <strong>by hand</strong>. Search the alphabet list one slot at a time until you find the letter, then report its position.</p>`,
+        starterLabel:'Starter data &middot; copy this in first', starter:LETTERS_LINE,
+        exampleLabel:'Example run', example:`Enter a capital letter: G\nG is at position 6`,
+        hints:[
+          {p:`Start with a position of <code>-1</code>, meaning "not found yet". Then loop through all 26 slots, and when the letter in that slot matches the one you want, record the slot number <code>i</code>.`},
+          {p:`This is a linear search. The <code>-1</code> is a sentinel: a value the real answer can never be, so you can tell whether the letter was found.`, code:`target = input("Enter a capital letter: ")\nposition = -1\nfor i in range(26):\n    if letters[i] == target:\n        position = i\nprint(target + " is at position " + str(position))`}
+        ],
+        aside:`<b>From the workshop:</b> the engineers have a one-line gadget that <em>builds</em> the whole alphabet list for you, instead of typing all 26 letters: <code>letters = [chr(65 + i) for i in range(26)]</code>. Here <code>chr(65)</code> is "A", <code>chr(66)</code> is "B", and so on. That trick is a list comprehension, well beyond the GCSE spec, so treat it as a clever piece of kit to admire. Keep using the written-out list for your answers.`
+      },
+      {
+        id:'slot', icon:'slot', title:'Letter at the Slot',
+        summary:'Given a slot number, read the letter back out, and reject anything off the board.',
+        chips:[['lists','c-loop'],['validation','c-str'],['boolean','c-str']],
+        brief:`<p>The reverse lookup. Ask for a number from 0 to 25 and print the letter sitting in that slot. If the number is out of range, refuse it.</p><div class="callout note">Remember: <code>input()</code> always hands you text. Wrap it in <code>int()</code> to get a whole number you can compare.</div>`,
+        starterLabel:'Starter data &middot; copy this in first', starter:LETTERS_LINE,
+        exampleLabel:'Two example runs', example:`Enter a slot number (0-25): 6\nSlot 6 holds G\n\nEnter a slot number (0-25): 30\nThat slot is off the board.`,
+        hints:[
+          {p:`Turn the input into a number with <code>int()</code>. A valid slot is 0 or more <strong>and</strong> 25 or less, so you will need <code>and</code> to check both at once.`},
+          {p:`Index straight into the list once you know it is safe:`, code:`position = int(input("Enter a slot number (0-25): "))\nif position >= 0 and position <= 25:\n    print("Slot " + str(position) + " holds " + letters[position])\nelse:\n    print("That slot is off the board.")`}
+        ],
+        aside:`Make it stubborn: wrap the question in a <code>while</code> loop that keeps asking until a valid slot is entered, so the program never just gives up on a bad answer.`
+      },
+      {
+        id:'nudge', icon:'nudge', title:'Nudge One Letter',
+        summary:'Shift a single letter forward by 3, wrapping the end of the alphabet round.',
+        chips:[['linear search','c-loop'],['arithmetic','c-str'],['selection','c-str']],
+        brief:`<p>The simplest cypher move: take a letter, find its position, add 3, and read out the new letter. The catch is the end of the alphabet. X, Y and Z would fall off, so they <strong>wrap back round</strong> to the start.</p>`,
+        starterLabel:'Starter data &middot; copy this in first', starter:LETTERS_LINE,
+        exampleLabel:'Two example runs', example:`Enter a capital letter: A\nA shifts to D\n\nEnter a capital letter: Y\nY shifts to B`,
+        hints:[
+          {p:`Find the position the same way you did in the Index Room, then add 3. If the new position goes past 25, it has fallen off the end, so take 26 off to wrap it back round to the start.`},
+          {p:`One <code>if</code> is enough here, because adding 3 can only ever overshoot once:`, code:`letter = input("Enter a capital letter: ")\nposition = -1\nfor i in range(26):\n    if letters[i] == letter:\n        position = i\nnew_position = position + 3\nif new_position > 25:\n    new_position = new_position - 26\nprint(letter + " shifts to " + letters[new_position])`}
+        ],
+        aside:`The slick way to wrap is with modulo: <code>new_position = (position + 3) % 26</code> does the wrap in one step. <code>%</code> is Python's MOD operator (the remainder after dividing), which is on the J277 spec, so it is well worth learning once the <code>if</code> version makes sense to you.`
+      }
+    ]
+  },
+  {
+    name: 'The Cypher Hut', num: 'HUT 3', when: 'breaking the shift',
+    cards: [
+      {
+        id:'one-letter', icon:'rotor', title:'Encipher a Single Letter',
+        summary:'Encipher one letter with any shift the operator chooses, wrapping safely.',
+        chips:[['input','c-str'],['while loop','c-loop'],['arithmetic','c-str']],
+        brief:`<p>Now the shift is not fixed at 3. Ask for a capital letter <strong>and</strong> a shift amount, then output the enciphered letter. Because the shift could be large, use a <code>while</code> loop to keep wrapping until the position is back on the board.</p>`,
+        starterLabel:'Starter data &middot; copy this in first', starter:LETTERS_LINE,
+        exampleLabel:'Example run', example:`Enter a capital letter: H\nEnter the shift: 7\nH enciphers to O`,
+        hints:[
+          {p:`Read the shift in and turn it into a number with <code>int()</code>. After adding the shift, a single <code>if</code> might not be enough if the shift is big, so use <code>while new_position > 25:</code> to keep subtracting 26 until it fits.`},
+          {p:`The <code>while</code> loop wraps as many times as it needs to:`, code:`letter = input("Enter a capital letter: ")\nshift = int(input("Enter the shift: "))\nposition = -1\nfor i in range(26):\n    if letters[i] == letter:\n        position = i\nnew_position = position + shift\nwhile new_position > 25:\n    new_position = new_position - 26\nprint(letter + " enciphers to " + letters[new_position])`}
+        ],
+        aside:`Allow negative shifts so the very same code can decipher as well as encipher. You will then also need <code>while new_position &lt; 0:</code> with <code>new_position = new_position + 26</code> to wrap the other way.`
+      },
+      {
+        id:'whole', icon:'signal', title:'Encipher the Whole Signal',
+        summary:'Run a fixed shift of 3 across an entire message, letter by letter.',
+        chips:[['nested loops','c-loop'],['strings','c-str'],['lists','c-loop']],
+        brief:`<p>Time to encipher a whole message with a shift of 3. Walk through the message one character at a time, and for each letter find its position, shift it, and add the new letter onto your growing ciphertext. Capitals only, no spaces for now.</p>`,
+        starterLabel:'Starter data &middot; copy this in first', starter:LETTERS_LINE,
+        exampleLabel:'Example run', example:`Enter the message (capitals, no spaces): MEETATDAWN\nPHHWDWGDZQ`,
+        hints:[
+          {p:`This is a loop inside a loop. The outer loop walks through each letter of the message. The inner loop is your position search from the Index Room. Once you have the shifted letter, glue it onto a string you are building up.`},
+          {p:`The search sits inside the loop over the message:`, code:`message = input("Enter the message (capitals, no spaces): ")\nencrypted = ""\nfor letter in message:\n    position = -1\n    for i in range(26):\n        if letters[i] == letter:\n            position = i\n    new_position = position + 3\n    if new_position > 25:\n        new_position = new_position - 26\n    encrypted = encrypted + letters[new_position]\nprint(encrypted)`}
+        ],
+        aside:`Let spaces through unchanged so you can send real sentences. At the top of the loop, add <code>if letter == " ":</code> that just adds a space onto the result, and do the shifting work in an <code>else</code>. You will need this exact trick again in Hut 8.`
+      },
+      {
+        id:'known', icon:'unlock', title:'Break a Known Shift',
+        summary:'Decipher a message when you already know the shift, by moving backwards.',
+        chips:[['selection','c-str'],['arithmetic','c-str'],['lists','c-loop']],
+        brief:`<p>If you know the shift, deciphering is just enciphering in reverse. Take a message that was shifted by 3 and shift every letter <strong>back</strong> by 3. When a position drops below 0, wrap it round to the end.</p>`,
+        starterLabel:'Starter data &middot; copy this in first', starter:LETTERS_LINE,
+        exampleLabel:'Example run', example:`Enter the secret message: PHHWDWGDZQ\nMEETATDAWN`,
+        hints:[
+          {p:`Same shape as enciphering, but subtract 3 instead of adding it. If the new position goes below 0, it has dropped off the front, so add 26 to wrap it round to the end.`},
+          {p:`Subtract, then wrap the other way:`, code:`message = input("Enter the secret message: ")\ndecrypted = ""\nfor letter in message:\n    position = -1\n    for i in range(26):\n        if letters[i] == letter:\n            position = i\n    new_position = position - 3\n    if new_position < 0:\n        new_position = new_position + 26\n    decrypted = decrypted + letters[new_position]\nprint(decrypted)`}
+        ],
+        aside:`Let the operator choose the shift instead of fixing it at 3. Read a shift in with <code>int()</code> and use it in place of the 3. That one change is exactly what makes the next hut possible.`
+      }
+    ]
+  },
+  {
+    name: 'Senior Cryptanalysts', num: 'HUT 8', when: 'the expert bench',
+    cards: [
+      {
+        id:'toolkit', icon:'toolkit', title:'Build the Toolkit',
+        summary:'Tidy your cypher work into reusable subroutines with parameters and return values.',
+        chips:[['subroutines','c-func'],['parameters','c-func'],['return values','c-func']],
+        brief:`<p>A senior cryptanalyst does not rewrite the position search every single time. Decompose your work into subroutines: one to find a position, and ones to encipher and decipher a whole message. Make <code>find_position</code> <strong>return</strong> the position so the others can use it.</p>`,
+        starterLabel:'Starter data &middot; copy this in first', starter:LETTERS_LINE,
+        exampleLabel:'Example calls and output', example:`print(encipher("HELLO", 3))\nprint(decipher("KHOOR", 3))\n\nKHOOR\nHELLO`,
+        hints:[
+          {p:`A subroutine that gives a value back ends with <code>return</code>. <code>find_position(letter)</code> should hand back the slot number. Then <code>encipher(message, shift)</code> can call <code>find_position</code> inside its loop instead of repeating the whole search.`},
+          {p:`Three subroutines, each one small and doing a single job:`, code:`def find_position(letter):\n    position = -1\n    for i in range(26):\n        if letters[i] == letter:\n            position = i\n    return position\n\ndef encipher(message, shift):\n    result = ""\n    for letter in message:\n        new_position = find_position(letter) + shift\n        while new_position > 25:\n            new_position = new_position - 26\n        result = result + letters[new_position]\n    return result\n\ndef decipher(message, shift):\n    result = ""\n    for letter in message:\n        new_position = find_position(letter) - shift\n        while new_position < 0:\n            new_position = new_position + 26\n        result = result + letters[new_position]\n    return result`}
+        ],
+        aside:`Add a <code>clean(message)</code> subroutine that returns the tidied, capitalised, space-free version, which is your very first card made reusable. A good toolkit is really just your earlier assignments, packaged up neatly.`
+      },
+      {
+        id:'crack', icon:'crack', title:'Crack the Signal',
+        summary:'Defeat an unknown shift by trying all 25 and reading the one that makes sense.',
+        chips:[['nested loops','c-loop'],['range','c-loop'],['the payoff','c-star']],
+        brief:`<p>This is the one. The signal pinned at the top of the board was enciphered with a shift nobody has told you. So <strong>try them all</strong>. Decipher the ciphertext with every shift from 1 to 25, print each attempt, and read the single line that comes out as plain English. Spaces are kept this time, so the message stays readable.</p>`,
+        starterLabel:'The intercept &middot; copy this in first', starter:LETTERS_LINE + '\ncipher = "BSAYH AOL NLLZL DOV ULCLY JHJRSLK"',
+        outLabel:'Expected output (first lines only)',
+        out:`Shift 1: ARZXG ZNK MKKYK CNU TKBKX IGIQRKJ\nShift 2: ZQYWF YMJ LJJXJ BMT SJAJW HFHPQJI\nShift 3: YPXVE XLI KIIWI ALS RIZIV GEGOPIH\n... 25 lines print in total, on down to Shift 25.\nExactly one of them reads as plain English. That line is your decode, and the number beside it was the enemy's shift.`,
+        hints:[
+          {p:`You already wrote a decipherer. Now wrap it in a loop that runs the shift from 1 to 25 with <code>for shift in range(1, 26):</code>. For each shift, build the deciphered line and print it with its shift number. Remember to let spaces straight through so the winning line is readable.`},
+          {p:`A loop over the shifts, with your deciphering inside it:`, code:`cipher = "BSAYH AOL NLLZL DOV ULCLY JHJRSLK"\nfor shift in range(1, 26):\n    decrypted = ""\n    for letter in cipher:\n        if letter == " ":\n            decrypted = decrypted + " "\n        else:\n            position = -1\n            for i in range(26):\n                if letters[i] == letter:\n                    position = i\n            new_position = position - shift\n            while new_position < 0:\n                new_position = new_position + 26\n            decrypted = decrypted + letters[new_position]\n    print("Shift " + str(shift) + ": " + decrypted)`}
+        ],
+        aside:`Real codebreakers rarely read all 25 lines. They hunted for <b>cribs</b>: patterns that survive the cypher untouched. A repeated letter stays repeated after a shift, so a doubled letter in the ciphertext means there was a doubled letter in the original. Look closely at the intercept pinned to the board, there is a doubled letter sitting in it. What everyday word might have put it there? Narrowing the search by eye like that is how the work was really done.`
+      },
+      {
+        id:'station', icon:'console', title:'The Codebreaking Station',
+        summary:'Assemble everything into one menu-driven station the Allies can actually use.',
+        chips:[['while loop','c-loop'],['selection','c-str'],['decomposition','c-func']],
+        brief:`<p>You have read the enemy. Now build something our own side can use. Wrap your toolkit in a menu that loops until the user quits, letting them clean, encipher, decipher, or crack a message on demand. This is your finished program.</p><div class="callout stretch"><b>Stretch &middot; give the station a memory:</b> basic file handling (open, read, write, close) is on the J277 spec, so this is good practice once the rest is working. Let the station load a signal from a text file and save a cracked message back out. To read: <code>file = open("signal.txt", "r")</code>, then <code>message = file.read()</code>, then <code>file.close()</code>. To write, swap <code>"r"</code> for <code>"w"</code> and use <code>file.write(...)</code>. Add them as two more menu options.</div>`,
+        starterLabel:'Starter data &middot; bring your subroutines from Build the Toolkit', starter:LETTERS_LINE,
+        exampleLabel:'How it runs', example:`STATION X - CYPHER CONSOLE\n1. Clean a message\n2. Encipher a message\n3. Decipher a message\n4. Crack an unknown shift\n5. Shut down\nChoose an option:`,
+        hints:[
+          {p:`A menu is a <code>while</code> loop that keeps going until the user picks the quit option. Print the choices, read the choice, then use <code>if</code> and <code>elif</code> to run the right tool. Start with print placeholders, then drop your real subroutines in one at a time.`},
+          {p:`Get the shell working with placeholders first, then replace each one:`, code:`choice = ""\nwhile choice != "5":\n    print("STATION X - CYPHER CONSOLE")\n    print("1. Clean a message")\n    print("2. Encipher a message")\n    print("3. Decipher a message")\n    print("4. Crack an unknown shift")\n    print("5. Shut down")\n    choice = input("Choose an option: ")\n\n    if choice == "1":\n        print("Clean tool goes here")\n    elif choice == "2":\n        print("Encipher tool goes here")\n    elif choice == "3":\n        print("Decipher tool goes here")\n    elif choice == "4":\n        print("Cracker goes here")\n    elif choice == "5":\n        print("Station X shutting down. Good work.")\n    else:\n        print("Unknown option, try again.")`}
+        ],
+        aside:`<b>Extended research &middot; a commission from Military Intelligence.</b> A Caesar shift moves every letter by the same amount, which is exactly why trying 25 shifts breaks it. MI want you to investigate a cypher whose shift <em>changes</em> as it moves along the message, so brute force no longer works. Look up the <b>Vigenere cypher</b>, work out how it uses a keyword, then build a working demo and report back on whether it really would defeat your cracker. This is well beyond GCSE, so it is yours to explore with no scaffolding. Build it and demo it to us.`
+      }
+    ]
+  }
+];
+
+/* flatten for lookups */
+const ALL = [];
+HUTS.forEach(h => h.cards.forEach(c => ALL.push(c)));
+
+/* ---------------- progress storage ---------------- */
+const KEY = 'stationXDone_v1';
+function loadDone(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ return []; } }
+function saveDone(arr){ try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e){} }
+let done = loadDone();
+function isDone(id){ return done.includes(id); }
+
+/* ---------------- build the board ---------------- */
+function chipHTML(ch){ return `<span class="chip ${ch[1]}">${ch[0]}</span>`; }
+
+function buildBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  let n = 0;
+  HUTS.forEach((hut, hi) => {
+    const sec = document.createElement('section');
+    sec.className = 'hut';
+    sec.dataset.hut = hi;
+
+    const head = document.createElement('div');
+    head.className = 'hut-head';
+    head.innerHTML = `
+      <span class="hut-sign"><span class="num">${hut.num}</span>${hut.name}</span>
+      <span class="hut-when">${hut.when}</span>
+      <span class="hut-line"></span>
+      <span class="hut-done-pill">&#10003; Hut cleared</span>`;
+    sec.appendChild(head);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    hut.cards.forEach(card => {
+      n++;
+      const el = document.createElement('div');
+      el.className = 'card' + (isDone(card.id) ? ' done' : '');
+      el.style.animationDelay = (n * 0.05) + 's';
+      el.innerHTML = `
+        <span class="card-no">No. ${String(n).padStart(2,'0')}</span>
+        <span class="tick">&#10003;</span>
+        <div class="card-icon">${I[card.icon]}</div>
+        <div class="card-title">${card.title}</div>
+        <div class="card-summary">${card.summary}</div>
+        <div class="chips">${card.chips.map(chipHTML).join('')}</div>`;
+      el.onclick = () => openCard(card.id);
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
+      el.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCard(card.id); } };
+      grid.appendChild(el);
+    });
+    sec.appendChild(grid);
+    board.appendChild(sec);
+  });
+  refreshState();
+}
+
+/* ---------------- modal ---------------- */
+let currentId = null;
+const hintShown = {};
+
+function openCard(id){
+  currentId = id;
+  const c = ALL.find(x => x.id === id);
+  if(!hintShown[id]) hintShown[id] = 0;
+  renderModal(c);
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCard(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentId = null;
+}
+
+function renderModal(c){
+  let html = '';
+  html += `<div class="modal-head">
+    <button class="x-close" onclick="closeCard()" aria-label="Close">&#10005;</button>
+    <div class="m-icon">${I[c.icon]}</div>
+    <div class="modal-eyebrow">Assignment</div>
+    <div class="modal-title">${c.title}</div>
+    <div class="modal-sum">${c.summary}</div>
+    <div class="modal-chips">${c.chips.map(chipHTML).join('')}</div>
+  </div>`;
+
+  html += `<div class="modal-body">`;
+  html += `<div class="field-label">The job</div>${c.brief}`;
+
+  if(c.starter){
+    html += `<div class="field-label">${c.starterLabel || 'Starter data'}</div>` + codeBlock(c.starter);
+  }
+  if(c.example){
+    html += `<div class="field-label">${c.exampleLabel || 'Example'}</div>` + outBox(c.example);
+  }
+  if(c.out){
+    html += `<div class="field-label">${c.outLabel || 'Expected output'}</div>` + outBox(c.out);
+  }
+  if(c.aside){
+    html += `<div class="callout ${c.id === 'station' ? 'research' : 'tip'}">${c.aside}</div>`;
+  }
+
+  const shown = hintShown[c.id] || 0;
+  html += `<div class="hints"><div class="hints-h">Stuck? Two hints, whenever you need them.</div><div class="hint-btns">`;
+  c.hints.forEach((h, i) => {
+    const isOut = i < shown;
+    const label = i === 0 ? 'Hint 1 &middot; gentle nudge' : 'Hint 2 &middot; the structure';
+    html += `<button class="h-btn" onclick="reveal(${i+1})" ${isOut ? 'disabled' : ''}>${isOut ? '&#10003; ' + (i===0?'Hint 1':'Hint 2') : label}</button>`;
+  });
+  html += `</div>`;
+  c.hints.forEach((h, i) => {
+    if(i < shown){
+      html += `<div class="hint-card"><div class="hint-tag">Hint ${i+1}</div><p>${h.p}</p>${h.code ? codeBlock(h.code) : ''}</div>`;
+    }
+  });
+  html += `</div>`;
+
+  const d = isDone(c.id);
+  html += `<div class="done-row"><button class="done-btn ${d ? 'is-done' : ''}" onclick="toggleDone()">${d ? '&#10003; Filed &middot; tap to undo' : 'File this assignment'}</button></div>`;
+
+  html += `</div>`;
+  document.getElementById('modal').innerHTML = html;
+}
+
+function reveal(n){
+  hintShown[currentId] = n;
+  renderModal(ALL.find(x => x.id === currentId));
+}
+
+function toggleDone(){
+  if(isDone(currentId)){
+    done = done.filter(x => x !== currentId);
+  } else {
+    done.push(currentId);
+    toast(pickPraise());
+  }
+  saveDone(done);
+  renderModal(ALL.find(x => x.id === currentId));
+  buildBoard();
+}
+
+/* ---------------- progress + hut state ---------------- */
+function refreshState(){
+  const num = done.length;
+  document.getElementById('progNum').textContent = num;
+  document.getElementById('progFill').style.width = (num / ALL.length * 100) + '%';
+  document.getElementById('progMsg').textContent = progressMessage(num);
+
+  HUTS.forEach((hut, hi) => {
+    const all = hut.cards.every(c => isDone(c.id));
+    const sec = document.querySelector(`.hut[data-hut="${hi}"]`);
+    if(sec) sec.classList.toggle('complete', all);
+  });
+
+  const intercept = document.getElementById('intercept');
+  if(intercept) intercept.classList.toggle('cracked', num === ALL.length);
+}
+
+function progressMessage(n){
+  if(n === 0) return 'New recruit. Pick any card to report for duty.';
+  if(n < 3)  return 'Settling in. The kettle is on in Hut 1.';
+  if(n < 6)  return 'Finding your way around the alphabet now.';
+  if(n < 9)  return 'Enciphering and deciphering like an old hand.';
+  if(n < 11) return 'Hut 8 trusts you with the hard traffic.';
+  if(n < 12) return 'One assignment left. The signal is almost yours.';
+  return 'Signal cracked. Station X salutes you.';
+}
+const PRAISE = ['Filed.', 'Good work, recruit.', 'One for the record.', 'Station X approves.', 'Signal handled.', 'Decoded and logged.'];
+function pickPraise(){ return PRAISE[Math.floor(Math.random()*PRAISE.length)]; }
+
+/* ---------------- bits and bobs ---------------- */
+function cp(btn){
+  const pre = btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = '\u2713 copied'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('ok'); }, 1800);
+  }).catch(() => { btn.textContent = 'select & copy'; });
+}
+
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+document.getElementById('overlay').addEventListener('click', e => { if(e.target.id === 'overlay') closeCard(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeCard(); });
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if(confirm('Clear all your progress and start fresh?')){ done = []; saveDone(done); buildBoard(); }
+});
+
+buildBoard();
+</script>
+</body>
+</html>

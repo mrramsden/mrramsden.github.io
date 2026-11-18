@@ -18,9 +18,10 @@ from solutions2 import GOOD as G2         # noqa: E402
 # section page -> the pages its cards should open
 SECTIONS = {
     "ks3/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "python-rescue.html"],
-    "ks4/": ["pseudocode-playground.html"],
+    "ks4/": ["pseudocode-playground.html", "station-x.html", "../ks5/robot-game-procedural.html"],
     "ks5/": ["algorithms-lab.html", "merge-sort-recursion.html", "dijkstra-table-method.html",
-             "a-star-table-method.html", "boolean-algebra-slips.html", "../ks4/pseudocode-playground.html"],
+             "a-star-table-method.html", "boolean-algebra-slips.html", "../ks4/pseudocode-playground.html",
+             "robot-game-procedural.html", "robot-game-oop.html"],
 }
 MOVED = ["escape-the-dungeon-1", "escape-the-dungeon-2", "escape-the-dungeon-3", "python-rescue"]
 
