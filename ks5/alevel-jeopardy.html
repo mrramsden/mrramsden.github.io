@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revision Jeopardy: OCR A-Level Computer Science</title>
+<style>
+  :root{--font-sans:'Nunito',sans-serif;--font-mono:'JetBrains Mono',monospace;}
+  html,body{margin:0;}
+  body{font-family:var(--font-sans);background:#FDFBF4;color:#1C3040;min-height:100vh;padding:64px 16px 32px;}
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 5</a></nav>
+<style>
+  .jp{background:#1a1a8e;border-radius:8px;padding:12px;font-family:var(--font-sans);user-select:none}
+  .jp-title{text-align:center;color:#FFD700;font-size:20px;font-weight:500;letter-spacing:.04em;margin-bottom:4px}
+  .jp-subtitle{text-align:center;color:#aaaadd;font-size:12px;margin-bottom:14px}
+  .jp-sl{color:#aaaadd;font-size:12px;letter-spacing:.06em;text-transform:uppercase;text-align:center;margin-bottom:10px}
+  .jp-tg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .jp-tb{background:#2626b0;border:2px solid #3333aa;border-radius:8px;padding:14px 10px;text-align:center;cursor:pointer;transition:background .1s}
+  .jp-tb:hover{background:#3535d0;border-color:#5555cc}
+  .jp-tb.sel{border-color:#FFD700;background:#1a1a6e}
+  .jp-tb.soon{background:#111166;border-color:#222266;cursor:default;opacity:.6}
+  .jp-tn{color:#fff;font-size:13px;font-weight:500}
+  .jp-badge{display:inline-block;font-size:10px;border-radius:4px;padding:2px 7px;margin-top:5px}
+  .rdy{background:#1a6e1a;color:#7fff7f}.sn{background:#333366;color:#8888bb}
+  .jp-ts{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+  .jp-tsb{background:#2626b0;border:2px solid #3333aa;color:#FFD700;border-radius:8px;width:56px;height:56px;font-size:22px;font-weight:500;cursor:pointer}
+  .jp-tsb:hover{background:#3535d0}
+  .jp-tsb.active{background:#FFD700;color:#0d0d6b;border-color:#FFD700}
+  .jp-sb-btn{display:block;width:100%;background:#FFD700;border:none;color:#0d0d6b;border-radius:8px;padding:12px;font-size:15px;font-weight:500;cursor:pointer}
+  .jp-sb-btn:hover{background:#ffe44d}
+  .jp-sb-btn:disabled{background:#555588;color:#888899;cursor:default}
+  .jp-sc{display:grid;gap:6px;margin-bottom:10px}
+  .jp-team{background:#0d0d6b;border-radius:6px;padding:6px 8px;text-align:center}
+  .jp-tn2{font-size:11px;color:#aaaadd;margin-bottom:2px}
+  .jp-ts2{font-size:18px;font-weight:500;color:#FFD700}
+  .jp-tbs{display:flex;gap:4px;justify-content:center;margin-top:4px}
+  .jp-bsm{background:#2626b0;border:1px solid #4444cc;color:#fff;border-radius:4px;padding:2px 8px;font-size:13px;cursor:pointer}
+  .jp-bsm:hover{background:#3333cc}
+  .jp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+  .jp-cat{background:#0d0d6b;border-radius:4px;padding:8px 4px;text-align:center;font-size:10px;font-weight:500;color:#FFD700;letter-spacing:.02em;min-height:40px;display:flex;align-items:center;justify-content:center}
+  .jp-cell{background:#2626b0;border:1px solid #3333aa;border-radius:4px;padding:8px 4px;text-align:center;font-size:17px;font-weight:500;color:#FFD700;cursor:pointer;min-height:48px;display:flex;align-items:center;justify-content:center;transition:background .1s}
+  .jp-cell:hover{background:#3535d0}
+  .jp-cell.used{background:#1a1a55;color:#44447a;cursor:default;border-color:#222266}
+  .jp-panel{background:#0d0d6b;border-radius:8px;padding:20px 16px;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+  .jp-pc{font-size:12px;color:#aaaadd;letter-spacing:.06em;text-transform:uppercase}
+  .jp-pv{font-size:28px;font-weight:500;color:#FFD700}
+  .jp-pq{font-size:15px;color:#fff;text-align:center;line-height:1.6;max-width:580px;white-space:pre-line}
+  .jp-pa{font-size:15px;color:#7fffb0;text-align:center;line-height:1.6;max-width:580px;white-space:pre-line}
+  .jp-code{font-family:var(--font-mono);font-size:12px;background:#06063a;border-radius:6px;padding:10px 14px;text-align:left;line-height:1.7;color:#b8e0ff;width:100%;max-width:560px;white-space:pre}
+  .jp-btn{background:#FFD700;border:none;color:#0d0d6b;border-radius:6px;padding:8px 22px;font-size:14px;font-weight:500;cursor:pointer}
+  .jp-btn:hover{background:#ffe44d}
+  .jp-bk{background:#2626b0;border:1px solid #4444cc;color:#fff;border-radius:6px;padding:8px 22px;font-size:14px;cursor:pointer}
+  .jp-bk:hover{background:#3333cc}
+  .jp-aw{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .jp-awl{font-size:11px;color:#aaaadd;text-align:center;width:100%;margin-bottom:2px}
+  .jp-awb{background:#1a1a6e;border:1px solid #4444aa;color:#FFD700;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer}
+  .jp-awb:hover{background:#2626b0}
+  .jp-fb{display:flex;justify-content:center;margin-top:8px}
+  .jp-lb{background:none;border:none;color:#6666aa;font-size:11px;cursor:pointer;text-decoration:underline}
+  .jp-lb:hover{color:#aaaadd}
+  .jp-h{display:none}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .jp-awb.won{background:#FFD700;color:#0d0d6b;border-color:#FFD700}
+  .jp-awb:disabled{cursor:default}
+  .jp-awb:disabled:not(.won){opacity:.45}
+  /* Bigger text when projected on a classroom screen */
+  @media (min-width:900px){
+    .jp{padding:18px}
+    .jp-title{font-size:26px}
+    .jp-cat{font-size:clamp(11px,1.1vw,16px);min-height:56px}
+    .jp-cell{font-size:clamp(18px,2.2vw,30px);min-height:clamp(52px,7vh,84px)}
+    .jp-pc{font-size:clamp(12px,1.2vw,16px)}
+    .jp-pv{font-size:clamp(28px,3vw,40px)}
+    .jp-pq,.jp-pa{font-size:clamp(16px,1.9vw,26px);max-width:900px}
+    .jp-panel{min-height:clamp(320px,55vh,620px)}
+    .jp-code{font-size:clamp(12px,1.3vw,18px);max-width:860px}
+  }
+</style>
+
+<h2 class="sr-only">OCR A-level Computer Science Jeopardy: select a topic, choose teams, then play</h2>
+
+<div class="jp">
+  <div class="jp-title">Revision Jeopardy: OCR A-level Computer Science</div>
+  <div class="jp-subtitle">H446 &nbsp;&middot;&nbsp; Paper 1 &amp; Paper 2</div>
+  <div id="tv">
+    <div class="jp-sl">Choose a topic</div>
+    <div class="jp-tg" id="tg"></div>
+    <div class="jp-sl">How many teams?</div>
+    <div class="jp-ts">
+      <button class="jp-tsb" onclick="sT(2)">2</button>
+      <button class="jp-tsb active" onclick="sT(3)">3</button>
+      <button class="jp-tsb" onclick="sT(4)">4</button>
+    </div>
+    <button class="jp-sb-btn" id="sb" onclick="go()" disabled>Select a topic to start</button>
+  </div>
+  <div id="gv" class="jp-h">
+    <div class="jp-sc" id="sc"></div>
+    <div id="bv">
+      <div class="jp-grid" id="gr"></div>
+      <div class="jp-fb"><button class="jp-lb" onclick="reset()">Change topic / reset</button></div>
+    </div>
+    <div id="qv" class="jp-h"><div class="jp-panel"><div class="jp-pc" id="qc"></div><div class="jp-pv" id="qval"></div><div class="jp-pq" id="qt"></div><button class="jp-btn" onclick="ans()">Show answer</button></div></div>
+    <div id="av" class="jp-h"><div class="jp-panel"><div class="jp-pc" id="ac"></div><div class="jp-pv" id="aval"></div><div class="jp-pq" id="aq" style="color:#aaaadd;font-size:13px"></div><div id="at"></div><div class="jp-aw" id="ab"></div><button class="jp-bk" style="margin-top:8px" onclick="back()">Back to board</button></div></div>
+  </div>
+</div>
+
+<script>
+const T=[
+  {
+    name:"Object-Oriented Programming",available:true,
+    cats:["Define it","Encapsulation","Inheritance","Quick code","Spot the error"],
+    qs:[
+      [
+        {q:"The template or blueprint that defines the attributes and methods for all objects of that type.",a:"A CLASS"},
+        {q:"A specific instance of a class, with its own values for the attributes defined by that class.",a:"An OBJECT"},
+        {q:"The process of creating a specific object from a class at runtime.",a:"INSTANTIATION"},
+        {q:"A subroutine defined inside a class that acts on the object's attributes and defines its behaviour.",a:"A METHOD"},
+        {q:"This OOP concept describes when different classes define methods with the same name but different implementations.",a:"POLYMORPHISM\n\nExample: both Animal and Dog could have a describe() method, and each provides a different implementation."},
+      ],
+      [
+        {q:"Attributes are declared with this access modifier to prevent direct access from outside the class.",a:"PRIVATE"},
+        {q:"This type of method returns the value of a private attribute. It takes no parameters.",a:"A GETTER method (must be a function, not a procedure)"},
+        {q:"This type of method updates a private attribute's value and may include validation.",a:"A SETTER method"},
+        {q:"Name both things required to fully implement encapsulation for a temperature attribute in a WeatherStation class.",a:"1. temperature declared as private\n2. Public getter (getTemperature) and setter (setTemperature) methods to control all access"},
+        {q:"Why might a setter method return a boolean value rather than simply assigning the new value?",a:"To tell the calling code whether the update succeeded. If validation rejects the value, the caller needs to know, so false signals the assignment did not happen."},
+      ],
+      [
+        {q:"The name for the parent class in an inheritance relationship.",a:"SUPERCLASS (also: parent class, base class)"},
+        {q:"The name for a class that inherits from another and can define its own additional attributes and methods.",a:"SUBCLASS (also: child class, derived class)"},
+        {q:"The OCR pseudocode keyword that links a subclass to its parent class.",a:"INHERITS\n\nExample:  class Dog inherits Animal"},
+        {q:"State one reason why a subclass constructor must call the superclass constructor.",a:"To initialise the inherited attributes. Without calling the superclass constructor (super.new()), those attributes would never be set up."},
+        {q:"'When the system needs five queue objects, inheritance is used so each queue inherits the class methods.' What is wrong?",a:"Confuses inheritance with instantiation.\n\nInheritance defines a class relationship: used once at design time. Instantiation creates objects at runtime.\n\nCorrect: 'Five objects are instantiated from one Queue class.'"},
+      ],
+      [
+        {q:"Write one line of pseudocode to create a Book object called lib1 with title 'Dune', author 'Herbert', and pages 412.",a:null,code:"lib1 = new Book(\"Dune\", \"Herbert\", 412)"},
+        {q:"Write the complete getter method for a private attribute called species in an Animal class.",a:null,code:"public function getSpecies()\n    return species\nendfunction"},
+        {q:"Write pseudocode for setAge() in an Animal class. It should only update age if the value is greater than 0, returning true if successful and false otherwise.",a:null,code:"public function setAge(pAge)\n    if pAge > 0 then\n        age = pAge\n        return true\n    else\n        return false\n    endif\nendfunction"},
+        {q:"Write the constructor for a Car class with three private attributes: make (string), model (string), and year (integer). Write the constructor only, not the full class.",a:null,code:"public procedure new(pMake, pModel, pYear)\n    make  = pMake\n    model = pModel\n    year  = pYear\nendprocedure"},
+        {q:"Write the pseudocode declaration for a Dog class that inherits from Animal and adds a private attribute breed (string). Include the class structure and constructor only.",a:null,code:"class Dog inherits Animal\n    private breed : string\n\n    public procedure new(pName, pAge, pBreed)\n        super.new(pName, pAge)\n        breed = pBreed\n    endprocedure\nendclass"},
+      ],
+      [
+        {q:"What is wrong?\n\nprivate function getSpecies()\n    return species\nendfunction",a:"Should be PUBLIC. Getter methods must be accessible from outside the class. private means only code inside the class can call it, which defeats the purpose."},
+        {q:"What is wrong?\n\npublic procedure getAge()\n    return age\nendprocedure",a:"Should be FUNCTION not procedure. A getter returns a value, which makes it a function by definition."},
+        {q:"What is wrong?\n\npublic function setBreed(pBreed)\n    return breed\nendfunction",a:"A setter should UPDATE the attribute, not return it.\n\nShould be:  breed = pBreed\n(with a return value if validation is included)"},
+        {q:"Give all the errors in this code.\n\npublic function getName(pName)\n    pName = name\nendfunction",a:"Three errors:\n1. Should take NO parameters: getters take nothing in\n2. Should RETURN name, not assign to a parameter\n3. Assignment direction is wrong: name = pName would go in a setter"},
+        {q:"What is the key error in this ElectricCar subclass constructor?\n\npublic procedure new(pMake, pModel, pYear, pRange)\n    make  = pMake\n    model = pModel\n    year  = pYear\n    range = pRange\nendprocedure",a:"It manually assigns inherited attributes instead of calling super.new().\n\nFix: replace the first three lines with super.new(pMake, pModel, pYear)\n\nDuplicating parent logic means any future change to the Vehicle constructor won't be reflected here."},
+      ],
+    ]
+  },
+  {
+    name:"Data Structures",available:true,
+    cats:["Define it","Stacks & queues","Trees & graphs","Big O notation","Spot the error"],
+    qs:[
+      [{q:"A linear data structure where items are added and removed from the same end.",a:"A STACK"},{q:"A linear data structure where items are added at the rear and removed from the front.",a:"A QUEUE"},{q:"A data structure where each node stores a value and a pointer to the next node.",a:"A LINKED LIST"},{q:"A hierarchical data structure with a root node where each node has at most two children.",a:"A BINARY TREE"},{q:"A measure of how an algorithm's time or space requirements grow relative to input size.",a:"BIG O NOTATION"}],
+      [{q:"The two operations used to add and remove items from a stack.",a:"PUSH (add to top) and POP (remove from top)"},{q:"The ordering principle that describes how a stack processes items.",a:"LIFO: Last In, First Out"},{q:"The ordering principle that describes how a queue processes items.",a:"FIFO: First In, First Out"},{q:"This term describes what happens when you try to push an item onto a full stack.",a:"STACK OVERFLOW"},{q:"Name two differences between a stack and a queue.",a:"1. Stack uses LIFO; queue uses FIFO\n2. Stack uses push/pop; queue uses enqueue/dequeue\n3. Stack adds and removes from the same end; queue uses opposite ends"}],
+      [{q:"The topmost node of a tree, from which all other nodes descend.",a:"The ROOT node"},{q:"A tree node that has no children.",a:"A LEAF node"},{q:"This tree traversal visits nodes in the order: left subtree, root, right subtree.",a:"IN-ORDER traversal\n\nUseful for retrieving values from a BST in ascending sorted order."},{q:"State two differences between a tree and a graph.",a:"1. Trees have no cycles; graphs can\n2. Trees are hierarchical with one root; graphs have no fixed root\n3. Trees have exactly n-1 edges for n nodes; graphs can have more"},{q:"Explain how a binary search tree stores values and why this makes searching efficient.",a:"Values less than a node go left; greater go right, so data is organised in sorted order. Searching eliminates half the remaining nodes at each step, giving O(log n) average complexity."}],
+      [{q:"O(1): what does this mean in plain terms?",a:"CONSTANT TIME: execution time does not change regardless of input size.\n\nExample: accessing an array element by index."},{q:"O(n): what does this mean, and give an example algorithm with this complexity?",a:"LINEAR TIME: grows proportionally with input size.\n\nExample: linear search: in the worst case, every element is checked."},{q:"Which is more efficient for large n: O(n²) or O(n log n)?",a:"O(n log n) is more efficient.\n\nO(n²) grows much faster, e.g. bubble sort vs merge sort."},{q:"State the Big O time complexity of a linear search and a binary search.",a:"Linear search: O(n)\nBinary search: O(log n)\n\nBinary search is faster but requires a sorted list."},{q:"Explain why binary search has O(log n) complexity.",a:"Each comparison halves the remaining search space. For n=1000 items, at most ~10 comparisons are needed (2^10 = 1024). Steps grow as the logarithm of n, not proportionally."}],
+      [{q:"'A queue uses LIFO ordering.' What is wrong?",a:"Wrong. Queues use FIFO (First In, First Out). LIFO is the ordering principle for STACKS."},{q:"'Binary search works on any list.' What is wrong?",a:"Wrong. Binary search requires the list to be SORTED first. It cannot work correctly on an unsorted list."},{q:"'A linked list gives O(1) access to any element by index.' What is wrong?",a:"Wrong. Linked lists require traversal from the head node, giving O(n) access time. O(1) indexed access is a feature of ARRAYS."},{q:"'In a binary tree, each node can have at most 3 children.' What is wrong?",a:"Wrong. In a BINARY tree, each node has at most 2 children (left and right). A tree with up to 3 children per node is a ternary tree."},{q:"'Bubble sort has O(n log n) complexity.' What is the correct answer and why?",a:"Bubble sort is O(n²) in the worst and average case.\n\nFor each of n elements it may compare against n others, giving n × n comparisons.\n\nO(n log n) belongs to merge sort and quicksort."}],
+    ]
+  },
+  {
+    name:"Databases",available:true,
+    cats:["Key terms","Keys & relationships","Normalisation","Write the SQL","Spot the error"],
+    qs:[
+      [{q:"A database where all data is stored in a single table with no links to other tables.",a:"A FLAT FILE DATABASE"},{q:"A database made up of multiple related tables linked together using keys.",a:"A RELATIONAL DATABASE"},{q:"The software system used to create, manage, and query a database.",a:"DBMS: Database Management System"},{q:"The term for data that is stored more than once unnecessarily in a database.",a:"DATA REDUNDANCY\n\nThis wastes storage and creates a risk of inconsistency when data is updated."},{q:"This principle ensures that data stored in a database is accurate, consistent, and free from corruption.",a:"DATA INTEGRITY\n\nRelational databases support this better than flat files because data is stored once and linked by keys."}],
+      [{q:"A field that uniquely identifies each record in a table.",a:"PRIMARY KEY\n\nIt must be unique and cannot be null."},{q:"A field in one table that is the primary key in a different (related) table, used to link the two tables.",a:"FOREIGN KEY\n\nCommon error: students say it uniquely identifies records. It does not. That is the primary key's job."},{q:"This type of relationship means one record in Table A links to many records in Table B, but each record in B links to only one in A.",a:"ONE-TO-MANY relationship\n\nExample: one Customer can place many Orders."},{q:"This type of relationship cannot be directly represented in a relational database and requires a link (junction) table to resolve it.",a:"MANY-TO-MANY relationship\n\nExample: one Order can contain many Products, and one Product can appear in many Orders."},{q:"A gym stores Member(MemberID, FirstName, Surname, PlanType) and Plan(PlanType, CostPerMonth, IncludesClasses). Each plan type appears once in Plan. In which table is PlanType the primary key, and in which is it a foreign key?",a:"Primary key: the Plan table (each plan type appears once)\nForeign key: the Member table (it links each member to their plan)\n\nCommon error: saying it is a foreign key in Plan. That is where it is the primary key."}],
+      [{q:"State one requirement for a database to be in First Normal Form (1NF).",a:"Any one of:\n- All data in each field must be atomic (cannot be split further)\n- Each attribute/field must have a unique name\n- A primary key must be identified"},{q:"A Member table has a ClassesBooked field containing: 'Yoga, Spin, Pilates'. Which normal form does this break, and why?",a:"1NF. The ClassesBooked field contains non-atomic data: several values are stored in one field. Each field must hold a single, indivisible value."},{q:"What does Second Normal Form (2NF) require, in addition to being in 1NF?",a:"No partial dependencies: every non-key attribute must depend on the whole primary key, not just part of it.\n\nThis only applies when there is a composite (multi-field) primary key."},{q:"An OrderLine table has the composite primary key (OrderID, ProductID) and also stores Quantity and ProductName. ProductName depends only on ProductID. Which normal form does this violate?",a:"2NF: ProductName has a partial dependency: it depends on only part of the composite key (ProductID), not the whole key.\n\nFix: move ProductName into a separate Product table, keyed on ProductID."},{q:"What does 3NF require? Give an example of a transitive dependency that would violate it.",a:"No transitive dependencies: no non-key attribute should depend on another non-key attribute.\n\nExample: storing EmployeeID, DepartmentID, DepartmentName in one table. DepartmentName depends on DepartmentID, not EmployeeID, so this is a transitive dependency."}],
+      [{q:"Write the SQL to select all fields and all records from a table called Student.",a:null,code:"SELECT * FROM Student"},{q:"Write SQL to select FirstName and Surname from Member where PlanType = 'Premium'.",a:null,code:"SELECT FirstName, Surname\nFROM Member\nWHERE PlanType = 'Premium'"},{q:"Write SQL to delete all records from Booking where Status = 'Cancelled'.",a:null,code:"DELETE FROM Booking\nWHERE Status = 'Cancelled'"},{q:"Write SQL to select the FirstName and Surname of every member whose plan includes classes, joining Member to Plan (IncludesClasses = TRUE).",a:null,code:"SELECT Member.FirstName, Member.Surname\nFROM Member\nJOIN Plan\n  ON Member.PlanType = Plan.PlanType\nWHERE Plan.IncludesClasses = TRUE"},{q:"Write SQL to update CostPerMonth to 24.99 in Plan where PlanType = 'Premium'.",a:null,code:"UPDATE Plan\nSET CostPerMonth = 24.99\nWHERE PlanType = 'Premium'"}],
+      [{q:"'A foreign key is the field that uniquely identifies each record in its own table.' What is wrong?",a:"That describes a PRIMARY KEY, not a foreign key.\n\nA foreign key is a field that is the primary key in a different, related table. It links the two tables together."},{q:"'A flat file database has less redundancy than a relational database.' What is wrong?",a:"Wrong. RELATIONAL databases have less redundancy. Flat file databases repeat data (e.g. customer details stored again for every order), wasting storage and risking inconsistency."},{q:"'For a database to be in 1NF, data must not be repeated anywhere in the database.' What is wrong?",a:"That describes reducing redundancy: a goal of higher normal forms, not 1NF.\n\n1NF requires: atomic data in each field, unique field names, and a primary key identified."},{q:"This SQL is meant to show the first names of members whose plan includes classes. What is missing?\n\nSELECT FirstName FROM Member, Plan WHERE IncludesClasses = TRUE",a:"The join condition is missing. Without it, the query pairs every Member row with every Plan row (a Cartesian product), so members appear whatever plan they are on.\n\nFix: WHERE Member.PlanType = Plan.PlanType AND IncludesClasses = TRUE"},{q:"'CustomerID would make a good primary key in an Orders table because each customer has a unique ID.' What is wrong?",a:"A primary key must uniquely identify each RECORD in that table.\n\nCustomerID cannot be the primary key in Orders because one customer can place many orders, so the same CustomerID would appear multiple times.\n\nOrderID is the appropriate primary key."}],
+    ]
+  },
+  {
+    name:"Computational Thinking",available:true,
+    cats:["Abstraction","Decomposition","Thinking ahead","Procedurally & logically","Concurrency"],
+    qs:[
+      [{q:"Removing unnecessary details from a problem and keeping only the information relevant to finding a solution.",a:"ABSTRACTION\n\nKey word: 'removing' unnecessary detail, not just 'simplifying'. Vague answers like 'making the problem simpler' are not awarded marks."},{q:"Give one reason why a programmer uses abstraction when designing a solution.",a:"Any one of:\n- Reduces complexity so the programmer can focus on key features\n- Reduces processing requirements / makes the model more efficient\n- Allows the solution to be reused for similar problems\n- Makes the problem more manageable during the design stage"},{q:"A flight simulator uses abstraction. Give one specific way the simulation might differ from reality.",a:"Any qualified example:\n- Wind resistance or turbulence may be simplified / not modelled fully\n- Not all cockpit controls may be represented\n- Terrain may use simplified graphics rather than photorealistic detail\n- The physics of every component may not be modelled accurately\n\nNote: vague answers like 'the terrain' without explanation are not credited."},{q:"The London Underground map is a famous example of abstraction. What detail has been removed, and why does that help?",a:"Removed: real distances, the exact routes of the tunnels, streets and buildings above ground.\nKept: the stations, the lines and where you can change between them.\n\nThat is all a passenger needs to plan a route, so the map is far easier to read and use."},{q:"A student writes: 'Abstraction saves time.' Explain precisely what abstraction achieves when designing a computer program.",a:"Too vague for a mark. A precise answer must specify:\n- Removes unnecessary detail so the programmer focuses on key features\n- Reduces the computational complexity of the model\n- Saves coding/development time by not implementing irrelevant features\n\nThe benefit must relate to the design process, not the end user."}],
+      [{q:"Splitting a problem down into smaller sub-problems that can be solved independently.",a:"DECOMPOSITION\n\nKey word: 'sub-problems', not just 'smaller parts' or 'steps'. Breaking into loops or sequences is not decomposition."},{q:"A student gives 'Students' as a sub-problem when decomposing a school timetable system. Why might this not be awarded a mark?",a:"It is too vague and unqualified. It names a thing, not a sub-problem.\n\nA credited answer would be specific: 'Adding a student record', 'Assigning a student to a class', or 'Checking a student's timetable for clashes'."},{q:"Give one benefit of using decomposition when designing a program.",a:"Any one of:\n- Makes the problem more manageable\n- Different sub-problems can be developed by different team members simultaneously\n- Individual components can be tested independently\n- Easier to locate and fix errors in a specific component"},{q:"Describe how a programmer would use decomposition to design a login system.",a:"They would identify the distinct sub-problems that make up the login process:\n- Accepting and validating username input\n- Accepting password input\n- Checking whether the username exists in the database\n- Checking whether the password matches the stored value\n- Handling failed login attempts\n\nEach sub-problem can then be designed and tested as a separate subroutine."},{q:"Describe how decomposition and abstraction work together when solving a complex problem.",a:"Decomposition breaks the problem into sub-problems that can be solved independently.\n\nAbstraction then removes unnecessary detail from each sub-problem, so each component is as simple as possible to design and implement.\n\nTogether they reduce complexity at every level: decomposition in breadth, abstraction in depth."}],
+      [{q:"Identifying the inputs and outputs a system will need before writing any code is an example of this element of computational thinking.",a:"THINKING AHEAD"},{q:"Describe what is meant by 'pre-conditions' in the context of thinking ahead.",a:"Conditions that must be true before a module or algorithm can run correctly.\n\nExample: a binary search pre-condition is that the list must already be sorted. If this is not checked before running, the algorithm may produce incorrect results."},{q:"Describe how caching is an example of thinking ahead.",a:"Caching stores data that has recently been accessed in faster memory, anticipating that it may be needed again soon.\n\nBy thinking ahead about what data will be needed, the system reduces the time spent fetching it from slower storage."},{q:"A racing game loads the next track before the player finishes the current one. Name this technique and explain why it is used.",a:"PRE-FETCHING (or pre-loading).\n\nThe system anticipates what the user will need next and loads it in advance, so there is no delay or interruption when the player moves to the next track."},{q:"Explain the difference between caching and pre-fetching, with an example of each.",a:"Caching: stores recently used data in faster memory in case it is needed again.\nExample: a browser caches a webpage so it loads faster on the next visit.\n\nPre-fetching: loads data before it is requested, based on predicting what will be needed next.\nExample: a game loads the next level while the player is finishing the current one.\n\nKey difference: caching reacts to past use; pre-fetching predicts future use."}],
+      [{q:"Breaking a solution into a sequence of clearly defined steps, procedures, or subroutines is an example of this element of computational thinking.",a:"THINKING PROCEDURALLY"},{q:"A programmer is thinking procedurally about a login system. Give two specific procedures they would need to define.",a:"Any two qualified examples:\n- Accept and validate the username\n- Accept the password input\n- Check whether the username exists in the database\n- Check whether the username/password combination is correct\n- Handle a failed login attempt / lock account after repeated failures"},{q:"Thinking logically involves identifying these points in a program: places where a decision must be made based on a condition being true or false.",a:"DECISION POINTS (or conditions / boolean conditions)\n\nExample: IF username exists THEN check password ELSE display error"},{q:"Explain the difference between thinking procedurally and thinking logically.",a:"Thinking procedurally: identifying the sequence of steps and subroutines needed to solve a problem: what needs to happen and in what order.\n\nThinking logically: identifying the conditions and decision points within those steps: determining what must be true or false to control the flow of the program."},{q:"A student says thinking procedurally just means 'writing the code step by step.' What is missing from this description?",a:"Thinking procedurally is about the design stage, not the coding stage.\n\nIt means identifying the distinct components and subroutines the solution needs, and what each one must do, before any code is written.\n\n'Step by step' describes sequential execution, not procedural design."}],
+      [{q:"This is the term for the apparent simultaneous execution of multiple processes, managed by rapidly switching between them.",a:"CONCURRENT PROCESSING\n\nNote: on a single processor, only one process runs at any instant, so concurrent processing creates the appearance of simultaneity."},{q:"Give one benefit of using concurrent processing.",a:"Any one of:\n- Multiple users can interact with a system at the same time\n- Tasks complete more quickly overall\n- The system remains responsive while background tasks run\n- Multiple CPU cores can be utilised more effectively"},{q:"Explain why an online multiplayer game requires concurrent processing.",a:"Multiple users are connected simultaneously and each user's actions must be handled at the same time.\n\nWithout concurrent processing, each user's request would have to wait for all previous requests to complete, making the game unresponsive."},{q:"Explain the difference between concurrent processing and parallel processing.",a:"Concurrent processing: a single processor rapidly switches between multiple processes (context switching), creating the appearance of simultaneity. Only one process runs at any given instant.\n\nParallel processing: multiple processes literally run at the same time on multiple processors or cores simultaneously."},{q:"A student says: 'Concurrent processing means two tasks run at exactly the same time on one processor.' Identify the error.",a:"Wrong. On a single processor, only one process executes at any given instant.\n\nConcurrent processing means the processor rapidly switches between processes (context switching), giving the appearance of simultaneous execution.\n\nTrue simultaneous execution requires multiple processors or cores: that is parallel processing."}],
+    ]
+  },
+  {name:"Algorithms",available:false},
+  {name:"Computer Systems",available:false},
+  {name:"Networks & Security",available:false},
+];
+
+let sel=null,nT=3,sc=[],used={},cur=null;
+
+function buildTG(){
+  const g=document.getElementById('tg');g.innerHTML='';
+  T.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='jp-tb'+(t.available?'':' soon');
+    d.innerHTML=`<div class="jp-tn">${t.name}</div><span class="jp-badge ${t.available?'rdy':'sn'}">${t.available?'Ready to play':'Coming soon'}</span>`;
+    if(t.available) d.onclick=()=>pick(i,d);
+    g.appendChild(d);
+  });
+}
+
+function pick(i,el){
+  sel=i;document.querySelectorAll('.jp-tb').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');
+  const b=document.getElementById('sb');b.disabled=false;b.textContent='Start: '+T[i].name;
+}
+function sT(n){nT=n;document.querySelectorAll('.jp-tsb').forEach((b,i)=>b.classList.toggle('active',i===n-2));}
+function go(){
+  if(sel===null)return;sc=Array(nT).fill(0);used={};cur=null;buildSC();buildGR();
+  document.getElementById('tv').classList.add('jp-h');document.getElementById('gv').classList.remove('jp-h');
+  document.getElementById('bv').classList.remove('jp-h');document.getElementById('qv').classList.add('jp-h');document.getElementById('av').classList.add('jp-h');
+}
+function reset(){
+  sel=null;document.querySelectorAll('.jp-tb').forEach(b=>b.classList.remove('sel'));
+  const b=document.getElementById('sb');b.disabled=true;b.textContent='Select a topic to start';
+  document.getElementById('gv').classList.add('jp-h');document.getElementById('tv').classList.remove('jp-h');
+}
+function buildSC(){
+  const s=document.getElementById('sc');s.style.gridTemplateColumns=`repeat(${nT},1fr)`;s.innerHTML='';
+  for(let i=0;i<nT;i++) s.innerHTML+=`<div class="jp-team"><div class="jp-tn2">Team ${i+1}</div><div class="jp-ts2" id="s${i}">0</div><div class="jp-tbs"><button class="jp-bsm" onclick="adj(${i},1)">+</button><button class="jp-bsm" onclick="adj(${i},-1)">&minus;</button></div></div>`;
+}
+function adj(t,d){sc[t]=Math.max(0,sc[t]+d*100);document.getElementById('s'+t).textContent=sc[t];}
+function award(t){
+  // One award per question; the +/− buttons are there to correct mistakes
+  if(!cur||cur.awarded)return;cur.awarded=true;
+  sc[t]+=cur.val;document.getElementById('s'+t).textContent=sc[t];
+  document.querySelectorAll('.jp-awb').forEach((b,i)=>{b.disabled=true;if(i===t){b.classList.add('won');b.textContent='\u2713 Team '+(t+1);}});
+}
+function buildGR(){
+  const t=T[sel],g=document.getElementById('gr');g.innerHTML='';
+  t.cats.forEach(c=>{const d=document.createElement('div');d.className='jp-cat';d.textContent=c;g.appendChild(d);});
+  [100,200,300,400,500].forEach((v,vi)=>{
+    t.cats.forEach((c,ci)=>{
+      const key=ci+'-'+vi,d=document.createElement('div');
+      d.className='jp-cell'+(used[key]?' used':'');
+      d.textContent=used[key]?'':'\u00A3'+v;
+      if(!used[key]) d.onclick=()=>openQ(ci,vi,key,v);
+      g.appendChild(d);
+    });
+  });
+}
+function openQ(ci,vi,key,val){
+  const q=T[sel].qs[ci][vi];cur={key,val,cat:T[sel].cats[ci]};
+  document.getElementById('qc').textContent=cur.cat;document.getElementById('qval').textContent='\u00A3'+val;document.getElementById('qt').textContent=q.q;
+  document.getElementById('bv').classList.add('jp-h');document.getElementById('av').classList.add('jp-h');document.getElementById('qv').classList.remove('jp-h');
+}
+function ans(){
+  if(!cur)return;
+  const ci=T[sel].cats.indexOf(cur.cat),vi=[100,200,300,400,500].indexOf(cur.val),q=T[sel].qs[ci][vi];
+  document.getElementById('ac').textContent=cur.cat;document.getElementById('aval').textContent='\u00A3'+cur.val;document.getElementById('aq').textContent=q.q;
+  const at=document.getElementById('at');at.innerHTML='';
+  if(q.code){const p=document.createElement('pre');p.className='jp-code';p.textContent=q.code;at.appendChild(p);}
+  else{const p=document.createElement('div');p.className='jp-pa';p.textContent=q.a;at.appendChild(p);}
+  const ab=document.getElementById('ab');ab.innerHTML='<div class="jp-awl">Award points to:</div>';
+  for(let i=0;i<nT;i++) ab.innerHTML+=`<button class="jp-awb" onclick="award(${i})">Team ${i+1}</button>`;
+  document.getElementById('qv').classList.add('jp-h');document.getElementById('av').classList.remove('jp-h');
+}
+function back(){
+  if(cur) used[cur.key]=true;cur=null;
+  document.getElementById('qv').classList.add('jp-h');document.getElementById('av').classList.add('jp-h');document.getElementById('bv').classList.remove('jp-h');buildGR();
+}
+buildTG();
+</script>
+
+</body>
+</html>

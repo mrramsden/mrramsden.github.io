@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setting Up Your Screen – Year 7 HTML</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #1a3a5c;
+            color: white;
+            padding: 22px 36px;
+        }
+
+        header h1 {
+            margin: 0 0 4px 0;
+            font-size: 24px;
+        }
+
+        header p {
+            margin: 0;
+            color: #a8c4e0;
+            font-size: 13px;
+        }
+
+        main {
+            max-width: 780px;
+            margin: 30px auto;
+            padding: 0 24px 50px 24px;
+        }
+
+        /* Intro box */
+        .intro {
+            background-color: #dbeafe;
+            border-left: 6px solid #1a3a5c;
+            padding: 14px 18px;
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 32px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .intro strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 16px;
+            color: #1a3a5c;
+        }
+
+        /* Section headers */
+        .phase {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a3a5c;
+            border-bottom: 3px solid #1a3a5c;
+            padding-bottom: 6px;
+            margin: 36px 0 18px 0;
+        }
+
+        /* Step cards */
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+
+        .step-number {
+            background-color: #1a3a5c;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            min-width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            padding-top: 4px;
+        }
+
+        .step-content p {
+            margin: 0 0 6px 0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .step-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Key press styling */
+        kbd {
+            display: inline-block;
+            background-color: #e8e8e8;
+            border: 2px solid #aaa;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            color: #222;
+            box-shadow: 0 2px 0 #888;
+        }
+
+        /* Tips and notes */
+        .note {
+            background-color: #fff8e1;
+            border-left: 5px solid #f9a825;
+            padding: 10px 15px;
+            border-radius: 0 5px 5px 0;
+            font-size: 13.5px;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .note strong {
+            color: #e65100;
+        }
+
+        /* Phase colour variants */
+        .phase.phase-2 {
+            color: #2e7d32;
+            border-bottom-color: #2e7d32;
+        }
+
+        .step.phase-2 .step-number {
+            background-color: #2e7d32;
+        }
+
+        .phase.phase-3 {
+            color: #6a1b9a;
+            border-bottom-color: #6a1b9a;
+        }
+
+        .step.phase-3 .step-number {
+            background-color: #6a1b9a;
+        }
+
+        /* Done banner */
+        .done {
+            background-color: #e8f5e9;
+            border: 2px solid #2e7d32;
+            border-radius: 8px;
+            padding: 16px 22px;
+            margin-top: 32px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .done strong {
+            display: block;
+            color: #2e7d32;
+            font-size: 17px;
+            margin-bottom: 6px;
+        }
+    </style>
+
+</head>
+<body>
+
+
+<header>
+    <h1>Setting Up Your Screen for HTML</h1>
+    <p>Follow these steps carefully &bull; Year 7 Computing</p>
+</header>
+
+<main>
+
+    <div class="intro">
+        <strong>What you are going to do:</strong>
+        You are going to open two things at the same time and put them side by side:
+        on the <strong>left</strong>, your HTML file open in Notepad so you can type your code, and on the <strong>right</strong>, the reference sheet open in Edge so you can look things up.
+    </div>
+
+
+    <!-- PART 1: Open in Notepad -->
+    <div class="phase">Part 1: Open your HTML file in Notepad</div>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+            <p>Find your HTML file in the folder your teacher has told you to use.
+            It will be called something like <strong>mypage.html</strong> and will have the blue and green
+            Microsoft Edge icon on it.</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+            <p><strong>Right-click</strong> on the file. A menu will appear.</p>
+            <div class="note">
+                <strong>Windows 11 only:</strong> If you see &ldquo;Show more options&rdquo; at the bottom of the menu,
+                click that first to see the full list of options.
+            </div>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+            <p>Hover your mouse over <strong>&ldquo;Open with&rdquo;</strong>. Another small menu will slide out.</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">4</div>
+        <div class="step-content">
+            <p>Click <strong>Notepad</strong> from the list.</p>
+            <div class="note">
+                <strong>Can&rsquo;t see Notepad?</strong> Click <strong>&ldquo;Choose another app&rdquo;</strong> and
+                then scroll down to find Notepad in the list.
+            </div>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">5</div>
+        <div class="step-content">
+            <p>Notepad should open and you will see your HTML code as plain text.
+            If you see lots of strange symbols, ask your teacher before continuing.</p>
+        </div>
+    </div>
+
+
+    <!-- PART 2: Open reference sheet in Edge -->
+    <div class="phase phase-2">Part 2: Open the reference sheet in Edge</div>
+
+    <div class="step phase-2">
+        <div class="step-number">6</div>
+        <div class="step-content">
+            <p>Open <strong>Microsoft Edge</strong> and go to <strong>mrramsden.github.io</strong>.</p>
+        </div>
+    </div>
+
+    <div class="step phase-2">
+        <div class="step-number">7</div>
+        <div class="step-content">
+            <p>Click <strong>Key Stage 3</strong>, then <strong>HTML reference sheet</strong>. Or use this link: <a href="html-reference.html">open the HTML reference sheet</a>.</p>
+            <div class="note">
+                <strong>Can't find it?</strong> Check the address is typed exactly, with no spaces, then ask your teacher.
+            </div>
+        </div>
+    </div>
+
+    <div class="step phase-2">
+        <div class="step-number">8</div>
+        <div class="step-content">
+            <p>You should now see the colourful reference sheet in Edge. You will use this to look up tags while you code.</p>
+        </div>
+    </div>
+
+
+    <!-- PART 3: Snap side by side -->
+    <div class="phase phase-3">Part 3: Put them side by side</div>
+
+    <div class="step phase-3">
+        <div class="step-number">9</div>
+        <div class="step-content">
+            <p>Click on your <strong>Notepad</strong> window to make it the active window
+            (click anywhere on it so it comes to the front).</p>
+        </div>
+    </div>
+
+    <div class="step phase-3">
+        <div class="step-number">10</div>
+        <div class="step-content">
+            <p>Hold down the <kbd>&#8862; Windows</kbd> key and press the <kbd>&larr; Left Arrow</kbd> key.</p>
+            <p>Notepad will snap to the left half of your screen.</p>
+        </div>
+    </div>
+
+    <div class="step phase-3">
+        <div class="step-number">11</div>
+        <div class="step-content">
+            <p>Your computer may show you a list of other open windows on the right side.
+            If you see <strong>Microsoft Edge</strong> appear, click on it and it will snap into place on the right.</p>
+            <div class="note">
+                <strong>If nothing appears on the right side:</strong> Click on the Edge window in your taskbar
+                (the bar at the bottom of the screen), then hold <kbd>&#8862; Windows</kbd> and press
+                <kbd>&rarr; Right Arrow</kbd>. Edge will snap to the right.
+            </div>
+        </div>
+    </div>
+
+    <div class="step phase-3">
+        <div class="step-number">12</div>
+        <div class="step-content">
+            <p>You should now have <strong>Notepad on the left</strong> and <strong>Edge on the right</strong>.
+            If either window is too small to read comfortably, drag the dividing line between them left or right
+            to resize them.</p>
+        </div>
+    </div>
+
+
+    <div class="done">
+        <strong>&#10003; You&rsquo;re all set!</strong>
+        Use the <strong>reference sheet on the right</strong> to look up tags, then type your code
+        in <strong>Notepad on the left</strong>.
+        When you want to check how your page looks in the browser, save your file in Notepad
+        (<kbd>Ctrl</kbd> + <kbd>S</kbd>), then open your own HTML file in a new Edge tab.
+        After that, just save in Notepad and press <kbd>F5</kbd> in Edge to see each change.
+    </div>
+
+</main>
+
+</body>
+</html>

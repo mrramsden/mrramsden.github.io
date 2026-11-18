@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Little Ashford Village Noticeboard: Year 12 Python Challenge</title>
+<style>
+:root {
+  --cork:        #7a5928;
+  --paper:       #f5edcf;
+  --paper-mid:   #ecddb0;
+  --paper-dark:  #dfc98a;
+  --ink:         #1a0e06;
+  --ink-mid:     #3a2010;
+  --ink-light:   #6b4020;
+  --hint-bg:     #fefadd;
+  --hint-border: #c8a800;
+  --hint-ink:    #5a4200;
+  --code-bg:     #191208;
+  --code-fg:     #e8d8a8;
+  --code-acc:    #e8a030;
+  --accent:      #8b1c1c;
+  --border:      #9a7030;
+  --info-bg:     #eef6ee;
+  --info-border: #4a8a4a;
+  --info-ink:    #2a4a2a;
+  --mys-bg:      #f8eee8;
+  --mys-border:  #9a3020;
+  --mys-ink:     #5a1a10;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  background-color: var(--cork);
+  background-image:
+    radial-gradient(ellipse at 15% 20%, rgba(0,0,0,.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 75%, rgba(0,0,0,.12) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='%237a5928'/%3E%3Ccircle cx='1.5' cy='1.5' r='.7' fill='%236a4818' opacity='.45'/%3E%3Ccircle cx='4.5' cy='4.5' r='.6' fill='%238a6838' opacity='.35'/%3E%3Ccircle cx='4' cy='1' r='.4' fill='%235a3810' opacity='.3'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 20px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--ink);
+}
+
+.site-header { text-align: center; width: 100%; max-width: 780px; padding: 10px 0 6px; }
+.site-title {
+  font-family: 'Special Elite', cursive;
+  font-size: clamp(1.05rem, 3vw, 1.45rem);
+  color: var(--paper-dark);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 6px rgba(0,0,0,.55);
+  margin-bottom: 3px;
+}
+.site-subtitle {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  color: rgba(245,237,207,.6);
+  font-size: .82rem;
+  letter-spacing: 1px;
+}
+
+.progress-row {
+  width: 100%; max-width: 780px;
+  display: flex; align-items: center; gap: 12px;
+  margin: 14px 0 8px;
+}
+.progress-track { flex: 1; height: 3px; background: rgba(0,0,0,.35); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--paper-dark); border-radius: 2px; transition: width .45s ease; }
+.progress-label { font-family: 'Special Elite', cursive; color: var(--paper-dark); font-size: .78rem; min-width: 90px; text-align: right; opacity: .85; }
+
+.task-dots { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; max-width: 780px; width: 100%; margin-bottom: 14px; }
+.dot {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid rgba(245,237,207,.25);
+  background: rgba(0,0,0,.28);
+  cursor: pointer;
+  font-family: 'Special Elite', cursive; font-size: .62rem;
+  color: rgba(245,237,207,.4);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.dot:hover { background: rgba(245,237,207,.22); color: var(--paper-dark); }
+.dot.active { background: var(--paper-dark); color: var(--ink); border-color: var(--paper); }
+
+.card {
+  background: var(--paper);
+  width: 100%; max-width: 780px;
+  border-radius: 2px;
+  padding: clamp(22px, 5vw, 42px) clamp(20px, 5vw, 46px);
+  box-shadow: 0 2px 4px rgba(0,0,0,.25), 0 10px 28px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25);
+  position: relative;
+  background-image: linear-gradient(170deg, rgba(255,255,255,.06) 0%, transparent 60%);
+  min-height: 280px;
+}
+.card::before {
+  content: '';
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  width: 17px; height: 17px;
+  background: radial-gradient(circle at 38% 32%, #e84040 0%, #901010 70%);
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(0,0,0,.55), inset 0 1px 2px rgba(255,160,160,.3);
+  z-index: 5;
+}
+
+.badge {
+  display: inline-block;
+  font-family: 'Special Elite', cursive; font-size: .68rem;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 3px 10px 2px; border-radius: 1px; margin-bottom: 10px;
+}
+.badge-task  { background: var(--accent); color: var(--paper); }
+.badge-intro { background: var(--ink-mid); color: var(--paper); }
+
+.task-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.4rem, 4vw, 1.85rem);
+  font-weight: 700; color: var(--ink); line-height: 1.2; margin-bottom: 5px;
+}
+.task-sig {
+  font-family: 'Special Elite', cursive; color: var(--ink-light);
+  font-size: .9rem; margin-bottom: 20px;
+  padding-bottom: 14px; border-bottom: 1px solid var(--paper-dark);
+}
+
+.body p { font-size: .94rem; line-height: 1.82; color: var(--ink-mid); margin-bottom: 12px; }
+.body ul, .body ol { margin: 6px 0 14px 22px; color: var(--ink-mid); }
+.body li { font-size: .92rem; line-height: 1.9; }
+.body strong { color: var(--ink); }
+code {
+  font-family: 'Special Elite', cursive;
+  background: var(--paper-mid); color: var(--accent);
+  padding: 1px 5px; border-radius: 2px; font-size: .88em;
+}
+
+.cb-wrap { position: relative; margin: 14px 0; }
+.cb-label {
+  display: inline-block;
+  font-family: 'Special Elite', cursive; font-size: .66rem;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(232,216,168,.7); background: var(--code-bg);
+  padding: 3px 10px; border-radius: 2px 2px 0 0;
+}
+pre.cb {
+  background: var(--code-bg); color: var(--code-fg);
+  font-family: 'Special Elite', cursive; font-size: .85rem;
+  line-height: 1.65; padding: 14px 20px;
+  border-radius: 0 2px 2px 2px; overflow-x: auto; margin: 0;
+  border-left: 3px solid var(--code-acc); white-space: pre; tab-size: 4;
+}
+.copy-btn {
+  position: absolute; top: 28px; right: 8px;
+  background: rgba(255,255,255,.08); color: rgba(232,216,168,.75);
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 4px 11px; font-family: 'Special Elite', cursive;
+  font-size: .68rem; letter-spacing: 1px; cursor: pointer;
+  border-radius: 2px; transition: all .2s; text-transform: uppercase;
+}
+.copy-btn:hover { background: rgba(255,255,255,.18); color: white; }
+.copy-btn.ok    { color: #90ee90; border-color: #90ee90; }
+
+.callout { border-radius: 2px; padding: 11px 15px; margin: 14px 0; font-size: .88rem; line-height: 1.7; }
+.callout.info    { background: var(--info-bg); border-left: 3px solid var(--info-border); color: var(--info-ink); }
+.callout.mystery { background: var(--mys-bg);  border-left: 3px solid var(--mys-border);  color: var(--mys-ink); font-style: italic; }
+
+.eg-wrap { margin: 14px 0; }
+.eg-label { font-family: 'Special Elite', cursive; font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 6px; }
+.eg-box { background: rgba(139,96,32,.07); border: 1px solid var(--paper-dark); border-radius: 2px; padding: 10px 14px; }
+.eg-box p { margin: 3px 0; font-size: .89rem; }
+
+.hints-section { margin-top: 26px; padding-top: 16px; border-top: 1px dashed var(--paper-dark); }
+.hints-heading { font-family: 'Special Elite', cursive; font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 10px; }
+.hint-btns { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 10px; }
+.h-btn {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--ink-mid); padding: 6px 16px;
+  font-family: 'Lora', serif; font-style: italic; font-size: .82rem;
+  cursor: pointer; border-radius: 2px; transition: all .2s;
+}
+.h-btn:hover:not(:disabled) { background: var(--hint-bg); border-color: var(--hint-border); }
+.h-btn.shown { background: var(--hint-bg); border-color: var(--hint-border); color: var(--hint-ink); cursor: default; }
+.hint-card {
+  display: none; background: var(--hint-bg); border: 1px solid var(--hint-border);
+  border-radius: 2px; padding: 11px 15px 11px 22px; margin: 7px 0;
+  position: relative; animation: slideIn .25s ease;
+}
+.hint-card::before { content: '📌'; position: absolute; top: -8px; left: 10px; font-size: 13px; }
+.hint-card.visible { display: block; }
+@keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.hint-num { font-family: 'Special Elite', cursive; font-size: .68rem; letter-spacing: 1px; color: #8a6a00; margin-bottom: 4px; }
+.hint-card p { font-size: .87rem; color: var(--hint-ink); line-height: 1.65; margin: 0; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 780px; margin: 18px 0 8px; }
+.nav-btn {
+  background: var(--paper-mid); color: var(--ink); border: none;
+  padding: 10px 26px; font-family: 'Special Elite', cursive;
+  font-size: .82rem; letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0,0,0,.35); transition: all .2s;
+}
+.nav-btn:hover:not(:disabled) { background: var(--paper); transform: translateY(-1px); box-shadow: 0 4px 9px rgba(0,0,0,.35); }
+.nav-btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+.page-ind { font-family: 'Special Elite', cursive; color: var(--paper-dark); font-size: .82rem; letter-spacing: 1px; }
+
+.ext-divider { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--paper-dark); }
+.ext-label { font-family: 'Special Elite', cursive; font-size: .78rem; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 10px; }
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 5</a></nav>
+
+
+<header class="site-header">
+  <div class="site-title">Little Ashford Village Noticeboard</div>
+  <div class="site-subtitle">Year 12 Python Programming Challenge</div>
+</header>
+
+<div class="progress-row">
+  <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+  <div class="progress-label" id="pLabel">Introduction</div>
+</div>
+
+<div class="task-dots" id="dots"></div>
+<div class="card" id="card"></div>
+
+<div class="nav-row">
+  <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>← Previous</button>
+  <span class="page-ind" id="pageInd"></span>
+  <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
+</div>
+
+<script>
+const PAGES = [
+
+// 0: INTRO
+{ badge:'intro', badgeText:'Before You Begin', title:'Welcome to Little Ashford',
+  sig:'A mystery hidden in plain sight',
+  body:`
+<p>A small village has a public noticeboard. At first, your job is simple: manage ordinary village notices: display them, add new ones, search through them.</p>
+<p>But look more carefully. Some notices contain <strong>suspicious words</strong>. When the right notices are correctly identified and filtered, the <strong>first letter of each one spells a hidden location</strong>.</p>
+<div class="callout mystery">🔍 There is a message hidden in the noticeboard. Your program will reveal it, but only if you build it correctly.</div>
+<p>Work through each task in order. Each one builds on the last. Copy all the starter data below into your Python file <em>before</em> you write a single line of code.</p>
+
+<div class="cb-wrap">
+  <span class="cb-label">Starter Data: copy this into your file</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">notices = [
+    "The bakery will be closed on Thursday.",
+    "Open gardens will take place this Sunday.",
+    "Waste collection has been delayed by one day.",
+    "Elderly residents are invited to tea at the hall.",
+    "Roadworks begin near the old bridge tomorrow.",
+    "Lost property can be collected from the library.",
+    "The annual duck race starts at midday.",
+    "New flower beds have been planted in the square.",
+    "A strange light was seen near the churchyard.",
+    "Parish council minutes are available online.",
+    "Everyone is welcome at the quiz night.",
+    "Several tools are missing from the shed."
+]
+
+keywords = ["closed", "delayed", "old", "open", "elderly", "strange", "missing"]
+
+dates = [
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+    "Saturday", "Sunday", "Monday", "Tuesday",
+    "Wednesday", "Thursday", "Friday"
+]
+
+notice_types = [
+    "urgent", "urgent", "urgent", "urgent", "urgent",
+    "general", "general", "general", "general",
+    "general", "general", "general"
+]</pre>
+</div>
+
+<p>Each list shares an index. <code>notices[0]</code>, <code>dates[0]</code>, and <code>notice_types[0]</code> all describe the same notice, and so on for every index.</p>
+<div class="callout info">💡 <strong>Note:</strong> Tasks 1–8 only use <code>notices</code> and <code>keywords</code>. Don't worry about <code>dates</code> or <code>notice_types</code> until Task 10.</div>
+`},
+
+// 1
+{ badge:'task', badgeText:'Task 1', title:'Display a Welcome Message',
+  sig:'display_welcome()',
+  body:`
+<p>Write a subroutine called <code>display_welcome()</code> that prints a welcome message when the program starts.</p>
+<p>It takes <strong>no parameters</strong> and returns nothing: it only prints.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output</div>
+  <div class="eg-box"><pre class="cb">Welcome to the Little Ashford Village Noticeboard
+Please check today's notices below.</pre></div>
+</div>
+<p>Call your function at the bottom of your file to test it before moving on.</p>
+`,
+  hints:[
+    `A subroutine with no parameters and no return value just uses <code>def</code>, empty brackets, and <code>print()</code>. What does the <code>def</code> line look like when nothing is passed in?`,
+    `The structure is:<br><br><code>def display_welcome():<br>&nbsp;&nbsp;&nbsp;&nbsp;print("Welcome to...")<br>&nbsp;&nbsp;&nbsp;&nbsp;print("Please check...")</code><br><br>Both print lines must be indented inside the function, because indentation is how Python knows they belong to it.`
+  ]
+},
+
+// 2
+{ badge:'task', badgeText:'Task 2', title:'Display One Notice',
+  sig:'display_notice(notice)',
+  body:`
+<p>Write a subroutine called <code>display_notice(notice)</code> that prints a single notice, prefixed with a dash and a space.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Example Call</div>
+  <div class="eg-box"><pre class="cb">display_notice("The bakery will be closed on Thursday.")</pre></div>
+</div>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output</div>
+  <div class="eg-box"><pre class="cb">- The bakery will be closed on Thursday.</pre></div>
+</div>
+<p>Keep it simple: you'll use this as a building block in later tasks.</p>
+`,
+  hints:[
+    `The function takes one parameter (the notice text) and prints it with <code>"- "</code> at the front. How do you combine two strings in Python?`,
+    `You can use concatenation: <code>print("- " + notice)</code><br>Or an f-string: <code>print(f"- {notice}")</code><br>Both are fine, so use whichever you find clearer.`
+  ]
+},
+
+// 3
+{ badge:'task', badgeText:'Task 3', title:'Display All Notices',
+  sig:'display_notices(notices)',
+  body:`
+<p>Write a subroutine called <code>display_notices(notices)</code> that prints every notice in the list, numbered from 1.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output (first three shown)</div>
+  <div class="eg-box"><pre class="cb">1. The bakery will be closed on Thursday.
+2. Open gardens will take place this Sunday.
+3. Waste collection has been delayed by one day.
+...</pre></div>
+</div>
+<p>You need the number <em>and</em> the notice text on every line. Think about how to count as you loop.</p>
+`,
+  hints:[
+    `You need to loop through the list and track a counter at the same time. Python's built-in <code>enumerate()</code> does both. Look it up if you haven't used it. The second argument controls where counting starts.`,
+    `<code>for i, notice in enumerate(notices, 1):</code> gives you the counter (<code>i</code>) and the notice text on each pass. Then: <code>print(f"{i}. {notice}")</code>`
+  ]
+},
+
+// 4
+{ badge:'task', badgeText:'Task 4', title:'Add a New Notice',
+  sig:'add_notice(notices)',
+  body:`
+<p>Write a subroutine called <code>add_notice(notices)</code> that asks the user to type a new notice, then adds it to the list.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Example Interaction</div>
+  <div class="eg-box"><pre class="cb">Enter a new notice: Choir practice is cancelled tonight.
+Notice added.</pre></div>
+</div>
+<p>After calling it, the list should be one item longer. Test by calling <code>display_notices(notices)</code> straight after.</p>
+<div class="callout info">💡 In Python, lists are <strong>mutable</strong>. When you pass a list into a function and change it, those changes affect the original list outside the function too, so there is no need to return it.</div>
+`,
+  hints:[
+    `You need two things: <code>input()</code> to get what the user types, and a list method to add it to the end. Which list method adds an item to the end?`,
+    `<code>new_notice = input("Enter a new notice: ")</code> captures the text.<br><code>notices.append(new_notice)</code> adds it to the list.<br>Finish with <code>print("Notice added.")</code>`
+  ]
+},
+
+// 5
+{ badge:'task', badgeText:'Task 5', title:'Search for a Word',
+  sig:'search_notices(notices, search_word)',
+  body:`
+<p>Write a subroutine called <code>search_notices(notices, search_word)</code> that prints only the notices containing the search word, keeping their original numbering.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Example Call</div>
+  <div class="eg-box"><pre class="cb">search_notices(notices, "bridge")</pre></div>
+</div>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output</div>
+  <div class="eg-box"><pre class="cb">5. Roadworks begin near the old bridge tomorrow.</pre></div>
+</div>
+<p>If nothing matches, print <code>No notices found.</code></p>
+`,
+  hints:[
+    `Use <code>enumerate()</code> to loop like Task 3. For each notice, check whether the search word appears in the notice text. Python has a very readable way to check if one string is inside another. What is it?`,
+    `Use <code>if search_word in notice:</code> inside your loop. Track whether anything matched: set <code>found = False</code> before the loop and <code>found = True</code> whenever you print a match. After the loop, check <code>found</code> for the "nothing found" message.`
+  ]
+},
+
+// 6
+{ badge:'task', badgeText:'Task 6', title:'Is a Notice Suspicious?',
+  sig:'is_suspicious(notice, keywords)',
+  body:`
+<p>Write a <strong>function</strong> (a subroutine that <em>returns</em> a value, rather than printing) called <code>is_suspicious(notice, keywords)</code> that returns <code>True</code> if the notice contains <em>any</em> keyword from the list, and <code>False</code> otherwise.</p>
+<div class="callout info">💡 <strong>Watch the capitals.</strong> The keywords are all lower case, but some notices start with a capital: <code>"open" in "Open gardens..."</code> is <code>False</code>. Compare against <code>notice.lower()</code> so the check ignores case.</div>
+<div class="eg-wrap">
+  <div class="eg-label">Returns True</div>
+  <div class="eg-box"><pre class="cb">is_suspicious("Several tools are missing from the shed.", keywords)</pre></div>
+</div>
+<div class="eg-wrap">
+  <div class="eg-label">Returns False</div>
+  <div class="eg-box"><pre class="cb">is_suspicious("The annual duck race starts at midday.", keywords)</pre></div>
+</div>
+<div class="callout mystery">🔍 This is the core detection function. Every suspicious-notice task from here on calls this one, so get it right.</div>
+`,
+  hints:[
+    `Loop through the <code>keywords</code> list. For each keyword, check if it appears in the notice text. If <em>any single keyword</em> matches, what should you do immediately, without finishing the loop?`,
+    `<code>for keyword in keywords:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if keyword in notice.lower():</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>return True</code><br><code>return False</code><br><br>The <code>.lower()</code> means "Open" and "Elderly" still match. The <code>return False</code> must be <em>outside</em> the loop. If it were inside, it would return False after checking just the first keyword, whether or not it matched.`
+  ]
+},
+
+// 7
+{ badge:'task', badgeText:'Task 7', title:'Display Suspicious Notices',
+  sig:'display_suspicious_notices(notices, keywords)',
+  body:`
+<p>Write a subroutine called <code>display_suspicious_notices(notices, keywords)</code> that prints only suspicious notices, keeping their original numbering.</p>
+<p>Use your <code>is_suspicious()</code> function from Task 6, so don't rewrite the logic.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output</div>
+  <div class="eg-box"><pre class="cb">1. The bakery will be closed on Thursday.
+2. Open gardens will take place this Sunday.
+3. Waste collection has been delayed by one day.
+4. Elderly residents are invited to tea at the hall.
+5. Roadworks begin near the old bridge tomorrow.
+9. A strange light was seen near the churchyard.
+12. Several tools are missing from the shed.</pre></div>
+</div>
+<div class="callout mystery">🔍 You should get <strong>seven</strong> suspicious notices. Only five form the hidden message. There are two red herrings. Can you spot which ones don't belong?</div>
+`,
+  hints:[
+    `This is essentially Task 5, but instead of checking for a search word, you call <code>is_suspicious(notice, keywords)</code> on each notice. Use <code>enumerate()</code> to keep the original numbering.`,
+    `<code>for i, notice in enumerate(notices, 1):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if is_suspicious(notice, keywords):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print(f"{i}. {notice}")</code><br><br>You've already done all the hard detection work in Task 6.`
+  ]
+},
+
+// 8
+{ badge:'task', badgeText:'Task 8', title:'Score a Notice',
+  sig:'score_notice(notice, keywords)',
+  body:`
+<p>Write a function called <code>score_notice(notice, keywords)</code> that returns the number of suspicious keywords found in a single notice. Each keyword found scores 1 point.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Example</div>
+  <div class="eg-box">
+    <pre class="cb">score_notice("The old bridge is closed after strange noises.", keywords)</pre>
+    <p style="margin-top:8px;">Returns <code>3</code> because because it contains <em>old</em>, <em>closed</em>, and <em>strange</em>.</p>
+  </div>
+</div>
+<p>Test it on a few notices from the starter data. Most real notices should score 0 or 1. Ignore capitals, just like you did in Task 6.</p>
+`,
+  hints:[
+    `Start with a score of zero. Loop through the keywords and add 1 each time one is found. What do you return at the end?`,
+    `<code>score = 0</code><br><code>for keyword in keywords:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if keyword in notice.lower():</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>score += 1</code><br><code>return score</code>`
+  ]
+},
+
+// 9
+{ badge:'task', badgeText:'Task 9', title:'Get Priority Notices',
+  sig:'get_priority_notices(notices, keywords)',
+  body:`
+<p>Write a function called <code>get_priority_notices(notices, keywords)</code> that <strong>returns a new list</strong> containing only notices that score <em>exactly 1</em>.</p>
+<p>Use your <code>score_notice()</code> function from Task 8.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Return Value</div>
+  <div class="eg-box"><pre class="cb">["The bakery will be closed on Thursday.",
+ "Open gardens will take place this Sunday.",
+ "Waste collection has been delayed by one day.",
+ "Elderly residents are invited to tea at the hall.",
+ "Roadworks begin near the old bridge tomorrow.",
+ "A strange light was seen near the churchyard.",
+ "Several tools are missing from the shed."]</pre></div>
+</div>
+<div class="callout mystery">🔍 Still seven. Scoring alone isn't enough to isolate the message. Two more filters to go.</div>
+`,
+  hints:[
+    `Build an empty list before the loop. Add to it when the condition is met. Return it after the loop. This is a standard "filter into a new list" pattern you'll reuse in Tasks 10 and 11.`,
+    `<code>result = []</code><br><code>for notice in notices:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if score_notice(notice, keywords) == 1:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>result.append(notice)</code><br><code>return result</code>`
+  ]
+},
+
+// 10
+{ badge:'task', badgeText:'Task 10', title:'Filter by Weekday',
+  sig:'get_weekday_suspicious_notices(notices, dates, keywords)',
+  body:`
+<p>Write a function called <code>get_weekday_suspicious_notices(notices, dates, keywords)</code> that returns only notices that are <strong>both</strong> suspicious (score exactly 1) <strong>and</strong> posted on a weekday (Monday to Friday).</p>
+<p>Remember: <code>notices[i]</code> and <code>dates[i]</code> refer to the same notice.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Return Value</div>
+  <div class="eg-box"><pre class="cb">["The bakery will be closed on Thursday.",
+ "Open gardens will take place this Sunday.",
+ "Waste collection has been delayed by one day.",
+ "Elderly residents are invited to tea at the hall.",
+ "Roadworks begin near the old bridge tomorrow.",
+ "A strange light was seen near the churchyard.",
+ "Several tools are missing from the shed."]</pre></div>
+</div>
+<div class="callout mystery">🔍 Still seven. As it happens, all suspicious notices fall on weekdays. The date filter doesn't remove anything here. One filter left.</div>
+`,
+  hints:[
+    `You need to access the same index in both <code>notices</code> and <code>dates</code> at once. <code>range(len(notices))</code> lets you do that. Define a list of the five weekday names to check against.`,
+    `<code>weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday"]</code><br><code>result = []</code><br><code>for i in range(len(notices)):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if score_notice(notices[i], keywords) == 1 and dates[i] in weekdays:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>result.append(notices[i])</code><br><code>return result</code>`
+  ]
+},
+
+// 11
+{ badge:'task', badgeText:'Task 11', title:'Filter by Urgency',
+  sig:'get_urgent_suspicious_notices(notices, dates, notice_types, keywords)',
+  body:`
+<p>Write a function called <code>get_urgent_suspicious_notices(notices, dates, notice_types, keywords)</code> that returns only notices meeting <strong>all three</strong> conditions:</p>
+<ul>
+  <li>Suspicious: score exactly 1</li>
+  <li>Posted on a weekday</li>
+  <li>Marked as <code>"urgent"</code></li>
+</ul>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Return Value</div>
+  <div class="eg-box"><pre class="cb">["The bakery will be closed on Thursday.",
+ "Open gardens will take place this Sunday.",
+ "Waste collection has been delayed by one day.",
+ "Elderly residents are invited to tea at the hall.",
+ "Roadworks begin near the old bridge tomorrow."]</pre></div>
+</div>
+<div class="callout mystery">🔍 Five notices. Their first letters spell something. What is it?</div>
+`,
+  hints:[
+    `This is Task 10 with one extra condition added. The structure is identical: extend your <code>if</code> statement with an additional <code>and</code>. What needs to be true about <code>notice_types[i]</code>?`,
+    `Add <code>and notice_types[i] == "urgent"</code> to your existing condition. All three parts of the <code>and</code> must be True. If any one is False, the notice is skipped (Python stops checking as soon as it finds a False part).`
+  ]
+},
+
+// 12
+{ badge:'task', badgeText:'Task 12', title:'Reveal the Hidden Message',
+  sig:'reveal_message(filtered_notices)',
+  body:`
+<p>Write a function called <code>reveal_message(filtered_notices)</code> that takes the first letter of each notice in the list, joins them into a single string, and returns it.</p>
+<div class="eg-wrap">
+  <div class="eg-label">Expected Output</div>
+  <div class="eg-box"><pre class="cb">Hidden message revealed: TOWER</pre></div>
+</div>
+
+<div class="cb-wrap">
+  <span class="cb-label">Call it like this</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">priority = get_urgent_suspicious_notices(notices, dates, notice_types, keywords)
+message = reveal_message(priority)
+print("Hidden message revealed:", message)</pre>
+</div>
+
+<div class="callout mystery">🏰 Why is it TOWER? Where in Little Ashford is the tower? What has been going on there? That's your story to tell.</div>
+
+<div class="ext-divider">
+  <p class="ext-label">Final Challenge: Build the Menu</p>
+  <p class="body" style="font-size:.94rem;line-height:1.82;color:var(--ink-mid);margin-bottom:12px;">Combine all your subroutines into a menu-driven program that lets the user choose what to do:</p>
+  <div class="cb-wrap">
+    <span class="cb-label">Menu Structure</span>
+    <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">Little Ashford Noticeboard
+
+1. Display all notices
+2. Add a new notice
+3. Search notices
+4. Display suspicious notices
+5. Analyse urgent suspicious notices
+6. Reveal hidden message
+7. Quit</pre>
+  </div>
+</div>
+
+<div class="ext-divider">
+  <p class="ext-label">Extension Tasks</p>
+  <ul class="body">
+    <li>Store each notice as a <strong>dictionary</strong> instead of three separate lists, e.g. <code>{"text": "...", "date": "Monday", "type": "urgent"}</code></li>
+    <li>Save notices to a <strong>text file</strong> and reload them when the program starts.</li>
+    <li>Add a <strong>second hidden message</strong> using the <em>last</em> letter of each selected notice.</li>
+    <li>Use <strong>different keyword lists</strong> that reveal different hidden words.</li>
+  </ul>
+</div>
+`,
+  hints:[
+    `How do you access the first character of a string in Python? You need to do that for each notice, collect the characters, then combine them into one string. There's a built-in string method for joining a list of characters.`,
+    `<code>letters = [notice[0] for notice in filtered_notices]</code> builds a list of first letters.<br><code>"".join(letters)</code> joins them into one string. Return that string, then print it with the reveal message.`
+  ]
+}
+
+]; // end PAGES
+
+let cur = 0;
+const hintState = {};
+
+function render() {
+  const p = PAGES[cur];
+  const pct = (cur / (PAGES.length - 1)) * 100;
+  document.getElementById('pFill').style.width = pct + '%';
+  document.getElementById('pLabel').textContent = cur === 0 ? 'Introduction' : `Task ${cur} of ${PAGES.length - 1}`;
+  document.getElementById('pageInd').textContent = cur === 0 ? 'Intro' : `${cur} / ${PAGES.length - 1}`;
+  document.getElementById('prevBtn').disabled = cur === 0;
+  document.getElementById('nextBtn').disabled = cur === PAGES.length - 1;
+
+  const dc = document.getElementById('dots');
+  dc.innerHTML = '';
+  PAGES.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.textContent = i === 0 ? '★' : i;
+    d.title = i === 0 ? 'Introduction' : `Task ${i}`;
+    d.setAttribute('aria-label', d.title);
+    if (i === cur) d.setAttribute('aria-current', 'step');
+    d.onclick = () => goTo(i);
+    dc.appendChild(d);
+  });
+
+  const shown = hintState[cur] || 0;
+  document.getElementById('card').innerHTML = `
+    <div class="badge badge-${p.badge}">${p.badgeText}</div>
+    <h1 class="task-heading">${p.title}</h1>
+    <p class="task-sig">${p.sig}</p>
+    <div class="body">${p.body}</div>
+    ${p.hints ? buildHints(p.hints, shown) : ''}
+  `;
+
+}
+
+function buildHints(hints, shown) {
+  let btns = '', cards = '';
+  hints.forEach((h, i) => {
+    const isShown = i < shown;
+    btns += `<button class="h-btn${isShown ? ' shown' : ''}" onclick="showHint(${i+1})" ${isShown ? 'disabled' : ''}>
+      ${isShown ? '&#10003; Hint ' + (i+1) : 'Hint ' + (i+1) + (i === 0 ? ': gentle nudge' : ': more detail')}
+    </button>`;
+    cards += `<div class="hint-card${isShown ? ' visible' : ''}">
+      <div class="hint-num">Hint ${i+1}</div>
+      <p>${h}</p>
+    </div>`;
+  });
+  const all = shown >= hints.length;
+  return `<div class="hints-section">
+    <div class="hints-heading">Need a hand?</div>
+    <div class="hint-btns">${btns}</div>
+    ${cards}
+    ${all ? '<p style="font-style:italic;font-size:.82rem;color:var(--ink-light);margin-top:8px;">All hints shown. If you\'re still stuck, ask.</p>' : ''}
+  </div>`;
+}
+
+function showHint(n) { hintState[cur] = n; render(); }
+function goTo(i) { cur = i; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function go(d) { goTo(Math.max(0, Math.min(PAGES.length - 1, cur + d))); }
+
+function cp(btn) {
+  const pre = btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent.trim()).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2200);
+  }).catch(() => {
+    btn.textContent = 'Failed';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
