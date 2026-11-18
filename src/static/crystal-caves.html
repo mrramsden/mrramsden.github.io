@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal Caves: Python Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:          #060810;
+  --stone:         #0e1420;
+  --stone-mid:     #161e2e;
+  --stone-light:   #1e2a3e;
+  --stone-lighter: #283650;
+  --aqua:          #24c49a;
+  --aqua-dim:      rgba(36,196,154,.12);
+  --aqua-glow:     rgba(36,196,154,.08);
+  --violet:        #7868d0;
+  --violet-dim:    rgba(120,104,208,.12);
+  --amber:         #c8820c;
+  --amber-bright:  #e09a24;
+  --text:          #ccc4aa;
+  --text-dim:      rgba(204,196,170,.55);
+  --text-bright:   #e8e0c8;
+  --bronze:        #b06820;
+  --bronze-hi:     #cc8438;
+  --silver:        #7898aa;
+  --silver-hi:     #9ab8c8;
+  --gold:          #be8e08;
+  --gold-hi:       #d8b030;
+  --code-bg:       #04060e;
+  --code-fg:       #b0c8b8;
+  --hint-bg:       rgba(36,196,154,.06);
+  --hint-border:   rgba(36,196,154,.28);
+  --req-bg:        rgba(20,14,36,.95);
+  --req-border:    rgba(90,72,148,.55);
+  --req-text:      #9080c0;
+  --req-sub:       rgba(144,128,192,.55);
+  --warn-border:   rgba(192,130,12,.45);
+  --warn-text:     #b89030;
+  --border:        rgba(255,255,255,.06);
+  --border-mid:    rgba(255,255,255,.1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Lora', Georgia, serif;
+  background-color: var(--void);
+  background-image:
+    radial-gradient(ellipse at 18% 12%,  rgba(36,196,154,.055) 0%, transparent 45%),
+    radial-gradient(ellipse at 82% 88%,  rgba(120,104,208,.06) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%,  rgba(0,0,0,.4)        0%, transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Crect width='10' height='10' fill='%23060810'/%3E%3Ccircle cx='2' cy='2' r='1' fill='%230a0e18' opacity='.9'/%3E%3Ccircle cx='7' cy='7' r='.8' fill='%23080c16' opacity='.8'/%3E%3Ccircle cx='7' cy='2' r='.6' fill='%230c1020' opacity='.7'/%3E%3Ccircle cx='2' cy='8' r='.5' fill='%23060a12' opacity='.9'/%3E%3Crect x='4' y='0' width='1' height='10' fill='%23050810' opacity='.12'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 20px 16px 52px;
+  display: flex; flex-direction: column; align-items: center;
+  color: var(--text);
+}
+
+/* ── HEADER ── */
+.site-header { width:100%; max-width:960px; display:flex; flex-direction:column; align-items:center; padding:18px 0 10px; text-align:center; }
+.site-title {
+  font-family:'Chakra Petch',sans-serif; font-weight:700; letter-spacing:6px; text-transform:uppercase;
+  font-size:clamp(2rem,6vw,3.4rem);
+  background:linear-gradient(130deg,var(--text-bright) 0%,var(--aqua) 35%,var(--text-bright) 55%,var(--violet) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 28px rgba(36,196,154,.22)); margin-bottom:5px; line-height:1.1;
+}
+.site-subtitle { font-family:'Chakra Petch',sans-serif; font-size:.65rem; letter-spacing:4.5px; text-transform:uppercase; color:var(--text-dim); margin-bottom:20px; }
+
+/* ── KS TOGGLE ── */
+.ks-row { display:flex; align-items:center; gap:12px; background:var(--stone-mid); border:1px solid var(--border); border-radius:30px; padding:6px 18px 6px 14px; margin-bottom:2px; user-select:none; }
+.ks-lbl { font-family:'Chakra Petch',sans-serif; font-size:.65rem; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-dim); transition:color .25s; }
+.ks-lbl.on { color:var(--text-bright); }
+.toggle-track { width:48px; height:25px; background:var(--stone-lighter); border-radius:13px; border:1px solid var(--border-mid); position:relative; cursor:pointer; transition:background .3s,border-color .3s; flex-shrink:0; }
+.toggle-track.ks5 { background:rgba(36,196,154,.18); border-color:rgba(36,196,154,.38); }
+.toggle-thumb { position:absolute; top:3px; left:3px; width:17px; height:17px; border-radius:50%; background:var(--silver-hi); box-shadow:0 1px 5px rgba(0,0,0,.55); transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .3s; }
+.toggle-track.ks5 .toggle-thumb { transform:translateX(23px); background:var(--aqua); }
+.toggle-track:focus-visible, .card-face:focus-visible, .dot:focus-visible { outline:2px solid var(--aqua); outline-offset:3px; }
+
+/* ── PROGRESS ── */
+.progress-row { width:100%; max-width:960px; display:flex; align-items:center; gap:12px; margin:16px 0 8px; }
+.progress-track { flex:1; height:2px; background:rgba(255,255,255,.06); border-radius:1px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:1px; background:linear-gradient(90deg,var(--aqua) 0%,var(--violet) 100%); box-shadow:0 0 8px rgba(36,196,154,.45); transition:width .5s ease; }
+.progress-lbl { font-family:'Chakra Petch',sans-serif; color:var(--text-dim); font-size:.66rem; letter-spacing:1.5px; min-width:85px; text-align:right; }
+
+/* ── PAGE DOTS ── */
+.task-dots { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; max-width:960px; width:100%; margin-bottom:18px; }
+.dot { width:26px; height:26px; border-radius:50%; background:var(--stone-mid); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:'Chakra Petch',sans-serif; font-size:.58rem; font-weight:600; color:var(--text-dim); transition:all .2s; }
+.dot:hover { background:var(--stone-light); color:var(--text); border-color:var(--border-mid); }
+.dot.active { background:transparent; color:var(--aqua); border-color:var(--aqua); box-shadow:0 0 10px rgba(36,196,154,.28),inset 0 0 8px rgba(36,196,154,.08); }
+
+/* ── PAGE CARD ── */
+#pageWrap { width:100%; max-width:960px; min-width:0; }
+.page-card { background:var(--stone); width:100%; max-width:960px; border-radius:3px; border:1px solid var(--border); padding:clamp(24px,5vw,50px) clamp(20px,5vw,50px); box-shadow:0 2px 4px rgba(0,0,0,.4),0 12px 36px rgba(0,0,0,.55); position:relative; overflow:hidden; }
+.page-card::before { content:''; position:absolute; top:0; right:0; width:120px; height:120px; background:radial-gradient(ellipse at 100% 0%,rgba(36,196,154,.1) 0%,transparent 65%); pointer-events:none; }
+.page-badge { display:inline-block; font-family:'Chakra Petch',sans-serif; font-size:.58rem; font-weight:600; letter-spacing:3px; text-transform:uppercase; padding:3px 10px 2px; border-radius:2px; margin-bottom:13px; }
+.badge-intro { background:var(--stone-lighter); color:var(--text-dim); border:1px solid var(--border-mid); }
+.badge-task { background:var(--aqua); color:var(--void); }
+.page-title { font-family:'Chakra Petch',sans-serif; font-size:clamp(1.5rem,4vw,2.2rem); font-weight:700; color:var(--text-bright); line-height:1.2; margin-bottom:6px; }
+.page-sig { font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--aqua); opacity:.8; margin-bottom:22px; padding-bottom:17px; border-bottom:1px solid var(--border); }
+
+/* body typography */
+.page-body p { font-size:.91rem; line-height:1.88; color:var(--text-dim); margin-bottom:13px; }
+.page-body p strong { color:var(--text); }
+.page-body ul,.page-body ol { margin:6px 0 14px 20px; }
+.page-body li { font-size:.89rem; line-height:1.9; color:var(--text-dim); }
+.page-body li strong { color:var(--text); }
+code { font-family:'JetBrains Mono',monospace; background:var(--stone-light); color:var(--aqua); padding:1px 5px; border-radius:2px; font-size:.83em; }
+
+/* code blocks */
+.cb-wrap { position:relative; margin:16px 0; }
+.cb-lbl { display:inline-block; font-family:'Chakra Petch',sans-serif; font-size:.58rem; letter-spacing:1.5px; text-transform:uppercase; color:rgba(180,210,190,.45); background:var(--code-bg); padding:3px 10px; border-radius:2px 2px 0 0; }
+pre.cb { background:var(--code-bg); color:var(--code-fg); font-family:'JetBrains Mono',monospace; font-size:.8rem; line-height:1.65; padding:14px 20px; border-radius:0 2px 2px 2px; overflow-x:auto; margin:0; border-left:3px solid var(--aqua); white-space:pre; tab-size:4; }
+.copy-btn { position:absolute; top:28px; right:8px; background:rgba(255,255,255,.05); color:rgba(180,210,190,.55); border:1px solid rgba(255,255,255,.1); padding:4px 10px; font-family:'Chakra Petch',sans-serif; font-size:.58rem; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.12); color:var(--text-bright); }
+.copy-btn.ok { color:var(--aqua); border-color:var(--aqua); }
+
+/* callouts */
+.callout { border-radius:2px; padding:11px 15px; margin:14px 0; font-size:.86rem; line-height:1.75; }
+.callout.info { background:var(--aqua-dim); border-left:3px solid rgba(36,196,154,.4); color:rgba(160,220,200,.85); }
+.callout.note { background:var(--violet-dim); border-left:3px solid rgba(120,104,208,.4); color:rgba(190,182,240,.85); }
+
+/* key table */
+.key-table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.83rem; }
+.key-table th { font-family:'Chakra Petch',sans-serif; font-size:.6rem; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); background:var(--stone-light); padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+.key-table td { padding:7px 12px; border-bottom:1px solid rgba(255,255,255,.03); color:var(--text-dim); vertical-align:middle; }
+.key-table td:first-child { font-family:'JetBrains Mono',monospace; font-size:1.1rem; color:var(--aqua); text-align:center; width:60px; }
+.key-table tr:last-child td { border-bottom:none; }
+
+/* ── TASK INTRO ── */
+.task-intro { margin-bottom:24px; }
+.task-intro p { font-size:.91rem; line-height:1.88; color:var(--text-dim); margin-bottom:8px; }
+.task-intro p strong { color:var(--text); }
+.task-intro ul { margin:4px 0 10px 20px; }
+.task-intro li { font-size:.89rem; line-height:1.9; color:var(--text-dim); }
+
+/* ── CARDS GRID ── */
+.cards-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+@media (max-width:700px) { .cards-grid { grid-template-columns:1fr; } }
+
+/* ── CARD FACE (face-down) ── */
+.card-face { border-radius:3px; border:1px solid; min-height:210px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; transition:transform .2s,box-shadow .25s; }
+.card-face:hover { transform:translateY(-4px); }
+.card-face.bronze { background:linear-gradient(155deg,#2a1208 0%,#180a04 45%,#221006 100%); border-color:rgba(176,104,32,.55); box-shadow:0 4px 18px rgba(0,0,0,.65),inset 0 1px 0 rgba(204,132,56,.15); }
+.card-face.bronze:hover { box-shadow:0 8px 28px rgba(0,0,0,.7),0 0 22px rgba(176,104,32,.2),inset 0 1px 0 rgba(204,132,56,.15); }
+.card-face.silver { background:linear-gradient(155deg,#141c28 0%,#0c1220 45%,#121c2e 100%); border-color:rgba(120,152,170,.5); box-shadow:0 4px 18px rgba(0,0,0,.65),inset 0 1px 0 rgba(154,184,200,.12); }
+.card-face.silver:hover { box-shadow:0 8px 28px rgba(0,0,0,.7),0 0 22px rgba(100,148,176,.18),inset 0 1px 0 rgba(154,184,200,.12); }
+.card-face.gold { background:linear-gradient(155deg,#201404 0%,#140c02 45%,#1c1204 100%); border-color:rgba(190,142,8,.5); box-shadow:0 4px 18px rgba(0,0,0,.65),inset 0 1px 0 rgba(216,176,48,.15); }
+.card-face.gold:hover { box-shadow:0 8px 28px rgba(0,0,0,.7),0 0 22px rgba(190,142,8,.25),inset 0 1px 0 rgba(216,176,48,.15); }
+.card-face::after { content:''; position:absolute; top:0; left:-120%; width:55%; height:100%; background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.035) 50%,transparent 100%); animation:sweep 5s infinite; pointer-events:none; }
+@keyframes sweep { 0%{left:-120%} 45%,100%{left:160%} }
+.face-letter { font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:4rem; line-height:1; margin-bottom:10px; }
+.bronze .face-letter { color:var(--bronze-hi); filter:drop-shadow(0 0 18px rgba(176,104,32,.55)); }
+.silver .face-letter { color:var(--silver-hi); filter:drop-shadow(0 0 18px rgba(120,168,196,.45)); }
+.gold   .face-letter { color:var(--gold-hi);   filter:drop-shadow(0 0 18px rgba(216,176,48,.55)); }
+.face-tier { font-family:'Chakra Petch',sans-serif; font-size:.62rem; letter-spacing:3.5px; text-transform:uppercase; margin-bottom:22px; }
+.bronze .face-tier { color:rgba(176,104,32,.65); }
+.silver .face-tier { color:rgba(120,168,196,.6); }
+.gold   .face-tier { color:rgba(190,160,24,.6); }
+.face-prompt { font-family:'Lora',serif; font-style:italic; font-size:.72rem; color:rgba(255,255,255,.18); }
+
+/* ── CARD CONTENT (face-up) ── */
+.card-content { border-radius:3px; border:1px solid; padding:18px 16px; animation:flipReveal .35s cubic-bezier(.22,.61,.36,1) forwards; }
+@keyframes flipReveal { from{opacity:0;transform:perspective(600px) rotateY(-12deg) scale(.97)} to{opacity:1;transform:perspective(600px) rotateY(0deg) scale(1)} }
+.card-content.bronze { border-color:rgba(176,104,32,.38); background:linear-gradient(180deg,rgba(42,18,8,.6) 0%,var(--stone) 35%); }
+.card-content.silver { border-color:rgba(100,140,165,.38); background:linear-gradient(180deg,rgba(18,26,42,.7) 0%,var(--stone) 35%); }
+.card-content.gold   { border-color:rgba(180,136,8,.38); background:linear-gradient(180deg,rgba(30,18,4,.7) 0%,var(--stone) 35%); }
+.content-badge { display:inline-block; font-family:'Chakra Petch',sans-serif; font-size:.56rem; font-weight:600; letter-spacing:2.5px; text-transform:uppercase; padding:2px 8px; border-radius:2px; margin-bottom:9px; }
+.bronze .content-badge { background:rgba(176,104,32,.18); color:var(--bronze-hi); border:1px solid rgba(176,104,32,.32); }
+.silver .content-badge { background:rgba(100,140,165,.15); color:var(--silver-hi); border:1px solid rgba(100,140,165,.28); }
+.gold   .content-badge { background:rgba(180,136,8,.15); color:var(--gold-hi); border:1px solid rgba(180,136,8,.28); }
+.content-title { font-family:'Chakra Petch',sans-serif; font-size:.96rem; font-weight:600; color:var(--text-bright); margin-bottom:11px; line-height:1.3; }
+.content-brief p { font-size:.85rem; line-height:1.83; color:var(--text-dim); margin-bottom:8px; }
+.content-brief p strong { color:var(--text); }
+.content-brief ul { margin:4px 0 10px 18px; }
+.content-brief li { font-size:.83rem; line-height:1.88; color:var(--text-dim); }
+.card-content pre.cb { font-size:.75rem; padding:10px 13px; }
+.card-content .cb-lbl { font-size:.54rem; }
+.eg-wrap { margin:10px 0 4px; }
+.eg-lbl { font-family:'Chakra Petch',sans-serif; font-size:.54rem; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; }
+.eg-box { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:2px; padding:9px 12px; }
+.eg-box pre { font-family:'JetBrains Mono',monospace; font-size:.74rem; color:var(--code-fg); white-space:pre; overflow-x:auto; line-height:1.6; }
+.fileio-banner { background:rgba(40,28,8,.8); border:1px solid var(--warn-border); border-radius:2px; padding:7px 11px; margin-bottom:11px; font-family:'Chakra Petch',sans-serif; font-size:.58rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--warn-text); text-align:center; }
+
+/* ── REQUIREMENTS SEAL ── */
+.req-seal { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:180px; padding:28px 18px; border-radius:3px; border:1px solid var(--req-border); background:var(--req-bg); text-align:center; gap:10px; }
+.req-icon { font-size:2rem; opacity:.55; }
+.req-title { font-family:'Chakra Petch',sans-serif; font-size:.7rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--req-text); line-height:1.7; }
+.req-sub { font-family:'Lora',serif; font-style:italic; font-size:.8rem; color:var(--req-sub); line-height:1.5; }
+
+/* ── HINTS ── */
+.hints-sec { margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,.05); }
+.hints-lbl { font-family:'Chakra Petch',sans-serif; font-size:.56rem; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; }
+.hint-btns { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:7px; }
+.h-btn { background:transparent; border:1px solid rgba(255,255,255,.1); color:var(--text-dim); padding:5px 13px; font-family:'Lora',serif; font-style:italic; font-size:.78rem; cursor:pointer; border-radius:2px; transition:all .2s; }
+.h-btn:hover:not(:disabled) { background:var(--hint-bg); border-color:var(--hint-border); color:var(--text); }
+.h-btn.shown { background:var(--hint-bg); border-color:var(--hint-border); color:rgba(160,220,200,.65); cursor:default; }
+.hint-box { display:none; background:var(--hint-bg); border:1px solid var(--hint-border); border-radius:2px; padding:9px 12px 9px 20px; margin:5px 0; position:relative; animation:fadeUp .22s ease; }
+.hint-box::before { content:'◈'; position:absolute; top:9px; left:7px; font-size:.6rem; color:var(--aqua); opacity:.55; }
+.hint-box.visible { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:none} }
+.hint-box p { font-size:.82rem; color:rgba(160,220,200,.8); line-height:1.68; margin:0; }
+.hint-box p+p { margin-top:6px; }
+
+/* ── SOLUTION ── */
+.sol-sec { margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.05); }
+.sol-btn { background:transparent; border:1px solid rgba(255,255,255,.1); color:var(--text-dim); padding:6px 14px; font-family:'Chakra Petch',sans-serif; font-size:.6rem; letter-spacing:2px; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all .2s; }
+.sol-btn:hover:not(:disabled) { background:rgba(255,255,255,.05); color:var(--text); border-color:var(--border-mid); }
+.sol-btn.shown { color:rgba(120,104,208,.65); border-color:rgba(120,104,208,.28); cursor:default; }
+.sol-box { display:none; margin-top:10px; animation:fadeUp .22s ease; }
+.sol-box.visible { display:block; }
+.sol-warn { display:block; font-family:'Lora',serif; font-style:italic; font-size:.78rem; color:var(--text-dim); margin-bottom:8px; }
+
+/* ── NAV ── */
+.nav-row { display:flex; justify-content:space-between; align-items:center; width:100%; max-width:960px; margin:18px 0 8px; }
+.nav-btn { background:var(--stone-mid); color:var(--text); border:1px solid var(--border-mid); padding:10px 26px; font-family:'Chakra Petch',sans-serif; font-size:.7rem; letter-spacing:2.5px; text-transform:uppercase; cursor:pointer; border-radius:2px; box-shadow:0 2px 8px rgba(0,0,0,.45); transition:all .2s; }
+.nav-btn:hover:not(:disabled) { background:var(--stone-light); transform:translateY(-1px); box-shadow:0 4px 14px rgba(0,0,0,.5); }
+.nav-btn:disabled { opacity:.22; cursor:not-allowed; transform:none; }
+.page-ind { font-family:'Chakra Petch',sans-serif; color:var(--text-dim); font-size:.7rem; letter-spacing:2px; }
+</style>
+</head>
+<body>
+
+
+<header class="site-header">
+  <div class="site-title">Crystal Caves</div>
+  <div class="site-subtitle">Python Programming Challenge</div>
+  <div class="ks-row">
+    <span class="ks-lbl" id="lbl4">KS4</span>
+    <div class="toggle-track" id="ksTgl" onclick="toggleKS()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleKS();}" role="switch" tabindex="0" aria-checked="false" aria-label="KS5 mode" title="Switch between KS4 and KS5 mode">
+      <div class="toggle-thumb"></div>
+    </div>
+    <span class="ks-lbl" id="lbl5">KS5</span>
+  </div>
+</header>
+
+<div class="progress-row">
+  <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+  <div class="progress-lbl" id="pLbl"></div>
+</div>
+<div class="task-dots" id="dots"></div>
+<div id="pageWrap"></div>
+<div class="nav-row">
+  <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>← Prev</button>
+  <span class="page-ind" id="pageInd"></span>
+  <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
+</div>
+
+<script>
+// ── STATE ──
+let STATE=(function(){try{const s=localStorage.getItem('crystalCaves.v2');return s?JSON.parse(s):fresh();}catch{return fresh();}})();
+function fresh(){return{mode:'ks4',page:0,cards:{}};}
+function save(){try{localStorage.setItem('crystalCaves.v2',JSON.stringify(STATE));}catch{}}
+function cs(pid,tier){const k=pid+'_'+tier;if(!STATE.cards[k])STATE.cards[k]={flipped:false,hints:0,sol:false};return STATE.cards[k];}
+const ks5=()=>STATE.mode==='ks5';
+
+// ── PAGE DATA ──
+const PAGES=[
+
+// ═══════════════════════════ 0: INTRO ═══════════════════════════════
+{id:'intro',type:'intro',title:'Crystal Caves',sig:'Python Programming Challenge',
+body:`
+<p>You are exploring the Crystal Caves: a labyrinth of tunnels, glittering crystal deposits, hidden traps and lurking enemies. Your job is to write a Python program that brings the cave to life: display the grid, navigate through it, collect crystals, survive hazards, and eventually build a fully playable game.</p>
+<p>The cave is stored as a <strong>2D list</strong>: a list of lists. Each inner list is one row. Each cell holds a single character.</p>
+
+<div class="cb-wrap">
+  <span class="cb-lbl">Starter Data: copy this into your file</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">cave = [
+    ["#", "#", "#", "#", "#", "#", "#", "#", "#", "#"],
+    ["#", "P", ".", ".", "#", ".", ".", ".", "C", "#"],
+    ["#", ".", "#", ".", "#", ".", "#", "#", ".", "#"],
+    ["#", ".", "#", ".", ".", ".", "#", "C", ".", "#"],
+    ["#", ".", ".", ".", "#", "#", "#", ".", ".", "#"],
+    ["#", "#", ".", "#", "C", ".", ".", ".", "#", "#"],
+    ["#", ".", ".", ".", "#", ".", "#", ".", ".", "#"],
+    ["#", ".", "#", "C", ".", ".", ".", ".", ".", "#"],
+    ["#", ".", ".", ".", "#", "#", ".", ".", ".", "#"],
+    ["#", "#", "#", "#", "#", "#", "#", "#", "#", "#"]
+]</pre>
+</div>
+
+<p>Each character in the grid has a specific meaning:</p>
+<table class="key-table">
+  <thead><tr><th>Symbol</th><th>Meaning</th><th>First used</th></tr></thead>
+  <tbody>
+    <tr><td>#</td><td>Wall: cannot be entered</td><td>Task 1</td></tr>
+    <tr><td>.</td><td>Empty passage</td><td>Task 1</td></tr>
+    <tr><td>P</td><td>Player: your current position</td><td>Task 2</td></tr>
+    <tr><td>C</td><td>Crystal: collect to score points</td><td>Task 5</td></tr>
+    <tr><td>T</td><td>Trap: instant game over</td><td>Task 7</td></tr>
+    <tr><td>E</td><td>Enemy: moves each turn, ends game on contact</td><td>Task 8</td></tr>
+  </tbody>
+</table>
+
+<div class="callout info">💡 <strong>No dictionaries in your main solutions.</strong> Every Bronze and Silver card uses only lists, loops, and functions. Some Gold cards introduce dictionaries as a deliberate upgrade, so you can see both approaches and decide which is cleaner.</div>
+<div class="callout note">🃏 <strong>How to use this resource:</strong> Each task has three challenge cards: Bronze, Silver, and Gold. Flip whichever you like, in any order. Bronze is a solid foundation. Silver adds depth. Gold pushes further. Work at your own pace, and your progress is saved automatically.</div>
+`},
+
+// ═══════════════════════════ 1: DISPLAY THE CAVE ════════════════════
+{id:'t1',type:'task',num:1,title:'Display the Cave',sig:'display_cave(cave)',
+intro:`<p>Before anything else works, you need to be able to <em>see</em> the cave. Write a function that prints the 2D grid clearly on screen. Every task from here on depends on this one, so get it working first.</p>`,
+cards:[
+  {tier:'bronze',title:'Print the Grid',
+   brief:`<p>Write a subroutine called <code>display_cave(cave)</code> that prints every row of the grid on its own line, with each cell separated by two spaces.</p>
+<p>It takes the cave as a parameter and returns nothing. It only prints.</p>`,
+   expected:`#  #  #  #  #  #  #  #  #  #
+#  P  .  .  #  .  .  .  C  #
+#  .  #  .  #  .  #  #  .  #
+...`,
+   hints:[
+     `The cave is a list of rows. Loop through it: each item is itself a list (one row). You need to print all cells in that inner list on one line. What does <code>print(cell, end="  ")</code> do instead of moving to a new line?`,
+     `Use two nested loops. The outer loop gives you each row. The inner loop gives you each cell, so print it with <code>end="  "</code> so cells stay on one line. After the inner loop finishes, call <code>print()</code> on its own to move to the next line.`
+   ],
+   solution:`def display_cave(cave):
+    for row in cave:
+        for cell in row:
+            print(cell, end="  ")
+        print()`},
+  {tier:'silver',title:'Add Row Numbers',
+   brief:`<p>Improve <code>display_cave</code> so it prints a <strong>row number</strong> at the start of each line (starting from 0) and a border line above and below the grid.</p>
+<p>Calculate the border width from the number of columns. Do not hard-code a number.</p>`,
+   expected:`+----------------------------------+
+ 0  #  #  #  #  #  #  #  #  #  #
+ 1  #  P  .  .  #  .  .  .  C  #
+ 2  #  .  #  .  #  .  #  #  .  #
+...
++----------------------------------+`,
+   hints:[
+     `You need a counter that starts at 0 and increases by 1 each row. Set it up before the loop and increment it at the end of each pass. To right-align the number, try printing it with a fixed width, for example, <code>print(f"{counter:2}", end="  ")</code>.`
+   ],
+   solution:`def display_cave(cave):
+    width = len(cave[0]) * 3 + 4
+    border = "+" + "-" * width + "+"
+    print(border)
+    row_num = 0
+    for row in cave:
+        print(f"{row_num:2}", end="  ")
+        for cell in row:
+            print(cell, end="  ")
+        print()
+        row_num = row_num + 1
+    print(border)`},
+  {tier:'gold',title:'Rewrite with join()',
+   brief:`<p>Rewrite <code>display_cave</code> so the inner loop is replaced by a single <code>"  ".join(row)</code> expression.</p>
+<p>The output should be identical to Silver, but the loop body becomes one line. This works because every cell is already a string.</p>`,
+   hints:[
+     `<code>"  ".join(row)</code> takes every item in <code>row</code> and joins them with two spaces between, the same result as your inner loop, in one expression. Use this inside an f-string alongside the row number.`
+   ],
+   solution:`def display_cave(cave):
+    width = len(cave[0]) * 3 + 4
+    border = "+" + "-" * width + "+"
+    print(border)
+    row_num = 0
+    for row in cave:
+        print(f"{row_num:2}  " + "  ".join(row))
+        row_num = row_num + 1
+    print(border)`}
+]},
+
+// ═══════════════════════════ 2: FIND THE PLAYER ═════════════════════
+{id:'t2',type:'task',num:2,title:'Find the Player',sig:'find_player(cave)',
+intro:`<p>Before you can move, you need to know where you are. Write a function that searches the entire grid and returns the player's position. You will call this function in almost every task from here on.</p>`,
+cards:[
+  {tier:'bronze',title:'Search the Grid',
+   brief:`<p>Write a function called <code>find_player(cave)</code> that loops through every row and column looking for <code>"P"</code>. When found, return the row and column as a pair.</p>
+<p>Test it with the starter cave: the player is at row 1, column 1.</p>`,
+   expected:`(1, 1)`,
+   hints:[
+     `You need two nested loops, both using <code>range()</code> so you have access to the row number and column number (not just the values). If <code>cave[r][c] == "P"</code>, you have found the player. What should you do immediately?`,
+     `Use <code>for r in range(len(cave)):</code> for rows and <code>for c in range(len(cave[r])):</code> for columns. When you find "P", return the pair <code>r, c</code> straight away, and the function stops at that point.`
+   ],
+   solution:`def find_player(cave):
+    for r in range(len(cave)):
+        for c in range(len(cave[r])):
+            if cave[r][c] == "P":
+                return r, c`},
+  {tier:'silver',title:'Handle Player Not Found',
+   brief:`<p>What if the player is not in the grid? Modify <code>find_player</code> so it returns <code>(-1, -1)</code> if no <code>"P"</code> is found.</p>
+<p>Test it by temporarily removing the "P" from the cave and checking what you get back.</p>`,
+   hints:[
+     `The <code>return r, c</code> inside the loop only runs if "P" is found. After both loops have finished without finding it, what should the function return? That line goes <em>outside</em> both loops.`
+   ],
+   solution:`def find_player(cave):
+    for r in range(len(cave)):
+        for c in range(len(cave[r])):
+            if cave[r][c] == "P":
+                return r, c
+    return -1, -1`},
+  {tier:'gold',title:'Find Any Symbol',
+   brief:`<p>Write a more general function called <code>find_all(cave, symbol)</code> that returns a <strong>list of all positions</strong> where that symbol appears.</p>
+<p>This is reusable: you can call <code>find_all(cave, "C")</code> to find every crystal, or <code>find_all(cave, "T")</code> to find every trap.</p>`,
+   expected:`find_all(cave, "C")
+[(1, 8), (3, 7), (5, 4), (7, 3)]`,
+   hints:[
+     `Build an empty list before the loops. Each time you find a match, append the <code>(r, c)</code> pair to the list instead of returning immediately. Return the full list after both loops finish.`
+   ],
+   solution:`def find_all(cave, symbol):
+    positions = []
+    for r in range(len(cave)):
+        for c in range(len(cave[r])):
+            if cave[r][c] == symbol:
+                positions.append((r, c))
+    return positions`}
+]},
+
+// ═══════════════════════════ 3: MOVE THE PLAYER ═════════════════════
+{id:'t3',type:'task',num:3,title:'Move the Player',sig:'move_player(cave, old_r, old_c, new_r, new_c)',
+intro:`<p>Now you know where the player is, make them move. The player enters a direction: <code>w</code> (up), <code>a</code> (left), <code>s</code> (down), <code>d</code> (right), and the grid updates to show the new position.</p>`,
+cards:[
+  {tier:'bronze',title:'Basic Movement',
+   brief:`<p>Write code that:</p>
+<ul>
+  <li>Calls <code>find_player</code> to get the current position</li>
+  <li>Asks the user for a direction (<code>w</code>/<code>a</code>/<code>s</code>/<code>d</code>)</li>
+  <li>Uses <code>if</code>/<code>elif</code> to work out the new row and column</li>
+  <li>Sets the old cell to <code>"."</code> and the new cell to <code>"P"</code></li>
+</ul>
+<p>Display the cave after the move to check it worked.</p>`,
+   hints:[
+     `Start by storing the current position: <code>pr, pc = find_player(cave)</code>. Create <code>new_r</code> and <code>new_c</code> as copies of <code>pr</code> and <code>pc</code>. Then use <code>if direction == "w":</code> to change <code>new_r</code> by -1 (up means a smaller row number).`,
+     `After the if/elif block: <code>cave[pr][pc] = "."</code> clears the old position, and <code>cave[new_r][new_c] = "P"</code> sets the new one. Call <code>display_cave(cave)</code> to see the result.`
+   ],
+   solution:`pr, pc = find_player(cave)
+direction = input("Enter direction (w/a/s/d): ")
+
+new_r = pr
+new_c = pc
+
+if direction == "w":
+    new_r = pr - 1
+elif direction == "s":
+    new_r = pr + 1
+elif direction == "a":
+    new_c = pc - 1
+elif direction == "d":
+    new_c = pc + 1
+
+cave[pr][pc] = "."
+cave[new_r][new_c] = "P"
+display_cave(cave)`},
+  {tier:'silver',title:'Extract a Function and Use Parallel Lists',
+   brief:`<p>Refactor your movement code into two parts:</p>
+<ul>
+  <li>A function <code>move_player(cave, old_r, old_c, new_r, new_c)</code> that updates the grid</li>
+  <li>Three parallel lists: <code>directions</code>, <code>row_offsets</code>, <code>col_offsets</code>, to replace the if/elif chain</li>
+</ul>
+<p>Look up the direction in the list to find its matching offset, then apply it.</p>`,
+   hints:[
+     `<code>directions = ["w", "s", "a", "d"]</code> and matching offsets in the same order: <code>row_offsets = [-1, 1, 0, 0]</code>, <code>col_offsets = [0, 0, -1, 1]</code>. Use <code>directions.index(direction)</code> to find the position, then use that index to look up the offset in the other two lists.`,
+     `Check the direction is valid first: <code>if direction in directions:</code>. Then <code>i = directions.index(direction)</code>. Calculate the new position and call <code>move_player(cave, pr, pc, new_r, new_c)</code>.`
+   ],
+   solution:`directions = ["w", "s", "a", "d"]
+row_offsets = [-1, 1, 0, 0]
+col_offsets = [0, 0, -1, 1]
+
+def move_player(cave, old_r, old_c, new_r, new_c):
+    cave[old_r][old_c] = "."
+    cave[new_r][new_c] = "P"
+
+pr, pc = find_player(cave)
+direction = input("Enter direction (w/a/s/d): ")
+
+if direction in directions:
+    i = directions.index(direction)
+    new_r = pr + row_offsets[i]
+    new_c = pc + col_offsets[i]
+    move_player(cave, pr, pc, new_r, new_c)
+
+display_cave(cave)`},
+  {tier:'gold',title:'Dictionary-Based Offsets', requires:'dictionaries',
+   brief:`<p>Replace the three parallel lists with a single <strong>dictionary</strong> that maps each direction key to its <code>(row_offset, col_offset)</code> pair.</p>
+<p>This is cleaner: one data structure instead of three, no <code>.index()</code> call, and the direction lookup happens in one step.</p>`,
+   hints:[
+     `<code>moves = {"w": (-1, 0), "s": (1, 0), "a": (0, -1), "d": (0, 1)}</code>. To use it: <code>if direction in moves:</code> then <code>dr, dc = moves[direction]</code>. Compare the readability to the parallel list version.`
+   ],
+   solution:`moves = {
+    "w": (-1, 0),
+    "s": (1, 0),
+    "a": (0, -1),
+    "d": (0, 1)
+}
+
+def move_player(cave, old_r, old_c, new_r, new_c):
+    cave[old_r][old_c] = "."
+    cave[new_r][new_c] = "P"
+
+pr, pc = find_player(cave)
+direction = input("Enter direction (w/a/s/d): ")
+
+if direction in moves:
+    dr, dc = moves[direction]
+    move_player(cave, pr, pc, pr + dr, pc + dc)
+
+display_cave(cave)`}
+]},
+
+// ═══════════════════════════ 4: WALLS AND BOUNDARIES ════════════════
+{id:'t4',type:'task',num:4,title:'Walls and Boundaries',sig:'can_move_to(cave, r, c)',
+intro:`<p>Try walking into a wall. Your program crashes, or or worse, it silently overwrites the wall with the player. You need a gatekeeper function that checks whether a move is valid <em>before</em> it happens.</p>`,
+cards:[
+  {tier:'bronze',title:'Check Before Moving',
+   brief:`<p>Add an <code>if</code> statement before your movement code that checks two things:</p>
+<ul>
+  <li>The new row and column are <strong>within the grid boundaries</strong></li>
+  <li>The cell at that position is <strong>not a wall</strong> (<code>"#"</code>)</li>
+</ul>
+<p>Only update the grid if both conditions are true. If the move is invalid, print <code>"You can't move there."</code></p>`,
+   hints:[
+     `The grid has <code>len(cave)</code> rows and <code>len(cave[0])</code> columns. A row number is valid if it is 0 or above <strong>and</strong> less than <code>len(cave)</code>. Same logic for columns. Then check the cell is not "#".`,
+     `<code>if new_r >= 0 and new_r < len(cave) and new_c >= 0 and new_c < len(cave[0]):</code> checks boundaries. Inside that, add <code>if cave[new_r][new_c] != "#":</code> to check for walls.`
+   ],
+   solution:`pr, pc = find_player(cave)
+direction = input("Enter direction (w/a/s/d): ")
+
+new_r = pr
+new_c = pc
+
+if direction == "w":
+    new_r = pr - 1
+elif direction == "s":
+    new_r = pr + 1
+elif direction == "a":
+    new_c = pc - 1
+elif direction == "d":
+    new_c = pc + 1
+
+if new_r >= 0 and new_r < len(cave) and new_c >= 0 and new_c < len(cave[0]):
+    if cave[new_r][new_c] != "#":
+        cave[pr][pc] = "."
+        cave[new_r][new_c] = "P"
+    else:
+        print("You can't move there.")
+else:
+    print("You can't move there.")
+
+display_cave(cave)`},
+  {tier:'silver',title:'Extract into can_move_to()',
+   brief:`<p>Write a function called <code>can_move_to(cave, r, c)</code> that returns <code>True</code> if the position is valid (inside the grid and not a wall), and <code>False</code> otherwise.</p>
+<p>Replace your inline checks with a single call to this function.</p>`,
+   hints:[
+     `The function should check boundaries first: if the position is outside the grid, return <code>False</code> immediately. If it is inside the grid, check whether the cell is a wall. Return <code>True</code> only if both checks pass.`,
+     `Returning early for the failing cases keeps the logic clean:<br><code>if r < 0 or r >= len(cave): return False</code><br><code>if c < 0 or c >= len(cave[r]): return False</code><br><code>if cave[r][c] == "#": return False</code><br><code>return True</code>`
+   ],
+   solution:`def can_move_to(cave, r, c):
+    if r < 0 or r >= len(cave):
+        return False
+    if c < 0 or c >= len(cave[r]):
+        return False
+    if cave[r][c] == "#":
+        return False
+    return True`},
+  {tier:'gold',title:'Flexible Blocked Symbols',
+   brief:`<p>Extend <code>can_move_to</code> so it accepts a <strong>list of blocked symbols</strong> instead of just checking for <code>"#"</code>.</p>
+<p>This means the same function can block walls for the player <em>and</em> later block walls, crystals, and other enemies for enemy movement, without writing a second function.</p>`,
+   expected:`can_move_to(cave, 3, 4, ["#"])         # True (empty passage)
+can_move_to(cave, 3, 4, ["#", "C"])    # True (no crystal here)
+can_move_to(cave, 1, 8, ["#", "C"])    # False (crystal here)`,
+   hints:[
+     `Add a parameter <code>blocked</code> that defaults to <code>["#"]</code>. Instead of checking <code>cave[r][c] == "#"</code>, check <code>cave[r][c] in blocked</code>. The <code>in</code> keyword checks whether the cell value appears anywhere in the list.`
+   ],
+   solution:`def can_move_to(cave, r, c, blocked=None):
+    if blocked is None:
+        blocked = ["#"]
+    if r < 0 or r >= len(cave):
+        return False
+    if c < 0 or c >= len(cave[r]):
+        return False
+    if cave[r][c] in blocked:
+        return False
+    return True`}
+]},
+
+// ═══════════════════════════ 5: CRYSTALS AND SCORE ══════════════════
+{id:'t5',type:'task',num:5,title:'Crystals and Score',sig:'count_crystals(cave)',
+intro:`<p>The cave has four crystals marked <code>"C"</code>. When the player walks onto a crystal, it should disappear, the score should increase, and the game should know how many crystals remain.</p>`,
+cards:[
+  {tier:'bronze',title:'Collect Crystals',
+   brief:`<p>Before calling <code>move_player</code>, check whether the new cell contains a <code>"C"</code>. If it does, add 1 to a score variable and print the updated score.</p>
+<p>The <code>move_player</code> function already replaces the cell with <code>"P"</code>, so the crystal disappears automatically.</p>`,
+   hints:[
+     `You need a <code>score</code> variable set to 0 before the movement code. Just before calling <code>move_player</code>, check: <code>if cave[new_r][new_c] == "C":</code> and if true, <code>score = score + 1</code>.`,
+     `<code>score = 0</code> at the top. After validating the move with <code>can_move_to</code> but before calling <code>move_player</code>:<br><code>if cave[new_r][new_c] == "C":</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>score = score + 1</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print("Crystal collected! Score:", score)</code>`
+   ],
+   solution:`score = 0
+pr, pc = find_player(cave)
+direction = input("Enter direction (w/a/s/d): ")
+
+new_r = pr
+new_c = pc
+if direction == "w":
+    new_r = pr - 1
+elif direction == "s":
+    new_r = pr + 1
+elif direction == "a":
+    new_c = pc - 1
+elif direction == "d":
+    new_c = pc + 1
+
+if can_move_to(cave, new_r, new_c):
+    if cave[new_r][new_c] == "C":
+        score = score + 1
+        print("Crystal collected! Score:", score)
+    move_player(cave, pr, pc, new_r, new_c)
+
+display_cave(cave)`},
+  {tier:'silver',title:'Count Remaining Crystals',
+   brief:`<p>Write a function called <code>count_crystals(cave)</code> that returns the number of <code>"C"</code> cells still in the grid.</p>
+<p>Call it after each move. When it returns 0, print <code>"All crystals collected!"</code></p>`,
+   hints:[
+     `Loop through every row and every cell, counting how many equal "C". Start a counter at 0, increment it each time you find one, and return the total after both loops.`,
+     `<code>total = 0</code><br><code>for row in cave:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>for cell in row:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>if cell == "C":</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>total = total + 1</code><br><code>return total</code>`
+   ],
+   solution:`def count_crystals(cave):
+    total = 0
+    for row in cave:
+        for cell in row:
+            if cell == "C":
+                total = total + 1
+    return total`},
+  {tier:'gold',title:'One-Line Crystal Count',
+   brief:`<p>Rewrite <code>count_crystals</code> as a single <code>return</code> statement using <code>sum()</code> with a generator expression.</p>
+<p>This is Python at its most concise. The nested loop becomes a flat expression that Python evaluates in one pass.</p>`,
+   hints:[
+     `<code>sum()</code> adds up a sequence. A generator expression like <code>(1 for row in cave for cell in row if cell == "C")</code> produces a 1 for every crystal found. Wrap it in <code>sum()</code> and you have the total.`
+   ],
+   solution:`def count_crystals(cave):
+    return sum(1 for row in cave for cell in row if cell == "C")`}
+]},
+
+// ═══════════════════════════ 6: THE GAME LOOP ═══════════════════════
+{id:'t6',type:'task',num:6,title:'The Game Loop',sig:'game_loop(cave)',
+intro:`<p>You have display, movement, boundary checking, and crystal collection. Now wire them together into a <code>while</code> loop that repeats every turn until the player quits or wins.</p>`,
+cards:[
+  {tier:'bronze',title:'Loop Until Quit',
+   brief:`<p>Write a subroutine called <code>game_loop(cave)</code> that:</p>
+<ul>
+  <li>Displays the cave at the start of each turn</li>
+  <li>Asks the player for a direction (or <code>q</code> to quit)</li>
+  <li>Moves the player if the move is valid</li>
+  <li>Repeats until the player types <code>q</code></li>
+</ul>`,
+   hints:[
+     `Use <code>while True:</code> for the main loop. Inside, display the cave, get input, check if the input is "q". If so, <code>break</code>. Otherwise, find the player, compute the new position, check with <code>can_move_to</code>, and move.`,
+     `The skeleton is:<br><code>def game_loop(cave):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>while True:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>display_cave(cave)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>direction = input("Move (w/a/s/d) or q to quit: ")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>if direction == "q":</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>break</code><br>Then add your movement code inside the loop.`
+   ],
+   solution:`def game_loop(cave):
+    score = 0
+    while True:
+        display_cave(cave)
+        print("Score:", score)
+        direction = input("Move (w/a/s/d) or q to quit: ")
+        if direction == "q":
+            print("Thanks for playing!")
+            break
+        pr, pc = find_player(cave)
+        new_r = pr
+        new_c = pc
+        if direction == "w":
+            new_r = pr - 1
+        elif direction == "s":
+            new_r = pr + 1
+        elif direction == "a":
+            new_c = pc - 1
+        elif direction == "d":
+            new_c = pc + 1
+        if can_move_to(cave, new_r, new_c):
+            if cave[new_r][new_c] == "C":
+                score = score + 1
+                print("Crystal collected! Score:", score)
+            move_player(cave, pr, pc, new_r, new_c)
+        else:
+            print("You can't move there.")
+
+game_loop(cave)`},
+  {tier:'silver',title:'Win Condition',
+   brief:`<p>Add a win condition: after each move, check whether all crystals have been collected using <code>count_crystals</code>. If the count is 0, print a victory message showing the final score and break out of the loop.</p>`,
+   hints:[
+     `After the movement block (inside the <code>if can_move_to</code> section), add:<br><code>if count_crystals(cave) == 0:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>display_cave(cave)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print("All crystals collected! Final score:", score)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>break</code>`
+   ],
+   solution:`def game_loop(cave):
+    score = 0
+    while True:
+        display_cave(cave)
+        print("Score:", score)
+        print("Crystals remaining:", count_crystals(cave))
+        direction = input("Move (w/a/s/d) or q to quit: ")
+        if direction == "q":
+            print("Thanks for playing!")
+            break
+        pr, pc = find_player(cave)
+        new_r = pr
+        new_c = pc
+        if direction == "w":
+            new_r = pr - 1
+        elif direction == "s":
+            new_r = pr + 1
+        elif direction == "a":
+            new_c = pc - 1
+        elif direction == "d":
+            new_c = pc + 1
+        if can_move_to(cave, new_r, new_c):
+            if cave[new_r][new_c] == "C":
+                score = score + 1
+                print("Crystal collected!")
+            move_player(cave, pr, pc, new_r, new_c)
+            if count_crystals(cave) == 0:
+                display_cave(cave)
+                print("All crystals collected! Final score:", score)
+                break
+        else:
+            print("You can't move there.")
+
+game_loop(cave)`},
+  {tier:'gold',title:'Turn Counter and Clean Display',
+   brief:`<p>Add a <strong>turn counter</strong> that increments on each valid move. Display it alongside the score.</p>
+<p>Also add a visual separator between turns: print 30 blank lines before each redraw to push old output off screen (a simple alternative to clearing the terminal).</p>`,
+   hints:[
+     `Set <code>turns = 0</code> before the loop. Increment it inside the <code>if can_move_to</code> block, alongside the score logic. Print <code>"\\n" * 30</code> at the top of each loop iteration to push old output up.`
+   ],
+   solution:`def game_loop(cave):
+    score = 0
+    turns = 0
+    while True:
+        print("\\n" * 30)
+        display_cave(cave)
+        print(f"Score: {score}  |  Turns: {turns}  |  Crystals left: {count_crystals(cave)}")
+        direction = input("Move (w/a/s/d) or q to quit: ")
+        if direction == "q":
+            print(f"Thanks for playing! Final score: {score} in {turns} turns.")
+            break
+        pr, pc = find_player(cave)
+        new_r = pr
+        new_c = pc
+        if direction == "w":
+            new_r = pr - 1
+        elif direction == "s":
+            new_r = pr + 1
+        elif direction == "a":
+            new_c = pc - 1
+        elif direction == "d":
+            new_c = pc + 1
+        if can_move_to(cave, new_r, new_c):
+            if cave[new_r][new_c] == "C":
+                score = score + 1
+            move_player(cave, pr, pc, new_r, new_c)
+            turns = turns + 1
+            if count_crystals(cave) == 0:
+                print("\\n" * 30)
+                display_cave(cave)
+                print(f"All crystals collected! Score: {score} in {turns} turns.")
+                break
+        else:
+            print("You can't move there.")
+
+game_loop(cave)`}
+]},
+
+// ═══════════════════════════ 7: TRAPS ═══════════════════════════════
+{id:'t7',type:'task',num:7,title:'Traps',sig:'Extending the game loop',
+intro:`<p>The cave just got more dangerous. Add trap cells marked <code>"T"</code>. If the player steps on one, the game ends immediately.</p>
+<p>Update your cave data first. Add some <code>"T"</code> cells by changing a few <code>"."</code> passages to <code>"T"</code>:</p>
+<div class="cb-wrap">
+  <span class="cb-lbl">Suggested trap positions</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb"># Change these cells in your cave list:
+cave[1][7] = "T"   # row 1, column 7
+cave[3][5] = "T"   # row 3, column 5
+cave[6][8] = "T"   # row 6, column 8
+cave[8][2] = "T"   # row 8, column 2</pre>
+</div>`,
+cards:[
+  {tier:'bronze',title:'Detect and End',
+   brief:`<p>Inside your game loop, after checking <code>can_move_to</code> but before calling <code>move_player</code>, check whether the target cell is a <code>"T"</code>. If so, print <code>"You stepped on a trap! Game over."</code> and end the game.</p>`,
+   hints:[
+     `Add another <code>if</code> check after the crystal check. If <code>cave[new_r][new_c] == "T"</code>, move the player there (so they can see where they died), display the cave, print the game over message, and <code>break</code>.`,
+     `<code>if cave[new_r][new_c] == "T":</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>move_player(cave, pr, pc, new_r, new_c)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>display_cave(cave)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print("You stepped on a trap! Game over.")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>break</code><br>Put this <em>before</em> the crystal check so traps take priority.`
+   ],
+   solution:`# Inside your game loop, after can_move_to check:
+if can_move_to(cave, new_r, new_c):
+    if cave[new_r][new_c] == "T":
+        move_player(cave, pr, pc, new_r, new_c)
+        display_cave(cave)
+        print("You stepped on a trap! Game over.")
+        break
+    elif cave[new_r][new_c] == "C":
+        score = score + 1
+        print("Crystal collected!")
+    move_player(cave, pr, pc, new_r, new_c)`},
+  {tier:'silver',title:'Refactor into process_cell()',
+   brief:`<p>Your game loop now checks for crystals, traps, and walls separately. Write a function called <code>process_cell(cave, r, c, score)</code> that handles all cell types in one place.</p>
+<p>It should return <strong>two values</strong>: the updated score and a status string: <code>"ok"</code>, <code>"crystal"</code>, <code>"trap"</code>, or <code>"blocked"</code>.</p>`,
+   hints:[
+     `Check the cell value with if/elif. For "C": return <code>score + 1, "crystal"</code>. For "T": return <code>score, "trap"</code>. For "#": return <code>score, "blocked"</code>. For anything else: return <code>score, "ok"</code>.`,
+     `<code>def process_cell(cave, r, c, score):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>cell = cave[r][c]</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if cell == "C":</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>return score + 1, "crystal"</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>elif cell == "T":</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>return score, "trap"</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>elif cell == "#":</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>return score, "blocked"</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>else:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>return score, "ok"</code>`
+   ],
+   solution:`def process_cell(cave, r, c, score):
+    cell = cave[r][c]
+    if cell == "C":
+        return score + 1, "crystal"
+    elif cell == "T":
+        return score, "trap"
+    elif cell == "#":
+        return score, "blocked"
+    else:
+        return score, "ok"
+
+# In your game loop, replace the if/elif checks with:
+# score, status = process_cell(cave, new_r, new_c, score)
+# if status == "blocked":
+#     print("You can't move there.")
+# elif status == "trap":
+#     move_player(cave, pr, pc, new_r, new_c)
+#     display_cave(cave)
+#     print("You stepped on a trap! Game over.")
+#     break
+# else:
+#     if status == "crystal":
+#         print("Crystal collected!")
+#     move_player(cave, pr, pc, new_r, new_c)`},
+  {tier:'gold',title:'Multiple Trap Types',
+   brief:`<p>Add a second trap type: <code>"S"</code> (slime). Instead of ending the game, slime costs the player 2 points (score cannot drop below 0). The player still moves onto the cell, the slime disappears, and the game continues.</p>
+<p>Extend <code>process_cell</code> to handle this new type.</p>`,
+   hints:[
+     `Add <code>elif cell == "S":</code> to <code>process_cell</code>. Return <code>max(score - 2, 0), "slime"</code>. Then handle the "slime" status in your game loop: print a message but do not break.`
+   ],
+   solution:`def process_cell(cave, r, c, score):
+    cell = cave[r][c]
+    if cell == "C":
+        return score + 1, "crystal"
+    elif cell == "T":
+        return score, "trap"
+    elif cell == "S":
+        new_score = score - 2
+        if new_score < 0:
+            new_score = 0
+        return new_score, "slime"
+    elif cell == "#":
+        return score, "blocked"
+    else:
+        return score, "ok"
+
+# In the game loop, add:
+# elif status == "slime":
+#     print("Slime! Lost 2 points. Score:", score)
+#     move_player(cave, pr, pc, new_r, new_c)`}
+]},
+
+// ═══════════════════════════ 8: THE ENEMY ═══════════════════════════
+{id:'t8',type:'task',num:8,title:'The Enemy',sig:'move_enemy(cave)',
+intro:`<p>The cave is no longer empty between your moves. Add an enemy (<code>"E"</code>) that takes a random step after every player turn. If it reaches you, the game ends.</p>
+<p>Add an enemy to your cave:</p>
+<div class="cb-wrap">
+  <span class="cb-lbl">Add this line after your cave definition</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">cave[7][8] = "E"   # enemy in row 7, column 8
+
+# You also need this at the top of your file:
+import random</pre>
+</div>`,
+cards:[
+  {tier:'bronze',title:'Random Movement',
+   brief:`<p>Write a function called <code>find_enemy(cave)</code>, identical in structure to <code>find_player</code> but searching for <code>"E"</code>.</p>
+<p>Then write <code>move_enemy(cave)</code> that:</p>
+<ul>
+  <li>Finds the enemy position</li>
+  <li>Builds a list of valid neighbouring cells (up/down/left/right, not walls)</li>
+  <li>Picks one at random using <code>random.choice()</code></li>
+  <li>Moves the enemy there</li>
+</ul>`,
+   hints:[
+     `Use a list called <code>possible</code>. Check all four directions. If <code>can_move_to</code> returns True for a neighbour, append that <code>(nr, nc)</code> pair to the list. After checking all four, use <code>random.choice(possible)</code> to pick one, but only if the list is not empty.`,
+     `<code>def move_enemy(cave):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>er, ec = find_enemy(cave)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if er == -1:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>return</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>possible = []</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>nr = er + dr</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>nc = ec + dc</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>if can_move_to(cave, nr, nc):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>possible.append((nr, nc))</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>if len(possible) > 0:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>nr, nc = random.choice(possible)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>cave[er][ec] = "."</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>cave[nr][nc] = "E"</code>`
+   ],
+   solution:`import random
+
+def find_enemy(cave):
+    for r in range(len(cave)):
+        for c in range(len(cave[r])):
+            if cave[r][c] == "E":
+                return r, c
+    return -1, -1
+
+def move_enemy(cave):
+    er, ec = find_enemy(cave)
+    if er == -1:
+        return
+    possible = []
+    for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        nr = er + dr
+        nc = ec + dc
+        if can_move_to(cave, nr, nc):
+            possible.append((nr, nc))
+    if len(possible) > 0:
+        nr, nc = random.choice(possible)
+        cave[er][ec] = "."
+        cave[nr][nc] = "E"`},
+  {tier:'silver',title:'Collision Detection',
+   brief:`<p>The enemy can now walk onto the player, or or the player can walk onto the enemy. Both should end the game.</p>
+<p>Add collision checks in <strong>two places</strong>:</p>
+<ul>
+  <li>In <code>move_enemy</code>: if the enemy's new cell contains <code>"P"</code>, the game is over</li>
+  <li>In the game loop: if the player tries to move onto <code>"E"</code>, the game is over</li>
+</ul>
+<p>For the enemy collision, have <code>move_enemy</code> return <code>True</code> if the enemy caught the player, <code>False</code> otherwise.</p>`,
+   hints:[
+     `In <code>move_enemy</code>, after picking the random cell, check <code>if cave[nr][nc] == "P":</code>. If so, update the grid and return <code>True</code>. At the end of the function, return <code>False</code>. In the game loop, call <code>caught = move_enemy(cave)</code> after the player moves, and break if caught is True.`
+   ],
+   solution:`def move_enemy(cave):
+    er, ec = find_enemy(cave)
+    if er == -1:
+        return False
+    possible = []
+    for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        nr = er + dr
+        nc = ec + dc
+        if can_move_to(cave, nr, nc) or cave[nr][nc] == "P":
+            possible.append((nr, nc))
+    if len(possible) > 0:
+        nr, nc = random.choice(possible)
+        if cave[nr][nc] == "P":
+            cave[er][ec] = "."
+            cave[nr][nc] = "E"
+            return True
+        cave[er][ec] = "."
+        cave[nr][nc] = "E"
+    return False
+
+# In the game loop, after the player moves:
+# caught = move_enemy(cave)
+# if caught:
+#     display_cave(cave)
+#     print("The enemy caught you! Game over.")
+#     break
+
+# Also add to process_cell:
+# elif cell == "E":
+#     return score, "enemy"`},
+  {tier:'gold',title:'Enemy as a Class', requires:'oop',
+   brief:`<p>Refactor the enemy into a <strong>class</strong> called <code>Enemy</code>. It should store its own row and column, and have methods <code>move(cave)</code> and <code>check_caught(cave)</code>.</p>
+<p>This makes it straightforward to have multiple enemies, each is an independent object tracking its own position.</p>`,
+   hints:[
+     `<code>class Enemy:</code> with <code>__init__(self, r, c)</code> storing position. The <code>move</code> method contains the same random-step logic from Bronze/Silver but uses <code>self.row</code> and <code>self.col</code>. To support multiple enemies, store them in a list and loop through it each turn.`
+   ],
+   solution:`class Enemy:
+    def __init__(self, r, c):
+        self.row = r
+        self.col = c
+
+    def move(self, cave):
+        possible = []
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nr = self.row + dr
+            nc = self.col + dc
+            if can_move_to(cave, nr, nc) or cave[nr][nc] == "P":
+                possible.append((nr, nc))
+        if len(possible) > 0:
+            nr, nc = random.choice(possible)
+            caught = cave[nr][nc] == "P"
+            cave[self.row][self.col] = "."
+            cave[nr][nc] = "E"
+            self.row = nr
+            self.col = nc
+            return caught
+        return False
+
+# Create enemies from the grid:
+# enemies = []
+# for pos in find_all(cave, "E"):
+#     enemies.append(Enemy(pos[0], pos[1]))
+#
+# Each turn:
+# for enemy in enemies:
+#     if enemy.move(cave):
+#         print("An enemy caught you!")
+#         break`}
+]},
+
+// ═══════════════════════════ 9: FILE I/O ════════════════════════════
+{id:'t9',type:'task',num:9,title:'Save and Load',sig:'load_cave(filename)',
+intro:`<p>Your cave is hard-coded into the program. That means every time you run it, the layout resets. File handling lets you <strong>save</strong> the current state and <strong>load</strong> different cave designs from text files.</p>
+<p>Cave files use a simple format: one row per line, cells separated by commas:</p>
+<div class="cb-wrap">
+  <span class="cb-lbl">Example file: cave1.txt</span>
+  <button class="copy-btn" onclick="cp(this)">Copy</button>
+<pre class="cb">#,#,#,#,#,#,#,#,#,#
+#,P,.,.,#,.,.,.,C,#
+#,.,#,.,#,.,#,#,.,#
+#,.,#,.,.,.,#,C,.,#
+#,.,.,.,#,#,#,.,.,#
+#,#,.,#,C,.,.,.,#,#
+#,.,.,.,#,.,#,.,.,#
+#,.,#,C,.,.,.,.,.,#
+#,.,.,.,#,#,.,.,.,#
+#,#,#,#,#,#,#,#,#,#</pre>
+</div>`,
+cards:[
+  {tier:'bronze',title:'Load a Cave from File', fileIO:true,
+   brief:`<p>Write a function called <code>load_cave(filename)</code> that opens a text file, reads each line, splits it by commas, and builds a 2D list. Return the completed cave.</p>
+<p>Create the text file first (copy the example above into a file called <code>cave1.txt</code>), then test your function loads it correctly.</p>`,
+   hints:[
+     `Open the file with <code>file = open(filename, "r")</code>. Loop through each line with <code>for line in file:</code>. Each line needs <code>.strip()</code> to remove the newline character, then <code>.split(",")</code> to turn it into a list. Append each list to a <code>cave</code> list. Close the file when done.`,
+     `<code>def load_cave(filename):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>cave = []</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>file = open(filename, "r")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>for line in file:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>row = line.strip().split(",")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>cave.append(row)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>file.close()</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>return cave</code>`
+   ],
+   solution:`def load_cave(filename):
+    cave = []
+    file = open(filename, "r")
+    for line in file:
+        row = line.strip().split(",")
+        cave.append(row)
+    file.close()
+    return cave
+
+# Usage:
+# cave = load_cave("cave1.txt")
+# display_cave(cave)`},
+  {tier:'silver',title:'Save the Current State', fileIO:true,
+   brief:`<p>Write a function called <code>save_cave(cave, filename)</code> that writes the current cave grid to a text file in the same comma-separated format.</p>
+<p>This means you can save mid-game and reload later: the player position, collected crystals, and everything else is preserved in the grid.</p>`,
+   hints:[
+     `Open the file with <code>"w"</code> mode. Loop through each row in the cave. Use <code>",".join(row)</code> to turn the list back into a comma-separated string, then write it with a newline at the end.`
+   ],
+   solution:`def save_cave(cave, filename):
+    file = open(filename, "w")
+    for row in cave:
+        file.write(",".join(row) + "\\n")
+    file.close()
+
+# Usage:
+# save_cave(cave, "save1.txt")`},
+  {tier:'gold',title:'Multiple Levels', fileIO:true,
+   brief:`<p>Create three cave files (<code>cave1.txt</code>, <code>cave2.txt</code>, <code>cave3.txt</code>) with different layouts. Write a function called <code>select_level()</code> that shows a menu of available levels and returns the loaded cave for the chosen one.</p>
+<p>Store the filenames and crystal targets in parallel lists.</p>`,
+   hints:[
+     `<code>filenames = ["cave1.txt", "cave2.txt", "cave3.txt"]</code> and <code>targets = [4, 6, 8]</code>. Print a numbered menu, get the user's choice with <code>input()</code>, convert to an integer, and use it as an index into both lists. Call <code>load_cave</code> with the chosen filename.`
+   ],
+   solution:`def select_level():
+    filenames = ["cave1.txt", "cave2.txt", "cave3.txt"]
+    targets = [4, 6, 8]
+    level_names = ["Beginner Cave", "Twisting Tunnels", "Crystal Gauntlet"]
+
+    print("Choose a level:")
+    i = 0
+    while i < len(filenames):
+        print(f"  {i + 1}. {level_names[i]} ({targets[i]} crystals)")
+        i = i + 1
+
+    choice = int(input("Enter level number: ")) - 1
+
+    if choice >= 0 and choice < len(filenames):
+        cave = load_cave(filenames[choice])
+        target = targets[choice]
+        print(f"Loaded {level_names[choice]}. Collect {target} crystals!")
+        return cave, target
+    else:
+        print("Invalid choice.")
+        return None, 0
+
+# Usage:
+# cave, target = select_level()
+# if cave is not None:
+#     game_loop(cave)`}
+]}
+
+]; // end PAGES
+
+// ── RENDER ──
+function render(){
+  const cur=STATE.page,tot=PAGES.length;
+  const pct=cur/(tot-1)*100;
+  document.getElementById('pFill').style.width=pct+'%';
+  document.getElementById('pLbl').textContent=cur===0?'Introduction':'Task '+cur+' of '+(tot-1);
+  document.getElementById('pageInd').textContent=cur===0?'Intro':cur+' / '+(tot-1);
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').disabled=cur===tot-1;
+  const trk=document.getElementById('ksTgl');
+  trk.classList.toggle('ks5',ks5());
+  trk.setAttribute('aria-checked',ks5()?'true':'false');
+  document.getElementById('lbl4').classList.toggle('on',!ks5());
+  document.getElementById('lbl5').classList.toggle('on',ks5());
+  const dc=document.getElementById('dots');
+  dc.innerHTML='';
+  PAGES.forEach((p,i)=>{
+    const d=document.createElement('button');
+    d.className='dot'+(i===cur?' active':'');
+    d.textContent=i===0?'★':i;
+    d.title=i===0?'Introduction':'Task '+i+': '+p.title;
+    d.onclick=()=>{STATE.page=i;save();render();};
+    dc.appendChild(d);
+  });
+  document.getElementById('pageWrap').innerHTML=buildPage(PAGES[cur]);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildPage(p){
+  if(p.type==='intro')return '<div class="page-card"><span class="page-badge badge-intro">Introduction</span><h1 class="page-title">'+p.title+'</h1><p class="page-sig">'+p.sig+'</p><div class="page-body">'+p.body+'</div></div>';
+  const cardsHTML=p.cards.map(c=>buildCard(p.id,c)).join('');
+  return '<div class="page-card"><span class="page-badge badge-task">Task '+p.num+'</span><h1 class="page-title">'+p.title+'</h1><p class="page-sig">'+p.sig+'</p><div class="task-intro">'+p.intro+'</div><div class="cards-grid">'+cardsHTML+'</div></div>';
+}
+
+function buildCard(pid,card){
+  const t=card.tier;
+  const LETTER={bronze:'B',silver:'S',gold:'G'};
+  const NAME={bronze:'Bronze',silver:'Silver',gold:'Gold'};
+  const state=cs(pid,t);
+  if(!state.flipped){
+    return '<div id="cw-'+pid+'-'+t+'"><div class="card-face '+t+'" role="button" tabindex="0" aria-label="Reveal '+NAME[t]+' card" onclick="flipCard(\''+pid+'\',\''+t+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();flipCard(\''+pid+'\',\''+t+'\');}"><div class="face-letter">'+LETTER[t]+'</div><div class="face-tier">'+NAME[t]+'</div><div class="face-prompt">click to reveal</div></div></div>';
+  }
+  const sealed=card.requires&&!ks5();
+  const REQ_LABEL={dictionaries:'Dictionaries',oop:'Object-Oriented Programming',file_io:'File Handling'};
+  if(sealed){
+    return '<div id="cw-'+pid+'-'+t+'"><div class="card-content '+t+'"><span class="content-badge">'+NAME[t]+'</span><div class="req-seal"><div class="req-icon">🔒</div><div class="req-title">Requires knowledge of:<br>'+( REQ_LABEL[card.requires]||card.requires)+'</div><div class="req-sub">You don\'t meet the requirements for this card yet!</div></div></div></div>';
+  }
+  const fileWarn=card.fileIO&&!ks5()?'<div class="fileio-banner">⚠ This task uses file handling. Only open once you\'ve covered it in class</div>':'';
+  const egHTML=card.expected?'<div class="eg-wrap"><div class="eg-lbl">Expected Output</div><div class="eg-box"><pre>'+esc(card.expected)+'</pre></div></div>':'';
+  let hintsHTML='';
+  if(card.hints&&card.hints.length){
+    let btns='',boxes='';
+    card.hints.forEach((h,i)=>{
+      const sh=i<state.hints;
+      btns+='<button class="h-btn'+(sh?' shown':'')+'" id="hb-'+pid+'-'+t+'-'+(i+1)+'" '+(sh?'disabled':'')+' onclick="revealHint(\''+pid+'\',\''+t+'\','+(i+1)+')">'+(sh?'&#10003; Hint '+(i+1):'Hint '+(i+1))+'</button>';
+      boxes+='<div class="hint-box'+(i<state.hints?' visible':'')+'" id="hx-'+pid+'-'+t+'-'+(i+1)+'"><p>'+h+'</p></div>';
+    });
+    hintsHTML='<div class="hints-sec"><div class="hints-lbl">Need a hand?</div><div class="hint-btns">'+btns+'</div>'+boxes+'</div>';
+  }
+  const solHTML='<div class="sol-sec"><button class="sol-btn'+(state.sol?' shown':'')+'" id="sb-'+pid+'-'+t+'" onclick="revealSol(\''+pid+'\',\''+t+'\')" '+(state.sol?'disabled':'')+'>'+(state.sol?'&#10003; Solution shown':'&#9655; Reveal solution')+'</button><div class="sol-box'+(state.sol?' visible':'')+'" id="sx-'+pid+'-'+t+'"><span class="sol-warn">Have a proper go first. The struggle is where learning happens.</span><div class="cb-wrap"><span class="cb-lbl">Worked Solution</span><button class="copy-btn" onclick="cp(this)">Copy</button><pre class="cb">'+esc(card.solution)+'</pre></div></div></div>';
+  return '<div id="cw-'+pid+'-'+t+'"><div class="card-content '+t+'"><span class="content-badge">'+NAME[t]+'</span><div class="content-title">'+card.title+'</div>'+fileWarn+'<div class="content-brief">'+card.brief+egHTML+'</div>'+hintsHTML+solHTML+'</div></div>';
+}
+
+// ── INTERACTIONS ──
+function flipCard(pid,tier){
+  cs(pid,tier).flipped=true;save();
+  const wrapper=document.getElementById('cw-'+pid+'-'+tier);
+  if(wrapper){
+    const page=PAGES.find(p=>p.id===pid);
+    const card=page&&page.cards&&page.cards.find(c=>c.tier===tier);
+    if(card)wrapper.outerHTML=buildCard(pid,card);
+  }
+}
+function revealHint(pid,tier,n){
+  const s=cs(pid,tier);s.hints=n;save();
+  const box=document.getElementById('hx-'+pid+'-'+tier+'-'+n);
+  const btn=document.getElementById('hb-'+pid+'-'+tier+'-'+n);
+  if(box)box.classList.add('visible');
+  if(btn){btn.classList.add('shown');btn.disabled=true;btn.innerHTML='&#10003; Hint '+n;}
+}
+function revealSol(pid,tier){
+  const s=cs(pid,tier);s.sol=true;save();
+  const box=document.getElementById('sx-'+pid+'-'+tier);
+  const btn=document.getElementById('sb-'+pid+'-'+tier);
+  if(box)box.classList.add('visible');
+  if(btn){btn.classList.add('shown');btn.disabled=true;btn.innerHTML='&#10003; Solution shown';}
+}
+function toggleKS(){
+  // Locked cards are worked out at render time, so switching mode keeps the student's progress
+  STATE.mode=ks5()?'ks4':'ks5';
+  save();render();
+}
+function go(d){STATE.page=Math.max(0,Math.min(PAGES.length-1,STATE.page+d));save();render();}
+function cp(btn){
+  const pre=btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent.trim()).then(()=>{
+    btn.textContent='✓ Copied';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('ok');},2200);
+  }).catch(()=>{btn.textContent='Failed';setTimeout(()=>{btn.textContent='Copy';},2000);});
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+render();
+</script>
+</body>
+</html>

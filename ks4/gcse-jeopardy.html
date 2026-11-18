@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revision Jeopardy: OCR GCSE Computer Science</title>
+<style>
+  :root{--font-sans:'Nunito',sans-serif;--font-mono:'JetBrains Mono',monospace;}
+  html,body{margin:0;}
+  body{font-family:var(--font-sans);background:#FDFBF4;color:#1C3040;min-height:100vh;padding:64px 16px 32px;}
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 4</a></nav>
+<style>
+  .jp{background:#1a1a8e;border-radius:8px;padding:12px;font-family:var(--font-sans);user-select:none}
+  .jp-title{text-align:center;color:#FFD700;font-size:20px;font-weight:500;letter-spacing:.04em;margin-bottom:4px}
+  .jp-subtitle{text-align:center;color:#aaaadd;font-size:12px;margin-bottom:14px}
+  .jp-sl{color:#aaaadd;font-size:12px;letter-spacing:.06em;text-transform:uppercase;text-align:center;margin-bottom:10px}
+  .jp-tg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .jp-tb{background:#2626b0;border:2px solid #3333aa;border-radius:8px;padding:14px 10px;text-align:center;cursor:pointer;transition:background .1s}
+  .jp-tb:hover{background:#3535d0;border-color:#5555cc}
+  .jp-tb.sel{border-color:#FFD700;background:#1a1a6e}
+  .jp-tb.soon{background:#111166;border-color:#222266;cursor:default;opacity:.6}
+  .jp-tn{color:#fff;font-size:13px;font-weight:500}
+  .jp-badge{display:inline-block;font-size:10px;border-radius:4px;padding:2px 7px;margin-top:5px}
+  .rdy{background:#1a6e1a;color:#7fff7f}.sn{background:#333366;color:#8888bb}
+  .jp-ts{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+  .jp-tsb{background:#2626b0;border:2px solid #3333aa;color:#FFD700;border-radius:8px;width:56px;height:56px;font-size:22px;font-weight:500;cursor:pointer}
+  .jp-tsb:hover{background:#3535d0}
+  .jp-tsb.active{background:#FFD700;color:#0d0d6b;border-color:#FFD700}
+  .jp-sb-btn{display:block;width:100%;background:#FFD700;border:none;color:#0d0d6b;border-radius:8px;padding:12px;font-size:15px;font-weight:500;cursor:pointer}
+  .jp-sb-btn:hover{background:#ffe44d}
+  .jp-sb-btn:disabled{background:#555588;color:#888899;cursor:default}
+  .jp-sc{display:grid;gap:6px;margin-bottom:10px}
+  .jp-team{background:#0d0d6b;border-radius:6px;padding:6px 8px;text-align:center}
+  .jp-tn2{font-size:11px;color:#aaaadd;margin-bottom:2px}
+  .jp-ts2{font-size:18px;font-weight:500;color:#FFD700}
+  .jp-tbs{display:flex;gap:4px;justify-content:center;margin-top:4px}
+  .jp-bsm{background:#2626b0;border:1px solid #4444cc;color:#fff;border-radius:4px;padding:2px 8px;font-size:13px;cursor:pointer}
+  .jp-bsm:hover{background:#3333cc}
+  .jp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+  .jp-cat{background:#0d0d6b;border-radius:4px;padding:8px 4px;text-align:center;font-size:10px;font-weight:500;color:#FFD700;letter-spacing:.02em;min-height:40px;display:flex;align-items:center;justify-content:center}
+  .jp-cell{background:#2626b0;border:1px solid #3333aa;border-radius:4px;padding:8px 4px;text-align:center;font-size:17px;font-weight:500;color:#FFD700;cursor:pointer;min-height:48px;display:flex;align-items:center;justify-content:center;transition:background .1s}
+  .jp-cell:hover{background:#3535d0}
+  .jp-cell.used{background:#1a1a55;color:#44447a;cursor:default;border-color:#222266}
+  .jp-panel{background:#0d0d6b;border-radius:8px;padding:20px 16px;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+  .jp-pc{font-size:12px;color:#aaaadd;letter-spacing:.06em;text-transform:uppercase}
+  .jp-pv{font-size:28px;font-weight:500;color:#FFD700}
+  .jp-pq{font-size:15px;color:#fff;text-align:center;line-height:1.6;max-width:580px;white-space:pre-line}
+  .jp-pa{font-size:15px;color:#7fffb0;text-align:center;line-height:1.6;max-width:580px;white-space:pre-line}
+  .jp-code{font-family:var(--font-mono);font-size:12px;background:#06063a;border-radius:6px;padding:10px 14px;text-align:left;line-height:1.7;color:#b8e0ff;width:100%;max-width:560px;white-space:pre}
+  .jp-btn{background:#FFD700;border:none;color:#0d0d6b;border-radius:6px;padding:8px 22px;font-size:14px;font-weight:500;cursor:pointer}
+  .jp-btn:hover{background:#ffe44d}
+  .jp-bk{background:#2626b0;border:1px solid #4444cc;color:#fff;border-radius:6px;padding:8px 22px;font-size:14px;cursor:pointer}
+  .jp-bk:hover{background:#3333cc}
+  .jp-aw{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .jp-awl{font-size:11px;color:#aaaadd;text-align:center;width:100%;margin-bottom:2px}
+  .jp-awb{background:#1a1a6e;border:1px solid #4444aa;color:#FFD700;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer}
+  .jp-awb:hover{background:#2626b0}
+  .jp-fb{display:flex;justify-content:center;margin-top:8px}
+  .jp-lb{background:none;border:none;color:#6666aa;font-size:11px;cursor:pointer;text-decoration:underline}
+  .jp-lb:hover{color:#aaaadd}
+  .jp-h{display:none}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .jp-awb.won{background:#FFD700;color:#0d0d6b;border-color:#FFD700}
+  .jp-awb:disabled{cursor:default}
+  .jp-awb:disabled:not(.won){opacity:.45}
+  /* Bigger text when projected on a classroom screen */
+  @media (min-width:900px){
+    .jp{padding:18px}
+    .jp-title{font-size:26px}
+    .jp-cat{font-size:clamp(11px,1.1vw,16px);min-height:56px}
+    .jp-cell{font-size:clamp(18px,2.2vw,30px);min-height:clamp(52px,7vh,84px)}
+    .jp-pc{font-size:clamp(12px,1.2vw,16px)}
+    .jp-pv{font-size:clamp(28px,3vw,40px)}
+    .jp-pq,.jp-pa{font-size:clamp(16px,1.9vw,26px);max-width:900px}
+    .jp-panel{min-height:clamp(320px,55vh,620px)}
+    .jp-code{font-size:clamp(12px,1.3vw,18px);max-width:860px}
+  }
+</style>
+
+<h2 class="sr-only">OCR GCSE Computer Science Jeopardy: select a topic, choose teams, then play</h2>
+
+<div class="jp">
+  <div class="jp-title">Revision Jeopardy: OCR GCSE Computer Science</div>
+  <div class="jp-subtitle">J277 &nbsp;&middot;&nbsp; Paper 1 &amp; Paper 2</div>
+  <div id="tv">
+    <div class="jp-sl">Choose a topic</div>
+    <div class="jp-tg" id="tg"></div>
+    <div class="jp-sl">How many teams?</div>
+    <div class="jp-ts">
+      <button class="jp-tsb" onclick="sT(2)">2</button>
+      <button class="jp-tsb active" onclick="sT(3)">3</button>
+      <button class="jp-tsb" onclick="sT(4)">4</button>
+    </div>
+    <button class="jp-sb-btn" id="sb" onclick="go()" disabled>Select a topic to start</button>
+  </div>
+  <div id="gv" class="jp-h">
+    <div class="jp-sc" id="sc"></div>
+    <div id="bv">
+      <div class="jp-grid" id="gr"></div>
+      <div class="jp-fb"><button class="jp-lb" onclick="reset()">Change topic / reset</button></div>
+    </div>
+    <div id="qv" class="jp-h"><div class="jp-panel"><div class="jp-pc" id="qc"></div><div class="jp-pv" id="qval"></div><div class="jp-pq" id="qt"></div><button class="jp-btn" onclick="ans()">Show answer</button></div></div>
+    <div id="av" class="jp-h"><div class="jp-panel"><div class="jp-pc" id="ac"></div><div class="jp-pv" id="aval"></div><div class="jp-pq" id="aq" style="color:#aaaadd;font-size:13px"></div><div id="at"></div><div class="jp-aw" id="ab"></div><button class="jp-bk" style="margin-top:8px" onclick="back()">Back to board</button></div></div>
+  </div>
+</div>
+
+<script>
+const T=[
+  {
+    name:"Von Neumann Architecture & the FDE Cycle",available:true,
+    cats:["Components","Registers","FDE Cycle","CPU Performance","Spot the error"],
+    qs:[
+      [
+        {q:"The component that performs arithmetic calculations and logical operations.",a:"ALU: Arithmetic Logic Unit"},
+        {q:"The component that manages and coordinates the fetch-execute cycle and decodes instructions.",a:"CONTROL UNIT (CU)\n\nCommon error: saying the CU executes instructions. It does not. It manages and decodes."},
+        {q:"This type of fast memory sits between the CPU and RAM. It stores recently used data and instructions to reduce the number of slower RAM accesses.",a:"CACHE\n\nCache is faster than RAM but holds less data. If the data needed is already in cache, this is called a cache hit."},
+        {q:"State the purpose of the Accumulator (ACC).",a:"The Accumulator stores the result of calculations performed by the ALU, or the data currently being processed."},
+        {q:"A student says: 'The Control Unit executes the instructions in a program.' Identify the error and give a correct description of what the CU does.",a:"Wrong. The CU does NOT execute instructions.\n\nThe CU manages and coordinates the fetch-execute cycle and decodes instructions. Execution (calculations and logic) is carried out by the ALU."},
+      ],
+      [
+        {q:"This register stores the address of the next instruction to be fetched from memory. It increments during each fetch-execute cycle.",a:"PROGRAM COUNTER (PC)"},
+        {q:"This register stores the address of the memory location that is about to be read from or written to.",a:"MEMORY ADDRESS REGISTER (MAR)"},
+        {q:"This register stores the data or instruction that has just been fetched from memory, or is about to be written to memory.",a:"MEMORY DATA REGISTER (MDR)"},
+        {q:"State the difference between what the Program Counter stores and what the Memory Address Register stores.",a:"PC: stores the address of the NEXT instruction to be fetched (always pointing ahead).\n\nMAR: stores the address of the memory location CURRENTLY being accessed (read from or written to)."},
+        {q:"Explain the difference between storing data and storing an address. Use an example to support your answer.",a:"An ADDRESS is a location in memory: it tells the CPU where to look.\nDATA is the actual content stored at that location, e.g. an instruction, a number, or a character.\n\nThink of it like a house number (address) vs what's inside the house (data)."},
+      ],
+      [
+        {q:"State the three stages of the fetch-execute cycle in the correct order.",a:"FETCH → DECODE → EXECUTE\n\nAll three stages must be in this exact order."},
+        {q:"Which component of the CPU is responsible for decoding an instruction?",a:"THE CONTROL UNIT (CU)"},
+        {q:"Describe what happens during the fetch stage of the fetch-execute cycle.",a:"1. The address in the PC is copied to the MAR.\n2. The instruction at that address is fetched from RAM into the MDR.\n3. The PC increments so it points to the next instruction."},
+        {q:"During the execute stage, a calculation needs to be carried out. Which component performs this, and where is the result stored?",a:"The ALU (Arithmetic Logic Unit) performs the calculation.\nThe result is stored in the ACCUMULATOR (ACC)."},
+        {q:"A student writes: 'The Program Counter keeps track of how many instructions have been processed so far.' Identify the error and write a correct description.",a:"Wrong. The PC does not count processed instructions.\n\nThe PC stores the ADDRESS of the next instruction to be fetched. It increments during each fetch stage so the CPU always knows where to look next."},
+      ],
+      [
+        {q:"Give three characteristics of a CPU that can affect its performance.",a:"1. Clock speed\n2. Cache size\n3. Number of cores"},
+        {q:"Explain what clock speed means and how a higher clock speed affects performance.",a:"Clock speed is the number of fetch-execute cycles the CPU can perform per second, measured in GHz.\n\nA higher clock speed means more instructions are processed per second, improving performance."},
+        {q:"Explain how a larger cache size can improve CPU performance.",a:"Cache stores recently used data and instructions closer to the CPU than RAM.\nIf the data needed is in cache (a cache hit), it can be accessed faster.\nThis reduces the time the CPU spends waiting for data from slower RAM."},
+        {q:"Explain how having more processor cores can improve performance.",a:"Multiple cores allow different programs or tasks to run at the same time (in parallel).\nEach core can execute its own instructions independently, so more work is completed in the same amount of time."},
+        {q:"A student says: 'Doubling the clock speed will always double the performance.' Give one reason why this is not always true.",a:"Other components (such as RAM speed or cache size) can become a bottleneck.\nThe CPU can only work as fast as its slowest component allows, so doubling clock speed may not double overall performance."},
+      ],
+      [
+        {q:"'The ALU decodes instructions so the CPU knows what to do.' What is wrong?",a:"Wrong. The ALU performs arithmetic and logical operations, not decoding.\nDecoding is the job of the CONTROL UNIT (CU)."},
+        {q:"'The Program Counter stores the address of the instruction currently being executed.' What is wrong?",a:"Wrong. The PC stores the address of the NEXT instruction to be fetched, not the current one.\nIt increments during the fetch stage so it always points ahead."},
+        {q:"'The MDR stores the address of the memory location being accessed.' What is wrong?",a:"Wrong. That is the job of the MAR (Memory Address Register).\nThe MDR stores the DATA or INSTRUCTION that has been fetched from (or is about to be written to) memory."},
+        {q:"'Cache is a type of secondary storage that is slower than RAM but cheaper to manufacture.' What is wrong?",a:"Two errors:\n1. Cache is NOT secondary storage: it is fast memory inside or very close to the CPU.\n2. Cache is FASTER than RAM (not slower), though it is more expensive per byte."},
+        {q:"'Von Neumann architecture means the CPU processes all instructions in parallel at the same time.' What is wrong?",a:"Wrong. Von Neumann architecture processes instructions SEQUENTIALLY, one at a time.\nA single shared bus means only one instruction is in the fetch-execute cycle at any moment.\n(This limitation is sometimes called the von Neumann bottleneck.)"},
+      ],
+    ]
+  },
+  {
+    name:"Translators",available:true,
+    cats:["High vs Low level","Need for translators","Compilers","Interpreters","Spot the error"],
+    qs:[
+      [
+        {q:"A language that uses English-like keywords, is easier to read and write, and is not specific to any one processor.",a:"HIGH-LEVEL LANGUAGE\n\nExamples: Python, Java, C#"},
+        {q:"A language that is specific to a particular processor architecture and uses binary or short mnemonics rather than English keywords.",a:"LOW-LEVEL LANGUAGE\n\nExamples: machine code, assembly language"},
+        {q:"State one reason why high-level languages are easier to use for programmers than low-level languages.",a:"Any one of:\n• Use English-like keywords that are easier to read and write\n• Not hardware specific, portable across different processors\n• Easier to find and fix errors (debug)"},
+        {q:"State two reasons why some programs are written in a low-level language rather than a high-level language.",a:"Any two of:\n• Direct control of hardware (e.g. device drivers, embedded systems)\n• Executes faster: already close to or is machine code\n• No translation needed at runtime\n• Used where memory or processing resources are very limited"},
+        {q:"A student says: 'High-level code runs faster than low-level code because it's easier to write.' Identify two errors in this statement.",a:"Error 1: Low-level code runs FASTER: it is already close to (or is) machine code, requiring little or no translation before execution.\n\nError 2: Ease of writing relates to development time, not execution speed. These are completely separate things."},
+      ],
+      [
+        {q:"State why high-level code must be translated before a computer can run it.",a:"The processor can only understand machine code (binary).\nHigh-level code must be translated into machine code before it can be executed."},
+        {q:"Name the two types of translator used to convert high-level language programs into machine code.",a:"COMPILER and INTERPRETER\n\nNote: assemblers translate assembly language, not required at GCSE."},
+        {q:"A compiler translates a whole program and produces a file that can be run directly without the original source code. What is this file called?",a:"AN EXECUTABLE FILE\n\nThe executable can be distributed and run without the compiler or source code being present."},
+        {q:"Explain the difference between how a compiler and an interpreter translate high-level code.",a:"A COMPILER translates the entire program in one go and produces a standalone executable file.\n\nAn INTERPRETER translates and executes the code one line at a time, without producing a separate file."},
+        {q:"Describe how a compiler handles errors during translation. Give one advantage of the compiler's approach and one advantage of the interpreter's approach to error handling.",a:"Compiler: translates the whole program first, then reports ALL errors at the end in one list.\n\nCompiler advantage: gives the programmer a complete picture of all errors at once.\n\nInterpreter advantage: stops immediately at the first error, making it easier to fix one problem at a time during development."},
+      ],
+      [
+        {q:"A compiler translates the whole program and produces this: a file that can be run without the compiler being installed.",a:"AN EXECUTABLE FILE"},
+        {q:"Give one advantage of using a compiled program over an interpreted one when running a finished program.",a:"The executable has already been translated, so no translation happens at runtime, so it runs faster."},
+        {q:"Give one advantage of a compiler for distributing commercial software.",a:"The source code does not need to be shared. Only the executable is distributed.\nThis protects the programmer's code from being copied or modified."},
+        {q:"Give two differences between a compiler and an interpreter.",a:"Any two paired differences:\n• Compiler translates all at once / interpreter translates one line at a time\n• Compiler produces an executable / interpreter does not\n• Compiler reports all errors at the end / interpreter stops at the first error\n• Compiled code runs without the compiler / interpreted code needs the interpreter every time"},
+        {q:"A developer wants to sell a program commercially. Give two reasons why a compiled program is better suited to distribution than an interpreted one.",a:"1. An executable runs without the compiler present, so customers need no special software to run it.\n\n2. The source code is not shared, only the compiled executable is distributed, protecting the developer's intellectual property."},
+      ],
+      [
+        {q:"An interpreter translates this many lines of code at a time before executing them.",a:"ONE line at a time\n\nIt translates, executes, then moves to the next line."},
+        {q:"State one advantage of using an interpreter during the development and testing stage of writing a program.",a:"It stops when it finds an error, making it easier to identify and fix bugs one at a time during development."},
+        {q:"Give one disadvantage of an interpreter compared to a compiler when running a finished program.",a:"The interpreter must translate the code every time the program is run, making it slower to execute than a compiled program."},
+        {q:"A student is developing a program and making frequent small changes. Give one reason why an interpreter would be more useful than a compiler at this stage.",a:"An interpreter allows the student to run and test code immediately without waiting for a full compilation each time.\nErrors appear as soon as the relevant line is reached, speeding up the edit-test cycle."},
+        {q:"Explain why an interpreted program cannot be run without the original source code present.",a:"An interpreter translates and executes code at the same time, line by line.\nNo separate executable is produced, so the source code must be present each time the program runs, because it is translated afresh on every execution."},
+      ],
+      [
+        {q:"'A compiler translates code one line at a time and stops when it finds an error.' What is wrong?",a:"Wrong. That describes an INTERPRETER.\n\nA compiler translates the entire program in one go and reports all errors at the end."},
+        {q:"'Once a program is compiled, you need to keep the compiler installed to run the executable.' What is wrong?",a:"Wrong. The compiled executable can run WITHOUT the compiler.\nThat is one of the key advantages of compilation: only the executable file is needed to distribute the program."},
+        {q:"'An interpreter is faster at running a finished program because it skips error checking.' What is wrong?",a:"Two errors:\n1. Interpreters are SLOWER for running finished programs: they translate line by line on every run.\n2. Interpreters do NOT skip error checking: they stop immediately when an error is found."},
+        {q:"'Machine code is a high-level language because it controls hardware directly.' What is wrong?",a:"Wrong. Machine code is a LOW-LEVEL language.\n\nHigh-level languages are human-readable and hardware-independent.\nThe fact that machine code controls hardware directly is precisely what makes it low-level, not high-level."},
+        {q:"'You should use a compiler when developing and testing, because the executable file is easier to test.' What is wrong?",a:"Wrong. During development and testing, an INTERPRETER is preferable.\nIt stops at each error, making bugs easier to find one at a time.\n\nA compiler is better suited to the final/distribution stage, once all errors have been fixed and an executable needs to be produced."},
+      ],
+    ]
+  },
+  {
+    name:"Memory & Storage",available:true,
+    cats:["RAM & ROM","Primary vs Secondary","Virtual Memory","Secondary Storage Types","Spot the error"],
+    qs:[
+      [
+        {q:"RAM loses its contents when the computer is switched off. What is the term for this property?",a:"VOLATILE\n\nROM is non-volatile: it retains its contents without power. RAM is volatile."},
+        {q:"State the key difference between RAM and ROM.",a:"RAM is VOLATILE: its contents are lost when power is removed.\nROM is NON-VOLATILE: its contents are retained without power and cannot usually be changed."},
+        {q:"Give two examples of data that would typically be stored in ROM in a computer system.",a:"Any two of:\n• BIOS / firmware / boot instructions\n• Start-up program\n• Fixed system configuration / settings\n\nNote: programs and user files are stored in secondary storage, not ROM."},
+        {q:"Give two examples of data that would be stored in RAM while a computer is running.",a:"Any two of:\n• Currently running applications / programs\n• Data currently being processed\n• Parts of the operating system currently in use\n• Data being entered by the user"},
+        {q:"A student says: 'ROM stores all the programs on the computer, so it must have a larger capacity than RAM.' Give two reasons why this is incorrect.",a:"Error 1: ROM stores only a small amount of fixed startup code (firmware/BIOS), not all programs. Programs are stored in secondary storage.\n\nError 2: RAM generally has a larger capacity than ROM, because it needs to hold all currently running programs and data."},
+      ],
+      [
+        {q:"State the purpose of primary storage in a computer system.",a:"To hold the data and instructions currently being used by the CPU. It provides fast, direct access for the processor.\n\nRAM, the main part of primary storage, is volatile: it loses its contents when power is removed."},
+        {q:"State the purpose of secondary storage in a computer system.",a:"To permanently store data and programs when they are not in use, and to retain them when the computer is switched off.\n\nSecondary storage is non-volatile."},
+        {q:"'Secondary storage is used when primary storage is full.' Identify the error in this statement.",a:"This describes VIRTUAL MEMORY, not the general purpose of secondary storage.\n\nSecondary storage is used to permanently store files and programs, not as overflow for RAM.\n\nThis is one of the most common misconceptions in this topic."},
+        {q:"Explain why a computer needs both primary and secondary storage.",a:"Primary storage (RAM) provides fast, direct access to programs and data currently being used by the CPU.\n\nSecondary storage provides permanent, non-volatile storage for files and programs. Without it, everything would be lost when the computer is switched off."},
+        {q:"Give two characteristics that distinguish primary storage from secondary storage.",a:"Any two paired differences:\n• Primary is faster to access / secondary is slower\n• Primary (RAM) is volatile / secondary is non-volatile\n• Primary has lower capacity / secondary has much higher capacity\n• Primary (RAM) is more expensive per GB / secondary is cheaper per GB"},
+      ],
+      [
+        {q:"Virtual memory is created by partitioning a section of this type of storage.",a:"SECONDARY STORAGE (e.g. part of a hard drive or SSD)\n\nCommon error: saying primary storage. Virtual memory uses secondary storage. That is the point."},
+        {q:"State the condition that causes a computer to use virtual memory.",a:"When RAM is full or nearly full.\n\nVirtual memory provides extra space so the system can continue running without crashing."},
+        {q:"Describe what happens when RAM is full and virtual memory is used.",a:"Data that is in RAM but not immediately needed is transferred to the virtual memory area on secondary storage.\nThis frees up space in RAM for the new data that needs to be processed."},
+        {q:"When data in virtual memory is needed again by the CPU, where is it transferred back to?",a:"Back into RAM.\n\nCommon error: saying it goes back to secondary storage, but it was already there as virtual memory. It must return to RAM before the CPU can use it."},
+        {q:"Give one disadvantage of using virtual memory compared to using RAM.",a:"Virtual memory is located on secondary storage, which is much slower to access than RAM.\nThis can make the computer appear slow or sluggish when it is heavily using virtual memory."},
+      ],
+      [
+        {q:"Name the three types of secondary storage technology covered in the OCR GCSE specification.",a:"1. Magnetic (e.g. hard disk drive)\n2. Optical (e.g. CD, DVD, Blu-ray)\n3. Solid state (e.g. SSD, USB flash drive)"},
+        {q:"Give one advantage of solid state storage over magnetic storage.",a:"Any one of:\n• Faster read/write speeds\n• No moving parts, so more durable and robust\n• Smaller, lighter, more portable\n• Silent in operation\n• Uses less power"},
+        {q:"A student stores large video files on a desktop computer that will never be moved. Identify one suitable storage type and give one reason to justify the choice.",a:"MAGNETIC (HDD):\n• Large capacity, suitable for storing large video files\n• Low cost per GB\n• Desktop won't move, so durability and portability are not concerns\n\nOR SOLID STATE: fast access, durable, becoming cheaper."},
+        {q:"Give one advantage and one disadvantage of optical storage compared to solid state storage.",a:"Advantage (any one):\n• Inexpensive to manufacture and buy\n• Widely compatible, so most devices can read CDs/DVDs\n• Easy to distribute physically\n\nDisadvantage (any one):\n• Slower read/write speeds\n• Lower capacity than solid state or magnetic\n• Fragile, easily scratched"},
+        {q:"A journalist works in the field and needs to store photos on a device that fits in a pocket and withstands rough handling. Identify the most suitable storage type and justify your choice with two reasons.",a:"SOLID STATE (e.g. USB flash drive or SD card)\n\n1. Portable and compact, small enough to fit in a pocket\n2. Durable: no moving parts, so it withstands knocks and rough handling in the field"},
+      ],
+      [
+        {q:"'ROM is volatile, which means its contents are lost when the computer is turned off.' What is wrong?",a:"Wrong. ROM is NON-VOLATILE. It retains its contents without power.\n\nRAM is volatile: RAM loses its contents when power is removed."},
+        {q:"'Virtual memory is a section of primary storage set aside when RAM becomes full.' What is wrong?",a:"Wrong. Virtual memory is a section of SECONDARY storage (e.g. part of a hard drive), not primary storage.\n\nThis is a very common error on this topic."},
+        {q:"'When the data in virtual memory is needed, it is transferred back to secondary storage.' What is wrong?",a:"Wrong. When data in virtual memory is needed again, it is transferred back to RAM.\n\nIt was already in secondary storage as virtual memory, so it must go back to RAM before the CPU can use it."},
+        {q:"'Secondary storage is used when RAM is full, to give the CPU somewhere to store extra data.' What is wrong?",a:"This describes VIRTUAL MEMORY, not the general purpose of secondary storage.\n\nSecondary storage is for permanently storing files and programs.\nVirtual memory is the specific mechanism that uses a section of secondary storage when RAM is full."},
+        {q:"'Optical storage is the best choice for a mobile phone because it is fast and durable.' Give two reasons why this is wrong.",a:"Error 1: Optical storage is NOT used in mobile phones: it is bulky, fragile, requires a disc drive, and is not portable in this context.\n\nError 2: Optical storage is not particularly fast compared to solid state. Mobile phones use solid state (flash) storage."},
+      ],
+    ]
+  },
+  {
+    name:"Boolean Logic",available:true,
+    cats:["AND gate","OR gate","NOT gate","Combining gates","Spot the error"],
+    qs:[
+      [
+        {q:"An AND gate outputs 1 only when this is true about its inputs.",a:"BOTH inputs are 1.\n\nIf either input is 0, the output is 0. AND is sometimes described as 'all or nothing'."},
+        {q:"A=1, B=0. What is the output of A AND B?",a:"OUTPUT = 0\n\nAND only outputs 1 when BOTH inputs are 1.\nSince B=0, the output is 0."},
+        {q:"A=1, B=1. What is the output of A AND B?",a:"OUTPUT = 1\n\nBoth inputs are 1, so the AND gate outputs 1.\nThis is the only combination that produces a 1 from an AND gate."},
+        {q:"How many rows does the truth table for a two-input AND gate have? How many of those rows produce an output of 1?",a:"4 rows: there are 2² = 4 possible input combinations.\n\nOnly 1 row produces an output of 1: the row where A=1 AND B=1."},
+        {q:"Write the complete truth table for A AND B.",a:"A=0, B=0 → Output: 0\nA=0, B=1 → Output: 0\nA=1, B=0 → Output: 0\nA=1, B=1 → Output: 1\n\nAND outputs 1 for only one input combination."},
+      ],
+      [
+        {q:"An OR gate outputs 1 when this is true about its inputs.",a:"AT LEAST ONE input is 1.\n\nOR only outputs 0 when ALL inputs are 0."},
+        {q:"A=0, B=0. What is the output of A OR B?",a:"OUTPUT = 0\n\nOR outputs 0 only when BOTH inputs are 0.\nThis is the only combination that gives an output of 0."},
+        {q:"A=1, B=0. What is the output of A OR B?",a:"OUTPUT = 1\n\nAt least one input is 1, so the OR gate outputs 1."},
+        {q:"How many rows in the truth table for A OR B produce an output of 1?",a:"3 rows produce a 1:\n• A=0, B=1 → 1\n• A=1, B=0 → 1\n• A=1, B=1 → 1\n\nOnly A=0, B=0 produces a 0."},
+        {q:"Write the complete truth table for A OR B.",a:"A=0, B=0 → Output: 0\nA=0, B=1 → Output: 1\nA=1, B=0 → Output: 1\nA=1, B=1 → Output: 1\n\nOR outputs 0 for only one input combination."},
+      ],
+      [
+        {q:"How many inputs does a NOT gate have?",a:"ONE input (and one output).\n\nNOT inverts its single input: 1 becomes 0, and 0 becomes 1.\nIt is the only single-input gate on the GCSE spec."},
+        {q:"A=1. What is the output of NOT A?",a:"OUTPUT = 0\n\nNOT inverts the input: 1 becomes 0."},
+        {q:"A=0. What is the output of NOT A?",a:"OUTPUT = 1\n\nNOT inverts the input: 0 becomes 1."},
+        {q:"The symbol for a NOT gate must include this specific feature to show it performs inversion. What is it, and what happens if it is missing?",a:"A SMALL CIRCLE at the output.\n\nWithout the circle, the triangle is a BUFFER, which just passes its input through unchanged, so it is no longer a NOT gate.\nForgetting the circle is a very common drawing error in exam answers."},
+        {q:"Write the complete truth table for NOT A, and explain in one sentence what NOT does.",a:"A=0 → Output: 1\nA=1 → Output: 0\n\nNOT inverts the input: it always outputs the opposite of whatever it receives."},
+      ],
+      [
+        {q:"A=1, B=1. Evaluate NOT A AND B. Work out NOT A first.",a:"Step 1: NOT A = 0\nStep 2: 0 AND 1 = 0\n\nOUTPUT = 0"},
+        {q:"A=0, B=1. Evaluate A OR NOT B. Work out NOT B first.",a:"Step 1: NOT B = 0\nStep 2: 0 OR 0 = 0\n\nOUTPUT = 0"},
+        {q:"A=1, B=0. Evaluate NOT(A AND B). Work out the bracket first.",a:"Step 1: A AND B = 1 AND 0 = 0\nStep 2: NOT 0 = 1\n\nOUTPUT = 1"},
+        {q:"A=1, B=1, C=0. Evaluate (A AND NOT B) OR C. Show your working.",a:"Step 1: NOT B = 0\nStep 2: A AND 0 = 0\nStep 3: 0 OR C = 0 OR 0 = 0\n\nOUTPUT = 0"},
+        {q:"Write the Boolean expression for this circuit: B is inverted by a NOT gate, then A and NOT B feed into an AND gate, whose output feeds into a second AND gate with C.",a:"Q = (A AND NOT B) AND C\n\nThis is one of the most commonly examined 3-gate circuits at GCSE.\nAlternative equivalent forms: A AND (NOT B AND C) or (A AND C) AND NOT B, all accepted."},
+      ],
+      [
+        {q:"'An AND gate outputs 1 when at least one input is 1.' What is wrong?",a:"Wrong. That describes an OR gate.\n\nAND requires ALL inputs to be 1 to output 1.\n'At least one' is the rule for OR."},
+        {q:"'A NOT gate takes two inputs and outputs the opposite of both.' What is wrong?",a:"Wrong. A NOT gate has only ONE input (and one output).\nIt inverts that single input.\n\nTwo-input gates are AND and OR."},
+        {q:"'OR outputs 0 when at least one input is 0.' What is wrong?",a:"Wrong. OR outputs 0 only when ALL inputs are 0.\n\nIf at least one input is 1, OR outputs 1.\nThe statement described would actually be the AND gate."},
+        {q:"'To draw a NOT gate, draw an AND gate shape and add a circle to show inversion.' What is wrong?",a:"Wrong on two counts:\n1. A NOT gate has its own distinct symbol: a triangle/pointer shape, not an AND gate shape.\n2. Adding a circle to an AND gate shape creates a NAND gate, which is not on the OCR specification at all."},
+        {q:"A=1, B=0. A student says the output of NOT(A OR B) is 1. Are they correct? Show your working.",a:"INCORRECT.\n\nStep 1: A OR B = 1 OR 0 = 1\nStep 2: NOT 1 = 0\n\nThe correct output is 0, not 1.\nThe student likely forgot to evaluate the bracket before applying NOT."},
+      ],
+    ]
+  },
+  {name:"Networks",available:false},
+  {name:"Algorithms",available:false},
+];
+
+let sel=null,nT=3,sc=[],used={},cur=null;
+
+function buildTG(){
+  const g=document.getElementById('tg');g.innerHTML='';
+  T.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='jp-tb'+(t.available?'':' soon');
+    d.innerHTML=`<div class="jp-tn">${t.name}</div><span class="jp-badge ${t.available?'rdy':'sn'}">${t.available?'Ready to play':'Coming soon'}</span>`;
+    if(t.available) d.onclick=()=>pick(i,d);
+    g.appendChild(d);
+  });
+}
+
+function pick(i,el){
+  sel=i;document.querySelectorAll('.jp-tb').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');
+  const b=document.getElementById('sb');b.disabled=false;b.textContent='Start: '+T[i].name;
+}
+function sT(n){nT=n;document.querySelectorAll('.jp-tsb').forEach((b,i)=>b.classList.toggle('active',i===n-2));}
+function go(){
+  if(sel===null)return;sc=Array(nT).fill(0);used={};cur=null;buildSC();buildGR();
+  document.getElementById('tv').classList.add('jp-h');document.getElementById('gv').classList.remove('jp-h');
+  document.getElementById('bv').classList.remove('jp-h');document.getElementById('qv').classList.add('jp-h');document.getElementById('av').classList.add('jp-h');
+}
+function reset(){
+  sel=null;document.querySelectorAll('.jp-tb').forEach(b=>b.classList.remove('sel'));
+  const b=document.getElementById('sb');b.disabled=true;b.textContent='Select a topic to start';
+  document.getElementById('gv').classList.add('jp-h');document.getElementById('tv').classList.remove('jp-h');
+}
+function buildSC(){
+  const s=document.getElementById('sc');s.style.gridTemplateColumns=`repeat(${nT},1fr)`;s.innerHTML='';
+  for(let i=0;i<nT;i++) s.innerHTML+=`<div class="jp-team"><div class="jp-tn2">Team ${i+1}</div><div class="jp-ts2" id="s${i}">0</div><div class="jp-tbs"><button class="jp-bsm" onclick="adj(${i},1)">+</button><button class="jp-bsm" onclick="adj(${i},-1)">&minus;</button></div></div>`;
+}
+function adj(t,d){sc[t]=Math.max(0,sc[t]+d*100);document.getElementById('s'+t).textContent=sc[t];}
+function award(t){
+  // One award per question; the +/− buttons are there to correct mistakes
+  if(!cur||cur.awarded)return;cur.awarded=true;
+  sc[t]+=cur.val;document.getElementById('s'+t).textContent=sc[t];
+  document.querySelectorAll('.jp-awb').forEach((b,i)=>{b.disabled=true;if(i===t){b.classList.add('won');b.textContent='\u2713 Team '+(t+1);}});
+}
+function buildGR(){
+  const t=T[sel],g=document.getElementById('gr');g.innerHTML='';
+  t.cats.forEach(c=>{const d=document.createElement('div');d.className='jp-cat';d.textContent=c;g.appendChild(d);});
+  [100,200,300,400,500].forEach((v,vi)=>{
+    t.cats.forEach((c,ci)=>{
+      const key=ci+'-'+vi,d=document.createElement('div');
+      d.className='jp-cell'+(used[key]?' used':'');
+      d.textContent=used[key]?'':'\u00A3'+v;
+      if(!used[key]) d.onclick=()=>openQ(ci,vi,key,v);
+      g.appendChild(d);
+    });
+  });
+}
+function openQ(ci,vi,key,val){
+  const q=T[sel].qs[ci][vi];cur={key,val,cat:T[sel].cats[ci]};
+  document.getElementById('qc').textContent=cur.cat;document.getElementById('qval').textContent='\u00A3'+val;document.getElementById('qt').textContent=q.q;
+  document.getElementById('bv').classList.add('jp-h');document.getElementById('av').classList.add('jp-h');document.getElementById('qv').classList.remove('jp-h');
+}
+function ans(){
+  if(!cur)return;
+  const ci=T[sel].cats.indexOf(cur.cat),vi=[100,200,300,400,500].indexOf(cur.val),q=T[sel].qs[ci][vi];
+  document.getElementById('ac').textContent=cur.cat;document.getElementById('aval').textContent='\u00A3'+cur.val;document.getElementById('aq').textContent=q.q;
+  const at=document.getElementById('at');at.innerHTML='';
+  if(q.code){const p=document.createElement('pre');p.className='jp-code';p.textContent=q.code;at.appendChild(p);}
+  else{const p=document.createElement('div');p.className='jp-pa';p.textContent=q.a;at.appendChild(p);}
+  const ab=document.getElementById('ab');ab.innerHTML='<div class="jp-awl">Award points to:</div>';
+  for(let i=0;i<nT;i++) ab.innerHTML+=`<button class="jp-awb" onclick="award(${i})">Team ${i+1}</button>`;
+  document.getElementById('qv').classList.add('jp-h');document.getElementById('av').classList.remove('jp-h');
+}
+function back(){
+  if(cur) used[cur.key]=true;cur=null;
+  document.getElementById('qv').classList.add('jp-h');document.getElementById('av').classList.add('jp-h');document.getElementById('bv').classList.remove('jp-h');buildGR();
+}
+buildTG();
+</script>
+
+</body>
+</html>
