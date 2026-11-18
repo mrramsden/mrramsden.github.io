@@ -15,8 +15,14 @@ sys.path.insert(0, os.path.join(HERE, ".."))
 from solutions import GOOD as G3          # noqa: E402
 from solutions2 import GOOD as G2         # noqa: E402
 
-PAGES = [("python/escape-the-dungeon-1.html", "Part 1"), ("python/escape-the-dungeon-2.html", "Part 2"),
-         ("python/escape-the-dungeon-3.html", "Part 3"), ("python/python-rescue.html", "Python Rescue")]
+# section page -> the pages its cards should open
+SECTIONS = {
+    "ks3/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "python-rescue.html"],
+    "ks4/": ["pseudocode-playground.html"],
+    "ks5/": ["algorithms-lab.html", "merge-sort-recursion.html", "dijkstra-table-method.html",
+             "a-star-table-method.html", "boolean-algebra-slips.html", "../ks4/pseudocode-playground.html"],
+}
+MOVED = ["escape-the-dungeon-1", "escape-the-dungeon-2", "escape-the-dungeon-3", "python-rescue"]
 
 
 def serve():
@@ -49,25 +55,42 @@ async def main(base):
         if os.path.isdir(PYO):
             await pg.route("**/pyodide/v0.26.4/full/**", route)
 
+        outside = set()
+        pg.on("request", lambda r: outside.add(r.url.split("/")[2]) if not r.url.startswith(base) and not r.url.startswith("data:") else None)
+
         await pg.goto(base)
         cards = await pg.locator("a.card").count()
-        print("menu cards:", cards)
-        problems += cards != 4
+        print("welcome page cards:", cards); problems += cards != 3
         await pg.screenshot(path=os.path.join(HERE, "smoke_menu.png"), full_page=True)
-        for href, name in PAGES:
-            await pg.goto(base)
-            await pg.click(f'a.card[href="{href}"]')
-            await pg.wait_for_load_state("load")
-            title = await pg.title()
-            ok_home = await pg.locator("a.homelink").count() == 1
-            await pg.click("a.homelink")
-            await pg.wait_for_load_state("load")
-            back = await pg.locator("a.card").count() == 4
-            print(f"{name:14} title: {title[:50]:50} | back link: {ok_home} | returns to menu: {back}")
-            problems += (not ok_home) + (not back)
+        for sec, pages in SECTIONS.items():
+            await pg.goto(base); await pg.click(f'a.card[href="{sec}"]'); await pg.wait_for_load_state("load")
+            hrefs = await pg.locator("a.card").evaluate_all("els => els.map(e => e.getAttribute('href'))")
+            if hrefs != pages: print("  card list differs:", sec, hrefs); problems += 1
+            await pg.screenshot(path=os.path.join(HERE, "smoke_" + sec.strip("/") + ".png"), full_page=True)
+            await pg.click("a.homelink"); await pg.wait_for_load_state("load")
+            back_home = await pg.locator("a.card").count() == 3
+            print(f"{sec:5} {len(hrefs)} cards | All key stages link returns home: {back_home}"); problems += not back_home
+            for href in pages:
+                await pg.goto(base + sec); await pg.click(f'a.card[href="{href}"]'); await pg.wait_for_load_state("load")
+                await pg.wait_for_timeout(300)
+                title = await pg.title()
+                back = pg.locator("a.homelink, nav.mr-back a").first
+                ok_back = await back.count() == 1
+                if ok_back:
+                    await back.click(); await pg.wait_for_load_state("load")
+                returned = pg.url == base + sec
+                print(f"   {href:38} {title[:46]:46} | back to {sec}: {returned}")
+                problems += (not ok_back) + (not returned)
+        await pg.goto(base + "ks5/algorithms-lab.html"); await pg.wait_for_timeout(500)
+        fonts = await pg.evaluate("document.fonts.ready.then(() => [...document.fonts].filter(f => f.status === 'loaded').map(f => f.family + ' ' + f.weight))")
+        print("fonts loaded on the lab:", sorted(set(fonts))); problems += not any("Atkinson" in f for f in fonts)
+        for old in MOVED:
+            await pg.goto(base + "python/" + old + ".html#keep"); await pg.wait_for_load_state("load"); await pg.wait_for_timeout(200)
+            ok = pg.url == base + "ks3/" + old + ".html#keep"
+            print(f"old link python/{old}.html redirects: {ok}"); problems += not ok
 
         # one real check per family, to prove Python loads from the hosted page
-        await pg.goto(base + "python/escape-the-dungeon-2.html")
+        await pg.goto(base + "ks3/escape-the-dungeon-2.html")
         await pg.click(".lvcard.lv-B")
         await pg.click('#dots [data-go="4"]')
         art = pg.locator('[data-part="p4b3"]')
@@ -77,13 +100,15 @@ async def main(base):
         msg = (await art.locator(".msg").first.inner_text()).replace("\n", " | ")
         print("Part 2 check:", msg[:60]); problems += "passed" not in msg
 
-        await pg.goto(base + "python/python-rescue.html#loop")
+        await pg.goto(base + "ks3/python-rescue.html#loop")
         fix = pg.locator("#fixslot .runner")
         await fix.locator(".run").click()
         await fix.locator(".msg").first.wait_for(timeout=90000)
         msg = (await fix.locator(".msg").first.inner_text()).replace("\n", " | ")
         print("Rescue run:", msg[:60]); problems += "finished" not in msg
 
+        allowed = {"cdn.jsdelivr.net"}
+        print("other sites contacted:", sorted(outside)); problems += len(outside - allowed)
         print("page errors:", errs)
         problems += len(errs)
         await br.close()

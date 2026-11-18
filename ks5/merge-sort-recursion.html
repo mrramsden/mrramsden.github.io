@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merge sort: the order the recursion really runs in</title>
+<style>
+  :root {
+    --paper: #EDF1F4;
+    --panel: #FFFFFF;
+    --ink: #1C2A39;
+    --muted: #566677;
+    --rule: #CBD5DE;
+    --cur: #E3A21A;
+    --cur-soft: #FBEBC4;
+    --open: #2F6FA3;
+    --open-soft: #DCE8F3;
+    --done: #2E8B62;
+    --done-soft: #DCF0E5;
+    --ghost: #AEBAC6;
+    --sans: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .page { max-width: 1240px; margin: 0 auto; padding: 28px 24px 48px; }
+  h1 {
+    font-size: clamp(1.6rem, 3vw, 2.3rem);
+    line-height: 1.15;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  h2 { font-size: 1.05rem; margin: 0 0 10px; }
+  .lede { margin: 0 0 18px; color: var(--muted); max-width: 70ch; }
+
+  /* Controls */
+  .bar {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--paper);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 10px 24px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .transport, .options, .listrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  button {
+    font: inherit; font-size: 15px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1.5px solid var(--ink);
+    background: var(--panel);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  button:hover { background: #E2E8EE; }
+  button.primary { background: var(--ink); color: #fff; }
+  button.primary:hover { background: #2D4157; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  :focus-visible { outline: 3px solid var(--cur); outline-offset: 2px; }
+  #counter { font-weight: 700; margin-left: 6px; min-width: 9ch; }
+  .seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 6px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; }
+  .seg button + button { border-left: 1.5px solid var(--ink); }
+  .seg button[aria-checked="true"] { background: var(--ink); color: #fff; }
+  .check { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--ink); }
+  .check.off { opacity: 0.4; cursor: default; }
+
+  .listrow { padding: 12px 0 4px; }
+  .listrow label { font-weight: 700; font-size: 15px; }
+  .listrow input {
+    font-family: var(--mono); font-size: 15px;
+    padding: 7px 10px;
+    border: 1.5px solid var(--ink); border-radius: 6px;
+    width: min(360px, 100%);
+    background: var(--panel); color: var(--ink);
+  }
+  #listError { color: #A33A2A; font-size: 15px; }
+
+  /* Tree */
+  .treeArea {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 16px 16px 10px;
+    margin-top: 14px;
+  }
+  .treeWrap { overflow-x: auto; }
+  #tree { display: block; width: 100%; height: auto; margin: 0 auto; }
+  .node rect.box { fill: #fff; stroke: #8B99A7; stroke-width: 1.5; }
+  .node.ghost rect.box { fill: none; stroke: var(--ghost); stroke-dasharray: 4 4; }
+  .node.open rect.box { fill: var(--open-soft); stroke: var(--open); stroke-width: 2; }
+  .node.active rect.box { fill: var(--cur-soft); stroke: var(--cur); stroke-width: 3.5; }
+  .node.done rect.box { fill: var(--done-soft); stroke: var(--done); stroke-width: 1.5; }
+  .cell { stroke: #C3CDD6; stroke-width: 1; }
+  .node.ghost .cell { stroke: #DCE2E8; stroke-dasharray: 2 3; }
+  .val { font-family: var(--mono); font-size: 15px; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
+  .edge { stroke: #9AA8B5; stroke-width: 1.5; fill: none; }
+  .edge.ghost { stroke: var(--ghost); stroke-dasharray: 3 4; }
+  .badge { font-family: var(--sans); font-size: 12.5px; fill: var(--muted); text-anchor: middle; }
+  .lvl { font-family: var(--sans); font-size: 13px; fill: var(--muted); dominant-baseline: central; }
+  @media (prefers-reduced-motion: no-preference) {
+    .node rect.box { transition: fill 0.25s, stroke 0.25s; }
+  }
+
+  .legend {
+    list-style: none; margin: 10px 0 0; padding: 10px 0 0;
+    border-top: 1px solid var(--rule);
+    display: flex; flex-wrap: wrap; gap: 6px 20px;
+    font-size: 14px; color: var(--muted);
+  }
+  .legend li { display: inline-flex; align-items: center; gap: 7px; }
+  .sw { width: 22px; height: 16px; border-radius: 3px; border: 1.5px solid; display: inline-block; }
+  .sw.active { background: var(--cur-soft); border: 3px solid var(--cur); }
+  .sw.open { background: var(--open-soft); border-color: var(--open); }
+  .sw.waiting { background: #fff; border-color: #8B99A7; }
+  .sw.done { background: var(--done-soft); border-color: var(--done); }
+  .sw.ghost { background: none; border: 1.5px dashed var(--ghost); }
+
+  #banner {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border: 1.5px dashed var(--open);
+    border-radius: 6px;
+    background: var(--open-soft);
+    font-size: 15.5px;
+  }
+
+  .narration {
+    background: var(--panel);
+    border-left: 6px solid var(--cur);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 19px;
+    line-height: 1.5;
+    min-height: 4.4em;
+  }
+  .narration code, .panel code { font-family: var(--mono); font-size: 0.9em; }
+
+  /* Lower panels */
+  .lower { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .side { display: grid; gap: 16px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px 16px;
+    position: relative;
+  }
+  .dimNote {
+    margin: 0 0 10px; padding: 8px 12px;
+    background: #F4F6F8; border-radius: 6px;
+    font-size: 14.5px; color: var(--muted);
+  }
+  .panel.dim .dimBody { opacity: 0.35; }
+
+  pre#code {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+  .line { display: flex; white-space: pre; padding-right: 10px; }
+  .ln { width: 3ch; flex: none; text-align: right; margin-right: 12px; color: #93A1AE; user-select: none; }
+  .line.hl { background: var(--cur-soft); box-shadow: inset 4px 0 var(--cur); }
+  .line.next { background: #EEF2F5; box-shadow: inset 4px 0 var(--muted); }
+
+  .stackEnd { font-size: 13px; color: var(--muted); margin: 2px 0 6px; }
+  #stack { display: flex; flex-direction: column; gap: 6px; }
+  .frame {
+    border: 1.5px solid; border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 14.5px;
+  }
+  .frame .call { font-family: var(--mono); font-weight: 600; font-size: 13.5px; word-break: break-word; }
+  .frame .note { color: var(--muted); }
+  .frame .locals { font-family: var(--mono); font-size: 12.5px; margin-top: 2px; word-break: break-word; }
+  .frame.top { border: 3px solid var(--cur); background: var(--cur-soft); }
+  .frame.paused { border-color: var(--open); background: var(--open-soft); }
+  .frame.main { border-color: #8B99A7; background: #F4F6F8; }
+  .frame.tbframe { border-style: dashed; border-color: var(--ghost); color: var(--muted); }
+
+  #log { margin: 0; padding: 0; list-style: none; max-height: 280px; overflow-y: auto; font-size: 14.5px; }
+  #log li button {
+    display: flex; gap: 8px; width: 100%;
+    text-align: left; border: 0; border-left: 4px solid transparent;
+    border-radius: 0; padding: 3px 8px; background: none;
+    font-size: 14.5px;
+  }
+  #log li button:hover { background: #EEF2F5; }
+  #log li.current button { border-left-color: var(--cur); background: var(--cur-soft); font-weight: 700; }
+  #log .num { min-width: 2.5ch; text-align: right; color: var(--muted); font-weight: 400; }
+  #log .txt { font-family: var(--mono); font-size: 13px; }
+  .emptyLog { color: var(--muted); font-size: 14.5px; margin: 0; }
+
+  .keys { margin-top: 18px; font-size: 14px; color: var(--muted); }
+  kbd {
+    font-family: var(--mono); font-size: 12.5px;
+    border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px;
+    padding: 0 5px; background: var(--panel);
+  }
+
+  @media (max-width: 900px) {
+    .lower { grid-template-columns: 1fr; }
+    .narration { font-size: 17px; }
+  }
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 5</a></nav>
+<div class="page">
+
+  <h1>What order does merge sort really run in?</h1>
+  <p class="lede">Step through the recursive code one call at a time and watch the call stack grow and shrink. Then switch to the textbook picture and compare the two orders.</p>
+
+  <section class="bar" aria-label="Controls">
+    <div class="transport">
+      <button id="btnReset" type="button">Reset</button>
+      <button id="btnBack" type="button">Back</button>
+      <button id="btnNext" type="button" class="primary">Next step</button>
+      <button id="btnPlay" type="button">Play</button>
+      <span id="counter" aria-live="polite"></span>
+    </div>
+    <div class="options">
+      <div class="seg" role="radiogroup" aria-label="Order to show">
+        <button type="button" role="radio" aria-checked="true" data-mode="df">How Python runs it</button>
+        <button type="button" role="radio" aria-checked="false" data-mode="tb">Textbook picture</button>
+      </div>
+      <label class="check" id="baseLabel"><input type="checkbox" id="chkBase" checked> Show base-case calls</label>
+    </div>
+  </section>
+
+  <section class="listrow" aria-label="Choose the list">
+    <label for="listInput">Numbers to sort</label>
+    <input id="listInput" type="text" value="15, 5, 2, 7, 4, 9, 10, 1, 8, 3" spellcheck="false">
+    <button id="btnUse" type="button">Use this list</button>
+    <button id="btnRandom" type="button">Random list</button>
+    <span id="listError" role="alert"></span>
+  </section>
+
+  <main>
+    <section class="treeArea" aria-label="Tree of calls">
+      <div id="banner" hidden>This is the picture most textbooks draw: every list on a level is split at once, then every pair is merged at once. The recursive code never runs in this order. It finishes the whole left side before it touches the right. Switch back to <strong>How Python runs it</strong> to compare.</div>
+      <div class="treeWrap"><svg id="tree" role="img" aria-label="Tree showing how the list is split and merged"></svg></div>
+      <ul class="legend">
+        <li><span class="sw active"></span>This step</li>
+        <li><span class="sw open"></span>Paused on the call stack</li>
+        <li><span class="sw waiting"></span>Created, waiting its turn</li>
+        <li><span class="sw done"></span>Sorted and finished</li>
+        <li><span class="sw ghost"></span>Not created yet</li>
+        <li id="legendBadges"></li>
+      </ul>
+    </section>
+
+    <p id="narration" class="narration" aria-live="polite"></p>
+
+    <div class="lower">
+      <section class="panel" id="codePanel" aria-label="The code">
+        <h2>The code</h2>
+        <p class="dimNote" id="codeNote" hidden>The recursive code does not follow the textbook order, so there is no line to highlight. A bottom-up (iterative) merge sort is the version that works level by level like this.</p>
+        <div class="dimBody"><pre id="code"></pre></div>
+      </section>
+
+      <div class="side">
+        <section class="panel" id="stackPanel" aria-label="Call stack">
+          <h2>Call stack <span id="depth" style="font-weight:400;color:var(--muted)"></span></h2>
+          <p class="dimNote" id="stackNote" hidden>The textbook picture has no call stack: it is not how the recursion runs.</p>
+          <div class="dimBody">
+            <p class="stackEnd">Top of the stack (running now)</p>
+            <div id="stack"></div>
+            <p class="stackEnd" style="margin-top:6px">Bottom of the stack</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Steps so far">
+          <h2>Steps so far</h2>
+          <ol id="log"></ol>
+          <p class="emptyLog" id="emptyLog">No steps yet. Press Next step to begin.</p>
+        </section>
+      </div>
+    </div>
+
+    <p class="keys">Keyboard: <kbd>&rarr;</kbd> next step, <kbd>&larr;</kbd> back, <kbd>Space</kbd> play or pause, <kbd>R</kbd> reset. Click any line in Steps so far to jump back to it.</p>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Source code shown in the panel ----------
+  const CODE = [
+    "def merge_sort(items):",
+    "    if len(items) > 1:",
+    "        mid = len(items) // 2",
+    "        left = items[:mid]",
+    "        right = items[mid:]",
+    "        merge_sort(left)",
+    "        merge_sort(right)",
+    "        left_pointer, right_pointer, new_list_pointer = 0, 0, 0",
+    "        new_list = [None] * len(items)",
+    "        while left_pointer < len(left) and right_pointer < len(right):",
+    "            if left[left_pointer] <= right[right_pointer]:",
+    "                new_list[new_list_pointer] = left[left_pointer]",
+    "                left_pointer = left_pointer + 1",
+    "            else:",
+    "                new_list[new_list_pointer] = right[right_pointer]",
+    "                right_pointer = right_pointer + 1",
+    "            new_list_pointer = new_list_pointer + 1",
+    "        while left_pointer < len(left):",
+    "            new_list[new_list_pointer] = left[left_pointer]",
+    "            left_pointer = left_pointer + 1",
+    "            new_list_pointer = new_list_pointer + 1",
+    "        while right_pointer < len(right):",
+    "            new_list[new_list_pointer] = right[right_pointer]",
+    "            right_pointer = right_pointer + 1",
+    "            new_list_pointer = new_list_pointer + 1",
+    "        items[:] = new_list",
+    "",
+    "numbers = []",           // line 28, filled in from the chosen list
+    "merge_sort(numbers)",    // line 29
+    "print(numbers)"          // line 30
+  ];
+  const NUMBERS_LINE = 28;
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (a) => "[" + a.join(", ") + "]";
+  const range = (a, b) => { const r = []; for (let i = a; i <= b; i++) r.push(i); return r; };
+
+  // ---------- State ----------
+  const S = {
+    values: [],
+    nodes: [],
+    boundaryDepth: {},
+    maxDepth: 0,
+    mode: "df",          // "df" = how Python runs it, "tb" = textbook picture
+    showBase: true,
+    tm: null,            // { full, s, d, c }
+    disp: [],            // indices into tm.full that are shown as steps
+    stepNum: {},         // full index -> displayed step number
+    k: 0,                // current displayed step
+    timer: null,
+    maxFrames: 0
+  };
+
+  // ---------- Build the tree of calls ----------
+  function mergeArrays(a, b) {
+    const out = [];
+    let i = 0, j = 0;
+    while (i < a.length && j < b.length) out.push(a[i] <= b[j] ? a[i++] : b[j++]);
+    while (i < a.length) out.push(a[i++]);
+    while (j < b.length) out.push(b[j++]);
+    return out;
+  }
+
+  function buildTree(values) {
+    const nodes = [];
+    const boundaryDepth = {};
+    function rec(lo, hi, depth, parent, side) {
+      const id = nodes.length;
+      const n = { id, lo, hi, depth, parent, side, left: null, right: null, values: values.slice(lo, hi) };
+      nodes.push(n);
+      if (hi - lo > 1) {
+        const mid = lo + Math.floor((hi - lo) / 2);   // matches len(items) // 2
+        n.mid = mid;
+        boundaryDepth[mid] = depth;
+        n.left = rec(lo, mid, depth + 1, id, "L");
+        n.right = rec(mid, hi, depth + 1, id, "R");
+        n.sorted = mergeArrays(nodes[n.left].sorted, nodes[n.right].sorted);
+      } else {
+        n.sorted = n.values.slice();
+      }
+      return id;
+    }
+    rec(0, values.length, 0, null, null);
+    return { nodes, boundaryDepth };
+  }
+
+  // ---------- Timelines ----------
+  // Depth-first: the order the recursive code actually runs in.
+  function dfTimeline(nodes) {
+    const full = [{ type: "ready" }];
+    const s = [], d = [], c = [];
+    (function go(id) {
+      const n = nodes[id];
+      if (n.left === null) {
+        s[id] = d[id] = full.length;
+        full.push({ type: "base", node: id });
+        return;
+      }
+      s[id] = full.length;
+      full.push({ type: "split", node: id });
+      go(n.left);
+      go(n.right);
+      d[id] = full.length;
+      full.push({ type: "merge", node: id });
+    })(0);
+    full.push({ type: "end" });
+    nodes.forEach((n) => { c[n.id] = n.parent === null ? 0 : s[n.parent]; });
+    return { full, s, d, c };
+  }
+
+  // Textbook: every level split at once, then every level merged at once.
+  function tbTimeline(nodes, maxDepth) {
+    const full = [{ type: "ready" }];
+    const s = [], d = [], c = [];
+    for (let L = 0; L <= maxDepth; L++) {
+      const ids = nodes.filter((n) => n.depth === L && n.left !== null).map((n) => n.id);
+      if (ids.length) { ids.forEach((i) => { s[i] = full.length; }); full.push({ type: "tsplit", level: L, ids }); }
+    }
+    for (let L = maxDepth; L >= 0; L--) {
+      const ids = nodes.filter((n) => n.depth === L && n.left !== null).map((n) => n.id);
+      if (ids.length) { ids.forEach((i) => { d[i] = full.length; }); full.push({ type: "tmerge", level: L, ids }); }
+    }
+    full.push({ type: "end" });
+    nodes.forEach((n) => {
+      c[n.id] = n.parent === null ? 0 : s[n.parent];
+      if (n.left === null) { s[n.id] = d[n.id] = c[n.id]; }
+    });
+    return { full, s, d, c };
+  }
+
+  function chainTo(id) {
+    const chain = [];
+    let x = id;
+    while (x !== null) { chain.unshift(x); x = S.nodes[x].parent; }
+    return chain;
+  }
+
+  function computeMaxFrames() {
+    // Deepest real call stack, counting the main program. Base-case calls count,
+    // because Python really does push a frame for them.
+    let deepest = 0;
+    S.nodes.forEach((n) => { deepest = Math.max(deepest, n.depth + 1); });
+    return deepest + 1;
+  }
+
+  function rebuildTimeline(keepPosition) {
+    const oldFull = keepPosition && S.tm ? S.disp[S.k] : 0;
+    S.tm = S.mode === "df" ? dfTimeline(S.nodes) : tbTimeline(S.nodes, S.maxDepth);
+    S.disp = [];
+    S.stepNum = {};
+    S.tm.full.forEach((ev, i) => {
+      if (ev.type === "base" && !S.showBase) return;
+      S.stepNum[i] = S.disp.length;
+      S.disp.push(i);
+    });
+    S.k = 0;
+    if (keepPosition) {
+      for (let j = 0; j < S.disp.length; j++) if (S.disp[j] <= oldFull) S.k = j;
+    }
+  }
+
+  function loadList(values) {
+    stopPlay();
+    S.values = values;
+    const built = buildTree(values);
+    S.nodes = built.nodes;
+    S.boundaryDepth = built.boundaryDepth;
+    S.maxDepth = Math.max.apply(null, S.nodes.map((n) => n.depth));
+    S.maxFrames = computeMaxFrames();
+    CODE[NUMBERS_LINE - 1] = "numbers = " + fmt(values);
+    rebuildTimeline(false);
+    render();
+  }
+
+  // ---------- Node status at a point in time ----------
+  function status(id, t) {
+    const { s, d, c } = S.tm;
+    const leaf = S.nodes[id].left === null;
+    if (t < c[id]) return "ghost";
+    if (S.mode === "tb") {
+      if (leaf) return "done";
+      if (t > d[id]) return "done";
+      if (t === s[id] || t === d[id]) return "active";
+      return "waiting";
+    }
+    if (t > d[id]) return "done";
+    if (t === s[id] || t === d[id]) return "active";
+    if (t > s[id]) return "open";
+    return "waiting";
+  }
+
+  // ---------- Narration ----------
+  function callName(id) {
+    return "<code>merge_sort(" + fmt(S.nodes[id].values) + ")</code>";
+  }
+  function callerName(id) {
+    const p = S.nodes[id].parent;
+    return p === null ? "the main program" : callName(p);
+  }
+  function arrivalText(id) {
+    const n = S.nodes[id];
+    if (n.parent === null) return "The main program calls <code>merge_sort(numbers)</code>. ";
+    if (n.side === "L") return callName(n.parent) + " makes its first call, <code>merge_sort(left)</code>. ";
+    return "The left half is finished, so " + callName(n.parent) + " now makes its second call, <code>merge_sort(right)</code>. ";
+  }
+
+  function narrate(t) {
+    const ev = S.tm.full[t];
+    const N = S.nodes;
+    const root = N[0];
+    if (S.mode === "df") {
+      switch (ev.type) {
+        case "ready":
+          return "Ready. The main program is about to call <code>merge_sort(numbers)</code> on line 29. Press <strong>Next step</strong> to begin.";
+        case "split": {
+          const n = N[ev.node], l = N[n.left], r = N[n.right];
+          return arrivalText(ev.node) + callName(ev.node) + " has " + n.values.length +
+            " items, so the <code>if</code> is True. It splits at <code>mid = " + Math.floor(n.values.length / 2) +
+            "</code>: <code>left = " + fmt(l.values) + "</code>, <code>right = " + fmt(r.values) +
+            "</code>. Then it calls <code>merge_sort(left)</code> and pauses until that call finishes.";
+        }
+        case "base":
+          return arrivalText(ev.node) + callName(ev.node) +
+            " has 1 item, so the <code>if</code> is False. A list of one is already sorted, so this call does nothing and returns straight away to " +
+            callerName(ev.node) + ".";
+        case "merge": {
+          const n = N[ev.node], l = N[n.left], r = N[n.right];
+          return "Both calls inside " + callName(ev.node) + " have returned, so <code>left = " + fmt(l.sorted) +
+            "</code> and <code>right = " + fmt(r.sorted) + "</code> are now sorted. The while loops merge them into <code>" +
+            fmt(n.sorted) + "</code>, and <code>items[:] = new_list</code> writes that back into the list that was passed in. " +
+            "This call then returns to " + callerName(ev.node) + ".";
+        }
+        case "end": {
+          let extra = "";
+          const rr = N[root.right];
+          if (rr) {
+            const firstRight = S.tm.s[rr.id];
+            const lastLeftDone = S.tm.d[root.left];
+            if (S.stepNum[firstRight] !== undefined && S.stepNum[lastLeftDone] !== undefined) {
+              extra = " Notice that the right half, <code>" + fmt(rr.values) + "</code>, was not touched until step " +
+                S.stepNum[firstRight] + ", after the whole left half had been sorted in step " + S.stepNum[lastLeftDone] + ".";
+            }
+          }
+          return "Done. <code>merge_sort(numbers)</code> has returned and <code>print</code> shows <code>" + fmt(root.sorted) +
+            "</code>. At its deepest, the call stack held " + S.maxFrames + " frames, counting the main program." + extra;
+        }
+      }
+    } else {
+      switch (ev.type) {
+        case "ready":
+          return "Textbook picture. The list is split level by level all the way down, then merged back up level by level. Press <strong>Next step</strong> to begin.";
+        case "tsplit":
+          return "Every list on level " + ev.level + " is split at the same time: " +
+            ev.ids.map((i) => "<code>" + fmt(N[i].values) + " &rarr; " + fmt(N[N[i].left].values) + " | " + fmt(N[N[i].right].values) + "</code>").join(", ") + ".";
+        case "tmerge":
+          return "Every pair on level " + (ev.level + 1) + " is merged back into level " + ev.level + " at the same time: " +
+            ev.ids.map((i) => "<code>" + fmt(N[N[i].left].sorted) + " + " + fmt(N[N[i].right].sorted) + " &rarr; " + fmt(N[i].sorted) + "</code>").join(", ") + ".";
+        case "end":
+          return "Done: <code>" + fmt(root.sorted) + "</code>. This picture shows correctly which lists get merged with which, but not the order the recursive code does it in. Switch to <strong>How Python runs it</strong> to see the real order.";
+      }
+    }
+    return "";
+  }
+
+  function logText(t) {
+    const ev = S.tm.full[t];
+    const N = S.nodes;
+    switch (ev.type) {
+      case "split": { const n = N[ev.node]; return "split " + fmt(n.values) + " \u2192 " + fmt(N[n.left].values) + " | " + fmt(N[n.right].values); }
+      case "base": return "base case " + fmt(N[ev.node].values);
+      case "merge": { const n = N[ev.node]; return "merge " + fmt(N[n.left].sorted) + " + " + fmt(N[n.right].sorted) + " \u2192 " + fmt(n.sorted); }
+      case "tsplit": return "split every list on level " + ev.level;
+      case "tmerge": return "merge level " + (ev.level + 1) + " into level " + ev.level;
+      case "end": return "print " + fmt(N[0].sorted);
+    }
+    return "";
+  }
+
+  // ---------- Rendering: tree ----------
+  const SVGNS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, text) {
+    const e = document.createElementNS(SVGNS, name);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function renderTree(t) {
+    const svg = $("tree");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    const n = S.values.length;
+    const cw = 40, ch = 36, G = 16, rowH = 84, padL = 70, padT = 8;
+    const W = padL + n * cw + (n - 1) * G + 10;
+    const H = padT + S.maxDepth * rowH + ch + 26;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.style.maxWidth = Math.round(W * 1.45) + "px";
+
+    const bounds = Object.keys(S.boundaryDepth).map(Number);
+    const xOf = (i, L) => {
+      let gaps = 0;
+      bounds.forEach((b) => { if (b <= i && S.boundaryDepth[b] < L) gaps++; });
+      return padL + i * cw + G * gaps;
+    };
+    const box = (node) => {
+      const x1 = xOf(node.lo, node.depth);
+      const x2 = xOf(node.hi - 1, node.depth) + cw;
+      return { x: x1, y: padT + node.depth * rowH, w: x2 - x1 };
+    };
+
+    for (let L = 0; L <= S.maxDepth; L++) {
+      svg.appendChild(el("text", { class: "lvl", x: 0, y: padT + L * rowH + ch / 2 }, "Level " + L));
+    }
+
+    // Edges
+    S.nodes.forEach((node) => {
+      if (node.parent === null) return;
+      const p = box(S.nodes[node.parent]);
+      const b = box(node);
+      const ghost = status(node.id, t) === "ghost";
+      svg.appendChild(el("line", {
+        class: "edge" + (ghost ? " ghost" : ""),
+        x1: p.x + p.w / 2, y1: p.y + ch + 22,
+        x2: b.x + b.w / 2, y2: b.y
+      }));
+    });
+
+    // Nodes
+    const { s, d } = S.tm;
+    S.nodes.forEach((node) => {
+      const st = status(node.id, t);
+      const b = box(node);
+      const g = el("g", { class: "node " + st });
+      g.appendChild(el("rect", { class: "box", x: b.x, y: b.y, width: b.w, height: ch, rx: 4 }));
+
+      const shown = t >= d[node.id] ? node.sorted : node.values;
+      for (let j = 0; j < node.values.length; j++) {
+        const cx = xOf(node.lo + j, node.depth);
+        if (j > 0) g.appendChild(el("line", { class: "cell", x1: cx, y1: b.y + 4, x2: cx, y2: b.y + ch - 4 }));
+        if (st !== "ghost") g.appendChild(el("text", { class: "val", x: cx + cw / 2, y: b.y + ch / 2 }, String(shown[j])));
+      }
+
+      // Step badges
+      const parts = [];
+      if (st !== "ghost") {
+        const leaf = node.left === null;
+        if (leaf) {
+          if (S.mode === "df" && S.stepNum[s[node.id]] !== undefined && t >= s[node.id]) parts.push("\u2022" + S.stepNum[s[node.id]]);
+        } else {
+          if (t >= s[node.id] && S.stepNum[s[node.id]] !== undefined) parts.push("\u2193" + S.stepNum[s[node.id]]);
+          if (t >= d[node.id] && S.stepNum[d[node.id]] !== undefined) parts.push("\u2191" + S.stepNum[d[node.id]]);
+        }
+      }
+      if (parts.length) g.appendChild(el("text", { class: "badge", x: b.x + b.w / 2, y: b.y + ch + 15 }, parts.join("  ")));
+      svg.appendChild(g);
+    });
+
+    $("legendBadges").textContent = S.mode === "df"
+      ? "Under each list: \u2193 step it was split, \u2191 step it was merged, \u2022 step its base-case call ran"
+      : "Under each list: \u2193 step it was split, \u2191 step it was merged";
+  }
+
+  // ---------- Rendering: code ----------
+  function codeLines(t) {
+    if (S.mode !== "df") return { hl: [], next: [] };
+    const ev = S.tm.full[t];
+    switch (ev.type) {
+      case "ready": return { hl: [], next: [29] };
+      case "split": return { hl: range(2, 6), next: [] };
+      case "base": return { hl: [2], next: [] };
+      case "merge": return { hl: range(8, 26), next: [] };
+      case "end": return { hl: [30], next: [] };
+    }
+    return { hl: [], next: [] };
+  }
+
+  function renderCode(t) {
+    const pre = $("code");
+    const { hl, next } = codeLines(t);
+    pre.innerHTML = "";
+    CODE.forEach((src, i) => {
+      const ln = i + 1;
+      const row = document.createElement("div");
+      row.className = "line" + (hl.includes(ln) ? " hl" : "") + (next.includes(ln) ? " next" : "");
+      const a = document.createElement("span"); a.className = "ln"; a.textContent = ln;
+      const b = document.createElement("span"); b.textContent = src;
+      row.appendChild(a); row.appendChild(b);
+      pre.appendChild(row);
+    });
+  }
+
+  // ---------- Rendering: call stack ----------
+  function frameEl(cls, callHTML, noteText, localsText) {
+    const f = document.createElement("div");
+    f.className = "frame " + cls;
+    const c = document.createElement("div"); c.className = "call"; c.innerHTML = callHTML;
+    f.appendChild(c);
+    if (noteText) { const n = document.createElement("div"); n.className = "note"; n.textContent = noteText; f.appendChild(n); }
+    if (localsText) { const l = document.createElement("div"); l.className = "locals"; l.textContent = localsText; f.appendChild(l); }
+    return f;
+  }
+
+  function renderStack(t) {
+    const box = $("stack");
+    box.innerHTML = "";
+    if (S.mode !== "df") {
+      box.appendChild(frameEl("tbframe", "No call stack", "The textbook picture is not produced by the recursive calls.", ""));
+      $("depth").textContent = "";
+      return;
+    }
+    const ev = S.tm.full[t];
+    const N = S.nodes;
+    const frames = [];
+
+    let mainNote = "paused at line 29: merge_sort(numbers)";
+    if (ev.type === "ready") mainNote = "about to run line 29";
+    if (ev.type === "end") mainNote = "running line 30: print(numbers)";
+    frames.push(frameEl((ev.type === "ready" || ev.type === "end") ? "main top" : "main",
+      "main program", mainNote, "numbers = " + fmt(ev.type === "end" ? N[0].sorted : S.values)));
+
+    if (ev.node !== undefined) {
+      const chain = chainTo(ev.node);
+      chain.forEach((id, idx) => {
+        const n = N[id];
+        const call = "merge_sort(" + fmt(n.values) + ")";
+        if (idx < chain.length - 1) {
+          const child = N[chain[idx + 1]];
+          const l = N[n.left], r = N[n.right];
+          if (child.side === "L") {
+            frames.push(frameEl("paused", call, "paused at line 6: merge_sort(left)",
+              "mid = " + Math.floor(n.values.length / 2) + ", left = " + fmt(l.values) + ", right = " + fmt(r.values)));
+          } else {
+            frames.push(frameEl("paused", call, "paused at line 7: merge_sort(right)",
+              "left = " + fmt(l.sorted) + " (sorted), right = " + fmt(r.values)));
+          }
+        } else {
+          if (ev.type === "split") {
+            const l = N[n.left], r = N[n.right];
+            frames.push(frameEl("top", call, "running lines 2 to 6",
+              "mid = " + Math.floor(n.values.length / 2) + ", left = " + fmt(l.values) + ", right = " + fmt(r.values)));
+          } else if (ev.type === "base") {
+            frames.push(frameEl("top", call, "line 2: len(items) is 1, so the if is False and the call returns", ""));
+          } else {
+            const l = N[n.left], r = N[n.right];
+            frames.push(frameEl("top", call, "running lines 8 to 26",
+              "left = " + fmt(l.sorted) + ", right = " + fmt(r.sorted) + ", new_list = " + fmt(n.sorted)));
+          }
+        }
+      });
+    }
+
+    for (let i = frames.length - 1; i >= 0; i--) box.appendChild(frames[i]);
+    $("depth").textContent = "(" + frames.length + (frames.length === 1 ? " frame)" : " frames)");
+  }
+
+  // ---------- Rendering: log ----------
+  function renderLog() {
+    const log = $("log");
+    log.innerHTML = "";
+    for (let j = 1; j <= S.k; j++) {
+      const li = document.createElement("li");
+      if (j === S.k) li.className = "current";
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.setAttribute("aria-label", "Go to step " + j);
+      const num = document.createElement("span"); num.className = "num"; num.textContent = j + ".";
+      const txt = document.createElement("span"); txt.className = "txt"; txt.textContent = logText(S.disp[j]);
+      btn.appendChild(num); btn.appendChild(txt);
+      btn.addEventListener("click", () => { stopPlay(); S.k = j; render(); });
+      li.appendChild(btn);
+      log.appendChild(li);
+    }
+    $("emptyLog").hidden = S.k > 0;
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // ---------- Main render ----------
+  function render() {
+    const t = S.disp[S.k];
+    const total = S.disp.length - 1;
+    $("counter").textContent = "Step " + S.k + " of " + total;
+    $("btnBack").disabled = S.k === 0;
+    $("btnNext").disabled = S.k === total;
+
+    const tb = S.mode === "tb";
+    $("banner").hidden = !tb;
+    $("codeNote").hidden = !tb;
+    $("stackNote").hidden = !tb;
+    $("codePanel").classList.toggle("dim", tb);
+    $("stackPanel").classList.toggle("dim", tb);
+    $("chkBase").disabled = tb;
+    $("baseLabel").classList.toggle("off", tb);
+
+    renderTree(t);
+    $("narration").innerHTML = narrate(t);
+    renderCode(t);
+    renderStack(t);
+    renderLog();
+  }
+
+  // ---------- Controls ----------
+  function next() { if (S.k < S.disp.length - 1) { S.k++; render(); } else stopPlay(); }
+  function back() { if (S.k > 0) { S.k--; render(); } }
+  function reset() { stopPlay(); S.k = 0; render(); }
+
+  function stopPlay() {
+    if (S.timer) { clearInterval(S.timer); S.timer = null; }
+    $("btnPlay").textContent = "Play";
+  }
+  function togglePlay() {
+    if (S.timer) { stopPlay(); return; }
+    if (S.k >= S.disp.length - 1) { S.k = 0; render(); }
+    $("btnPlay").textContent = "Pause";
+    S.timer = setInterval(() => {
+      if (S.k >= S.disp.length - 1) { stopPlay(); return; }
+      next();
+      if (S.k >= S.disp.length - 1) stopPlay();
+    }, 1500);
+  }
+
+  function setMode(mode) {
+    if (mode === S.mode) return;
+    stopPlay();
+    S.mode = mode;
+    document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.mode === mode)));
+    rebuildTimeline(false);
+    render();
+  }
+
+  function parseList(text) {
+    const parts = text.split(/[\s,]+/).filter((p) => p.length);
+    if (parts.length < 2 || parts.length > 12) return null;
+    const out = [];
+    for (const p of parts) {
+      if (!/^-?\d+$/.test(p)) return null;
+      out.push(parseInt(p, 10));
+    }
+    return out;
+  }
+
+  function useInput() {
+    const vals = parseList($("listInput").value);
+    if (!vals) {
+      $("listError").textContent = "Enter between 2 and 12 whole numbers, separated by commas.";
+      return;
+    }
+    $("listError").textContent = "";
+    loadList(vals);
+  }
+
+  function randomList() {
+    const len = 8 + Math.floor(Math.random() * 5);
+    const vals = [];
+    for (let i = 0; i < len; i++) vals.push(1 + Math.floor(Math.random() * 60));
+    $("listInput").value = vals.join(", ");
+    $("listError").textContent = "";
+    loadList(vals);
+  }
+
+  $("btnNext").addEventListener("click", () => { stopPlay(); next(); });
+  $("btnBack").addEventListener("click", () => { stopPlay(); back(); });
+  $("btnReset").addEventListener("click", reset);
+  $("btnPlay").addEventListener("click", togglePlay);
+  $("btnUse").addEventListener("click", useInput);
+  $("btnRandom").addEventListener("click", randomList);
+  $("listInput").addEventListener("keydown", (e) => { if (e.key === "Enter") useInput(); });
+  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
+  $("chkBase").addEventListener("change", (e) => {
+    stopPlay();
+    S.showBase = e.target.checked;
+    rebuildTimeline(true);
+    render();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") return;
+    if (e.key === "ArrowRight") { e.preventDefault(); stopPlay(); next(); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); stopPlay(); back(); }
+    else if (e.key === " ") { if (tag === "button") return; e.preventDefault(); togglePlay(); }
+    else if (e.key === "r" || e.key === "R") { reset(); }
+  });
+
+  // ---------- Start ----------
+  loadList([15, 5, 2, 7, 4, 9, 10, 1, 8, 3]);
+})();
+</script>
+</body>
+</html>

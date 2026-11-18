@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dijkstra's algorithm: the table method</title>
+<style>
+  :root {
+    --paper: #f6f8fb; --grid: #e1e8f2; --surface: #ffffff; --text: #1d2433; --muted: #566079;
+    --ink: #1f3f9a; --ink-soft: #e4ebff; --hl: #ffe45c; --hl-soft: #fff3a8; --on-hl: #1d2433;
+    --red: #c0392b; --good: #1c7a45; --good-soft: #e2f5ea; --bad-soft: #fdeceb; --line: #c2ccdc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #121824; --grid: #1b2332; --surface: #1a2130; --text: #e7ebf3; --muted: #9aa4b8;
+      --ink: #9fb6ff; --ink-soft: #26335a; --hl: #f0cf3a; --hl-soft: #4a4216; --on-hl: #1d2433;
+      --red: #ff8a80; --good: #6fd49a; --good-soft: #173526; --bad-soft: #3d1c1c; --line: #34405a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #121824; --grid: #1b2332; --surface: #1a2130; --text: #e7ebf3; --muted: #9aa4b8;
+    --ink: #9fb6ff; --ink-soft: #26335a; --hl: #f0cf3a; --hl-soft: #4a4216; --on-hl: #1d2433;
+    --red: #ff8a80; --good: #6fd49a; --good-soft: #173526; --bad-soft: #3d1c1c; --line: #34405a;
+  }
+  :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; color: var(--text); background-color: var(--paper);
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+    font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1.0625rem; line-height: 1.55;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 2.25rem 1.25rem 3rem; }
+  h1, h2, h3 { line-height: 1.2; }
+  .hero h1 { font-size: clamp(1.9rem, 4.6vw, 2.9rem); margin: 0 0 .5rem; letter-spacing: -0.01em; }
+  .lede { margin: 0 0 1.5rem; color: var(--muted); max-width: 62ch; }
+  .rule { list-style: none; margin: 0 0 2rem; padding: 0; display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); counter-reset: r; }
+  .rule li { counter-increment: r; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: .85rem 1rem .85rem 3.4rem; position: relative; }
+  .rule li::before {
+    content: counter(r); position: absolute; left: .9rem; top: .7rem; width: 1.9rem; height: 1.9rem; border-radius: 50%;
+    border: 2px solid var(--ink); color: var(--ink); font: 700 1.15rem/1.75rem "Kalam", "Comic Sans MS", cursive; text-align: center;
+  }
+  .tabs { display: flex; gap: .25rem; border-bottom: 2px solid var(--line); margin-bottom: 1.5rem; overflow-x: auto; }
+  .tabs button {
+    font: inherit; font-weight: 700; background: none; border: 0; color: var(--muted); padding: .7rem 1rem; cursor: pointer;
+    border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap;
+  }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+  .stage { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+  @media (min-width: 920px) { .stage { grid-template-columns: 1.25fr 1fr; align-items: start; } }
+  .graph-wrap { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: .75rem; }
+  .graph-wrap svg { width: 100%; height: auto; display: block; }
+  .key { display: flex; flex-wrap: wrap; gap: .4rem 1rem; font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+  .key span { display: inline-flex; align-items: center; gap: .35rem; }
+  .key svg { width: 16px; height: 16px; }
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 360px; }
+  th, td { border-bottom: 1px solid var(--line); padding: .45rem .7rem; text-align: left; vertical-align: middle; }
+  thead th { font-size: .85rem; color: var(--muted); font-weight: 700; background: var(--paper); }
+  tbody th { font-size: 1.1rem; width: 3.5rem; }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+  td.hand { font-family: "Kalam", "Comic Sans MS", cursive; font-size: 1.4rem; color: var(--ink); line-height: 1.2; }
+  td.hand s { color: var(--muted); text-decoration-color: var(--red); text-decoration-thickness: 2px; margin-right: .35rem; }
+  .inf { color: var(--muted); }
+  .tick { font-family: "Kalam", "Comic Sans MS", cursive; font-size: 1.3rem; color: var(--good); }
+  .tick sub { font-size: .8rem; color: var(--muted); margin-left: .1rem; }
+  tr.is-current > * { background: var(--hl-soft); }
+  tr.on-path th { color: var(--ink); box-shadow: inset 4px 0 0 var(--ink); }
+  tr.flash > * { animation: flash 1.4s ease-out; }
+  @keyframes flash { 0% { background: var(--hl); } 100% { background: transparent; } }
+  tr.is-current.flash > * { animation: none; }
+  .explain {
+    background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--ink); border-radius: 10px;
+    padding: 1rem 1.25rem; margin-top: 1rem; min-height: 9.5rem;
+  }
+  .explain h2 { font-size: 1.3rem; margin: 0 0 .4rem; }
+  .explain p { margin: .4rem 0; max-width: 72ch; }
+  .step-count { font-size: .85rem; color: var(--muted); margin: 0 0 .2rem !important; }
+  .controls { display: flex; align-items: center; gap: .6rem; margin-top: 1rem; flex-wrap: wrap; }
+  .progress { flex: 1 1 140px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .progress span { display: block; height: 100%; width: 0; background: var(--ink); transition: width .25s ease; }
+  .btn {
+    font: inherit; font-weight: 700; padding: .55rem 1rem; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink);
+  }
+  .btn.primary { background: var(--ink); color: var(--surface); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--hl); outline-offset: 2px; }
+  .hint { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+  .switcher { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+  .switcher .btn[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+  .msg { border-radius: 8px; padding: .6rem .85rem; margin: 0 0 .75rem; }
+  .msg.good { background: var(--good-soft); border-left: 4px solid var(--good); }
+  .msg.bad { background: var(--bad-soft); border-left: 4px solid var(--red); }
+  .urow { display: grid; grid-template-columns: 2.2rem 1fr; gap: .3rem .75rem; padding: .7rem 0; border-top: 1px solid var(--line); align-items: center; }
+  .urow:first-of-type { border-top: 0; }
+  .unode { font-weight: 700; font-size: 1.3rem; grid-row: span 2; align-self: start; }
+  .uinfo { color: var(--muted); font-size: .95rem; }
+  .ufields { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+  .ufields label, .pathform label { display: inline-flex; align-items: center; gap: .4rem; font-size: .95rem; }
+  input, select {
+    font: inherit; padding: .35rem .5rem; border: 1.5px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--text);
+  }
+  input[type="number"] { width: 5.5rem; }
+  .ufb { grid-column: 2; font-size: .95rem; }
+  .ufb.ok { color: var(--good); } .ufb.no { color: var(--red); }
+  .pathform { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin: .5rem 0; }
+  .pathform input[type="text"] { width: 11rem; }
+  .actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .75rem; }
+  .tips { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .tip { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.2rem; }
+  .tip h3 { margin: 0 0 .35rem; font-size: 1.1rem; color: var(--ink); }
+  .tip p { margin: 0; }
+  .edge { stroke: var(--line); stroke-width: 2.5; }
+  .edge.checking { stroke: var(--hl); stroke-width: 9; stroke-linecap: round; }
+  .edge.route { stroke: var(--ink); stroke-width: 5; }
+  .weight circle { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .weight text { font: 700 14px "Atkinson Hyperlegible", system-ui, sans-serif; fill: var(--text); text-anchor: middle; }
+  .weight.checking circle { fill: var(--hl); stroke: var(--hl); }
+  .weight.checking text { fill: var(--on-hl); }
+  .node circle { stroke-width: 2.5; transition: fill .2s ease; }
+  .node .label { font: 700 18px "Atkinson Hyperlegible", system-ui, sans-serif; text-anchor: middle; }
+  .node.unreached circle { fill: var(--surface); stroke: var(--line); stroke-dasharray: 4 4; }
+  .node.unreached .label { fill: var(--muted); }
+  .node.open circle { fill: var(--surface); stroke: var(--ink); }
+  .node.open .label { fill: var(--text); }
+  .node.current circle { fill: var(--hl); stroke: var(--on-hl); }
+  .node.current .label { fill: var(--on-hl); }
+  .node.visited circle { fill: var(--ink); stroke: var(--ink); }
+  .node.visited .label { fill: var(--surface); }
+  .node.route circle { fill: var(--ink); stroke: var(--hl); stroke-width: 5; }
+  .node.route .label { fill: var(--surface); }
+  .node[role="button"] { cursor: pointer; }
+  .node[role="button"]:hover circle { stroke-width: 4.5; }
+  .node:focus { outline: none; }
+  .node:focus-visible circle { stroke: var(--red); stroke-width: 4.5; }
+  .pill rect { fill: var(--paper); stroke: var(--line); }
+  .pill text { font: 400 17px "Kalam", "Comic Sans MS", cursive; fill: var(--ink); text-anchor: middle; }
+  @media (prefers-reduced-motion: reduce) {
+    tr.flash > * { animation: none; }
+    .progress span, .node circle { transition: none; }
+  }
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 5</a></nav>
+<div class="wrap">
+  <header class="hero">
+    <h1>Dijkstra's shortest path, one row at a time</h1>
+    <p class="lede">OCR A Level Computer Science. Step through a worked example using the table method, then try two graphs yourself.</p>
+    <ol class="rule">
+      <li><strong>Pick</strong> the unvisited node with the smallest distance anywhere in the table.</li>
+      <li><strong>Check</strong> each of its unvisited neighbours. Is the route through this node shorter?</li>
+      <li><strong>Repeat</strong> until every node has been visited, then read the route backwards.</li>
+    </ol>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="tab-learn" aria-controls="panel-learn" aria-selected="true">Worked example</button>
+    <button role="tab" id="tab-practise" aria-controls="panel-practise" aria-selected="false">Practise</button>
+    <button role="tab" id="tab-tips" aria-controls="panel-tips" aria-selected="false">Exam tips</button>
+  </nav>
+
+  <main>
+    <section id="panel-learn" role="tabpanel" aria-labelledby="tab-learn">
+      <div class="stage">
+        <figure class="graph-wrap">
+          <svg id="learn-svg" viewBox="0 0 660 380" role="img" aria-label="Weighted graph with nodes A to G"></svg>
+          <figcaption class="key" data-key></figcaption>
+        </figure>
+        <div class="table-wrap"><table id="learn-table"></table></div>
+      </div>
+      <div class="explain" aria-live="polite">
+        <p class="step-count" id="learn-count"></p>
+        <h2 id="learn-title"></h2>
+        <div id="learn-text"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="learn-back">Back</button>
+        <button class="btn primary" id="learn-next">Next step</button>
+        <div class="progress" aria-hidden="true"><span id="learn-bar"></span></div>
+        <button class="btn" id="learn-reset">Start again</button>
+      </div>
+      <p class="hint">You can also use the left and right arrow keys.</p>
+    </section>
+
+    <section id="panel-practise" role="tabpanel" aria-labelledby="tab-practise" hidden>
+      <div class="switcher">
+        <button class="btn" data-graph="p1" aria-pressed="true">Graph 1 (6 nodes)</button>
+        <button class="btn" data-graph="p2" aria-pressed="false">Graph 2 (8 nodes)</button>
+        <button class="btn" id="p-restart">Start again</button>
+      </div>
+      <div class="stage">
+        <figure class="graph-wrap">
+          <svg id="p-svg" viewBox="0 0 660 380" role="group" aria-label="Weighted graph. Nodes are clickable when choosing."></svg>
+          <figcaption class="key" data-key></figcaption>
+        </figure>
+        <div class="table-wrap"><table id="p-table"></table></div>
+      </div>
+      <div class="explain" id="p-panel" aria-live="polite"></div>
+    </section>
+
+    <section id="panel-tips" role="tabpanel" aria-labelledby="tab-tips" hidden>
+      <div class="tips">
+        <div class="tip"><h3>Set the table up first</h3><p>The start node gets a distance of 0 and every other node starts at ∞. Examiners regularly see answers that forget to give the start node 0.</p></div>
+        <div class="tip"><h3>Pick from the whole table</h3><p>The next node is the unvisited one with the smallest distance anywhere in the table, not just the closest neighbour of the node you have just visited. Following neighbours is the most common way to get the wrong route.</p></div>
+        <div class="tip"><h3>Cross out, don't rub out</h3><p>When you find a shorter route, put a line through the old distance and write the new one beside it. Markers want to see that a value was overwritten, and it is often worth a mark on its own.</p></div>
+        <div class="tip"><h3>Keep going</h3><p>Dijkstra's algorithm does not stop when you first reach the goal. Carry on until every node has been visited, because a shorter route can still turn up.</p></div>
+        <div class="tip"><h3>Show the working</h3><p>Spotting the route by eye only earns a couple of marks. The table is the evidence that you used the algorithm.</p></div>
+        <div class="tip"><h3>Finish the answer</h3><p>State the route in order from start to goal and the total distance. Get the route by starting at the goal and following the previous node column backwards.</p></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var INF = Infinity;
+
+  var GRAPHS = {
+    worked: {
+      start: "A", goal: "G",
+      nodes: { A: [60, 190], B: [200, 80], C: [200, 300], D: [360, 80], E: [360, 300], F: [490, 190], G: [605, 190] },
+      edges: [["A","B",6],["A","C",2],["B","C",3],["B","D",4],["C","E",9],["D","E",1],["D","F",6],["E","F",2],["E","G",7],["F","G",3]]
+    },
+    p1: {
+      start: "A", goal: "F",
+      nodes: { A: [70, 190], B: [220, 80], C: [220, 300], D: [400, 80], E: [400, 300], F: [570, 190] },
+      edges: [["A","B",2],["A","C",4],["B","C",1],["B","D",7],["C","E",3],["D","E",2],["D","F",2],["E","F",6]]
+    },
+    p2: {
+      start: "A", goal: "H",
+      nodes: { A: [60, 190], B: [190, 90], C: [190, 290], D: [330, 70], E: [330, 300], F: [470, 300], G: [470, 70], H: [600, 190] },
+      edges: [["A","B",3],["A","C",4],["B","D",6],["B","E",8],["C","E",6],["D","G",2],["E","F",2],["E","G",3],["G","H",6],["F","H",4]]
+    }
+  };
+
+  // ---------- helpers ----------
+  function names(g) { return Object.keys(g.nodes).sort(); }
+  function last(arr) { return arr.length ? arr[arr.length - 1] : INF; }
+  function fmt(d) { return d === INF ? "∞" : String(d); }
+  function edgeKey(a, b) { return [a, b].sort().join(""); }
+  function adjOf(g) {
+    var m = {};
+    names(g).forEach(function (n) { m[n] = []; });
+    g.edges.forEach(function (e) { m[e[0]].push([e[1], e[2]]); m[e[1]].push([e[0], e[2]]); });
+    Object.keys(m).forEach(function (n) { m[n].sort(function (x, y) { return x[0].localeCompare(y[0]); }); });
+    return m;
+  }
+  function initState(g) {
+    var s = { dist: {}, prev: {}, visited: {}, order: [] };
+    names(g).forEach(function (n) {
+      s.dist[n] = n === g.start ? [0] : [];
+      s.prev[n] = n === g.start ? ["–"] : [];
+      s.visited[n] = false;
+    });
+    return s;
+  }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function candidates(g, s) {
+    return names(g).filter(function (n) { return !s.visited[n] && last(s.dist[n]) !== INF; });
+  }
+  function allVisited(g, s) { return names(g).every(function (n) { return s.visited[n]; }); }
+  function tracePath(g, s) {
+    var p = [g.goal], n = g.goal;
+    while (n !== g.start) { n = last(s.prev[n]); p.unshift(n); }
+    return p;
+  }
+  function listAnd(items) {
+    if (items.length <= 1) return items.join("");
+    return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
+  }
+
+  // ---------- rendering ----------
+  function renderGraph(svg, g, s, opts) {
+    opts = opts || {};
+    var current = opts.current || null, checking = opts.edges || [], path = opts.path || null, clickable = !!opts.clickable;
+    var routeEdges = {};
+    if (path) for (var i = 0; i < path.length - 1; i++) routeEdges[edgeKey(path[i], path[i + 1])] = true;
+    var checkKeys = {};
+    checking.forEach(function (e) { checkKeys[edgeKey(e[0], e[1])] = true; });
+
+    var lines = "", weights = "", nodes = "", pills = "";
+    g.edges.forEach(function (e) {
+      var a = g.nodes[e[0]], b = g.nodes[e[1]], k = edgeKey(e[0], e[1]);
+      var cls = "edge" + (checkKeys[k] ? " checking" : "") + (routeEdges[k] ? " route" : "");
+      lines += '<line class="' + cls + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
+      var mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+      weights += '<g class="weight' + (checkKeys[k] ? " checking" : "") + '"><circle cx="' + mx + '" cy="' + my + '" r="13"/>' +
+        '<text x="' + mx + '" y="' + my + '" dy="0.35em">' + e[2] + '</text></g>';
+    });
+    names(g).forEach(function (n) {
+      var p = g.nodes[n], d = last(s.dist[n]), cls;
+      if (path && path.indexOf(n) !== -1) cls = "route";
+      else if (n === current) cls = "current";
+      else if (s.visited[n]) cls = "visited";
+      else if (d === INF) cls = "unreached";
+      else cls = "open";
+      var attrs = clickable
+        ? ' tabindex="0" role="button" aria-label="Node ' + n + ', distance ' + (d === INF ? "infinity" : d) + (s.visited[n] ? ", visited" : "") + '"'
+        : '';
+      nodes += '<g class="node ' + cls + '" data-node="' + n + '"' + attrs + '>' +
+        '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="22"/>' +
+        '<text class="label" x="' + p[0] + '" y="' + p[1] + '" dy="0.35em">' + n + '</text></g>';
+      var py = p[1] <= 190 ? p[1] - 36 : p[1] + 38;
+      pills += '<g class="pill" aria-hidden="true"><rect x="' + (p[0] - 20) + '" y="' + (py - 12) + '" width="40" height="24" rx="12"/>' +
+        '<text x="' + p[0] + '" y="' + py + '" dy="0.35em">' + fmt(d) + '</text></g>';
+    });
+    svg.innerHTML = lines + weights + pills + nodes;
+  }
+
+  function historyHTML(arr, isDist) {
+    if (!arr.length) return isDist ? '<span class="inf">∞</span>' : "";
+    return arr.map(function (v, i) { return i < arr.length - 1 ? "<s>" + v + "</s>" : "<span>" + v + "</span>"; }).join("");
+  }
+
+  function renderTable(table, g, s, changed, current, path) {
+    changed = changed || [];
+    var h = '<thead><tr><th scope="col">Node</th><th scope="col">Visited</th><th scope="col">Shortest distance from ' + g.start +
+      '</th><th scope="col">Previous node</th></tr></thead><tbody>';
+    names(g).forEach(function (n) {
+      var cls = [];
+      if (n === current) cls.push("is-current");
+      if (changed.indexOf(n) !== -1) cls.push("flash");
+      if (path && path.indexOf(n) !== -1) cls.push("on-path");
+      var idx = s.order.indexOf(n);
+      var vis = s.visited[n] ? '<span class="tick" aria-label="visited, number ' + (idx + 1) + '">✓<sub>' + (idx + 1) + '</sub></span>' : "";
+      h += '<tr class="' + cls.join(" ") + '"><th scope="row">' + n + '</th><td>' + vis + '</td><td class="hand">' +
+        historyHTML(s.dist[n], true) + '</td><td class="hand">' + historyHTML(s.prev[n], false) + '</td></tr>';
+    });
+    table.innerHTML = h + "</tbody>";
+  }
+
+  function renderKeys() {
+    var items = [
+      ["unreached", "Not reached (∞)"], ["open", "Reached, not visited"], ["current", "Being visited"],
+      ["visited", "Visited"], ["route", "Shortest route"]
+    ];
+    var html = items.map(function (it) {
+      return '<span><svg viewBox="0 0 16 16" aria-hidden="true"><g class="node ' + it[0] + '"><circle cx="8" cy="8" r="6"/></g></svg>' + it[1] + '</span>';
+    }).join("");
+    document.querySelectorAll("[data-key]").forEach(function (el) { el.innerHTML = html; });
+  }
+
+  // ---------- worked example ----------
+  function buildSteps(g) {
+    var adj = adjOf(g), s = initState(g), steps = [], total = names(g).length;
+    function snap(o) { o.state = clone(s); steps.push(o); }
+
+    snap({
+      title: "Set up the table",
+      text: "<p>Write <strong>0</strong> for the start node " + g.start + ", because it costs nothing to get there. Every other node starts at <strong>∞</strong> because we haven't found a route to it yet.</p>" +
+        "<p>The small labels on the graph show each node's current distance, so you can see the table and the graph change together.</p>",
+      changed: [g.start]
+    });
+
+    while (true) {
+      var cand = candidates(g, s);
+      if (!cand.length) break;
+      cand.sort(function (a, b) { return last(s.dist[a]) - last(s.dist[b]) || a.localeCompare(b); });
+      var u = cand[0];
+      var listTxt = cand.map(function (n) { return n + " (" + last(s.dist[n]) + ")"; });
+      s.visited[u] = true; s.order.push(u);
+      var nbs = adj[u].filter(function (x) { return !s.visited[x[0]]; });
+
+      var text = cand.length > 1
+        ? "<p>The unvisited nodes with a distance so far are " + listAnd(listTxt) + ". <strong>" + u + "</strong> has the smallest, so visit " + u + " and tick it off. Its distance of " + last(s.dist[u]) + " is now final.</p>"
+        : "<p><strong>" + u + "</strong> is the only unvisited node with a distance, so visit it and tick it off.</p>";
+      text += nbs.length
+        ? "<p>Its unvisited neighbours are " + listAnd(nbs.map(function (x) { return x[0]; })) + ". Check each one in turn.</p>"
+        : "<p>It has no unvisited neighbours, so there is nothing to update.</p>";
+      snap({ title: "Visit " + u, current: u, changed: [u], text: text });
+
+      nbs.forEach(function (x) {
+        var v = x[0], w = x[1], du = last(s.dist[u]), dv = last(s.dist[v]), nd = du + w, t, changed = [];
+        if (nd < dv) {
+          s.dist[v].push(nd); s.prev[v].push(u); changed = [v];
+          t = dv === INF
+            ? "<p>" + u + " to " + v + ": " + du + " + " + w + " = <strong>" + nd + "</strong>. " + v + " was ∞, so write " + nd + " and put " + u + " as its previous node.</p>"
+            : "<p>" + u + " to " + v + ": " + du + " + " + w + " = <strong>" + nd + "</strong>. That is less than " + v + "'s current " + dv + ", so cross out " + dv + ", write " + nd + ", and change the previous node to " + u + ".</p><p>This is exactly the overwriting that examiners want to see in your table.</p>";
+        } else {
+          t = "<p>" + u + " to " + v + ": " + du + " + " + w + " = <strong>" + nd + "</strong>. That is not less than " + v + "'s current " + dv + ", so leave " + v + "'s row alone.</p>";
+        }
+        snap({ title: "Check " + u + " to " + v, current: u, edge: [u, v], changed: changed, text: t });
+      });
+    }
+
+    snap({
+      title: "Every node visited",
+      text: "<p>All " + total + " nodes have been visited, so the algorithm stops. Each distance in the table is now the shortest possible distance from " + g.start + ".</p>" +
+        "<p>Notice that we didn't stop when we first reached " + g.goal + ". Its distance changed later on.</p>"
+    });
+
+    var path = tracePath(g, s), chain = [];
+    for (var i = path.length - 1; i > 0; i--) chain.push(path[i] + " came from " + path[i - 1]);
+    snap({
+      title: "Read off the route",
+      path: path,
+      text: "<p>Start at " + g.goal + " and follow the previous node column backwards: " + chain.join(", ") + ".</p>" +
+        "<p>Reverse that to get the route <strong>" + path.join(" → ") + "</strong>. The total distance is in " + g.goal + "'s row: <strong>" + last(s.dist[g.goal]) + "</strong>.</p>"
+    });
+    return steps;
+  }
+
+  var learnG = GRAPHS.worked, learnSteps = buildSteps(learnG), li = 0;
+  var lSvg = document.getElementById("learn-svg"), lTable = document.getElementById("learn-table");
+  var lBack = document.getElementById("learn-back"), lNext = document.getElementById("learn-next");
+
+  function showLearn() {
+    var st = learnSteps[li];
+    renderGraph(lSvg, learnG, st.state, { current: st.current, edges: st.edge ? [st.edge] : [], path: st.path });
+    renderTable(lTable, learnG, st.state, st.changed, st.current, st.path);
+    document.getElementById("learn-count").textContent = "Step " + (li + 1) + " of " + learnSteps.length;
+    document.getElementById("learn-title").textContent = st.title;
+    document.getElementById("learn-text").innerHTML = st.text;
+    lBack.disabled = li === 0;
+    lNext.disabled = li === learnSteps.length - 1;
+    document.getElementById("learn-bar").style.width = ((li + 1) / learnSteps.length * 100) + "%";
+  }
+  lBack.addEventListener("click", function () { if (li > 0) { li--; showLearn(); } });
+  lNext.addEventListener("click", function () { if (li < learnSteps.length - 1) { li++; showLearn(); } });
+  document.getElementById("learn-reset").addEventListener("click", function () { li = 0; showLearn(); });
+  document.addEventListener("keydown", function (e) {
+    if (document.getElementById("panel-learn").hidden) return;
+    var tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "select" || tag === "textarea") return;
+    if (e.key === "ArrowRight") { lNext.click(); }
+    else if (e.key === "ArrowLeft") { lBack.click(); }
+  });
+
+  // ---------- practice ----------
+  var P = { key: "p1" };
+  var pSvg = document.getElementById("p-svg"), pTable = document.getElementById("p-table"), pPanel = document.getElementById("p-panel");
+
+  function startPractice(key) {
+    P.key = key; P.g = GRAPHS[key]; P.adj = adjOf(P.g); P.s = initState(P.g);
+    P.phase = "choose"; P.current = null; P.pending = []; P.flash = [P.g.start];
+    P.msg = '<p class="msg good">The table is set up: ' + P.g.start + " is 0 and every other node is ∞. Find the route from " + P.g.start + " to " + P.g.goal + ".</p>";
+    document.querySelectorAll(".switcher [data-graph]").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.getAttribute("data-graph") === key ? "true" : "false");
+    });
+    renderPractice();
+  }
+
+  function renderPractice() {
+    var g = P.g, s = P.s;
+    var edges = P.phase === "update" ? P.pending.map(function (x) { return [P.current, x[0]]; }) : [];
+    var path = P.phase === "done" ? tracePath(g, s) : null;
+    var cur = P.phase === "update" ? P.current : null;
+    renderGraph(pSvg, g, s, { current: cur, edges: edges, path: path, clickable: P.phase === "choose" });
+    renderTable(pTable, g, s, P.flash, cur, path);
+    P.flash = [];
+
+    var h = P.msg || "";
+    if (P.phase === "choose") {
+      h += "<h2>Which node do you visit next?</h2><p>Click it on the graph (or tab to it and press Enter).</p>";
+    } else if (P.phase === "update") {
+      var u = P.current, du = last(s.dist[u]);
+      h += "<h2>Visiting " + u + " (distance " + du + ")</h2><p>For each unvisited neighbour, work out whether going through " + u + " is shorter. Fill in what that row of the table should say now.</p>";
+      var opts = '<option value="">Choose</option>' + names(g).map(function (n) { return '<option value="' + n + '">' + n + "</option>"; }).join("");
+      P.pending.forEach(function (x) {
+        var v = x[0], w = x[1];
+        h += '<div class="urow"><span class="unode">' + v + '</span>' +
+          '<span class="uinfo">Edge ' + u + " to " + v + " has weight " + w + ". The table currently says " + fmt(last(s.dist[v])) + ".</span>" +
+          '<div class="ufields"><label>Distance <input type="number" inputmode="numeric" id="in-d-' + v + '"></label>' +
+          '<label>Previous node <select id="in-p-' + v + '">' + opts + "</select></label></div>" +
+          '<span class="ufb" id="fb-' + v + '"></span></div>';
+      });
+      h += '<div class="actions"><button class="btn primary" id="p-check">Check answers</button><button class="btn" id="p-show">Show me</button></div>';
+    } else if (P.phase === "path") {
+      h += "<h2>Every node is visited. Now write the answer.</h2><p>Use the previous node column to work backwards from " + g.goal + ", then write the route from " + g.start + " to " + g.goal + ".</p>" +
+        '<div class="pathform"><label>Route <input type="text" id="in-route" placeholder="e.g. A B C" autocomplete="off"></label>' +
+        '<label>Total distance <input type="number" inputmode="numeric" id="in-total"></label>' +
+        '<button class="btn primary" id="p-path">Check answer</button></div><p class="ufb" id="fb-path"></p>';
+    } else if (P.phase === "done") {
+      var other = P.key === "p1" ? "p2" : "p1";
+      h += '<h2>Complete</h2><p>A full table with the overwritten values showing, the route in order, and the total distance. That is what a full-marks answer looks like.</p>' +
+        '<div class="actions"><button class="btn primary" data-go="' + other + '">Try ' + (other === "p1" ? "Graph 1" : "Graph 2") + '</button><button class="btn" data-go="' + P.key + '">Do this one again</button></div>';
+    }
+    pPanel.innerHTML = h;
+
+    var chk = document.getElementById("p-check"), show = document.getElementById("p-show"), pb = document.getElementById("p-path");
+    if (chk) chk.addEventListener("click", function () { checkUpdate(false); });
+    if (show) show.addEventListener("click", function () { checkUpdate(true); });
+    if (pb) pb.addEventListener("click", checkPath);
+    pPanel.querySelectorAll("input").forEach(function (inp) {
+      inp.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); if (chk) checkUpdate(false); else if (pb) checkPath(); }
+      });
+    });
+    pPanel.querySelectorAll("[data-go]").forEach(function (b) {
+      b.addEventListener("click", function () { startPractice(b.getAttribute("data-go")); });
+    });
+  }
+
+  function practiceClick(n) {
+    if (P.phase !== "choose") return;
+    var g = P.g, s = P.s, cand = candidates(g, s);
+    var min = Math.min.apply(null, cand.map(function (x) { return last(s.dist[x]); }));
+    var d = last(s.dist[n]);
+    if (s.visited[n]) {
+      P.msg = '<p class="msg bad">' + n + " has already been visited. Once a node is visited its distance is final, so you never go back to it.</p>";
+    } else if (d === INF) {
+      P.msg = '<p class="msg bad">' + n + " is still ∞, so no route to it has been found yet. Choose from the nodes that have a distance in the table.</p>";
+    } else if (d > min) {
+      var best = cand.filter(function (x) { return last(s.dist[x]) === min; });
+      P.msg = '<p class="msg bad">' + n + " has a distance of " + d + ", but " + listAnd(best) + (best.length > 1 ? " have " : " has ") + min +
+        ". Look down the whole table for the smallest unvisited distance, not just at the neighbours of the last node you visited.</p>";
+    } else {
+      s.visited[n] = true; s.order.push(n);
+      P.current = n; P.flash = [n];
+      P.pending = P.adj[n].filter(function (x) { return !s.visited[x[0]]; });
+      if (P.pending.length) {
+        P.phase = "update";
+        P.msg = '<p class="msg good">Correct. ' + n + " has the smallest unvisited distance (" + min + "), so it is ticked off.</p>";
+      } else {
+        P.msg = '<p class="msg good">Correct. ' + n + " has the smallest unvisited distance (" + min + "). It has no unvisited neighbours, so there is nothing to update.</p>";
+        afterUpdate(); return;
+      }
+    }
+    renderPractice();
+  }
+
+  function afterUpdate() {
+    P.current = null; P.pending = [];
+    P.phase = allVisited(P.g, P.s) ? "path" : "choose";
+    renderPractice();
+  }
+
+  function checkUpdate(reveal) {
+    var s = P.s, u = P.current, du = last(s.dist[u]), allOk = true, results = [];
+    P.pending.forEach(function (x) {
+      var v = x[0], w = x[1], dv = last(s.dist[v]), nd = du + w, better = nd < dv;
+      var expD = better ? nd : dv, expP = better ? u : last(s.prev[v]);
+      var dIn = document.getElementById("in-d-" + v), pIn = document.getElementById("in-p-" + v), fb = document.getElementById("fb-" + v);
+      if (reveal) { dIn.value = expD; pIn.value = expP; }
+      var ok = parseInt(dIn.value, 10) === expD && pIn.value === expP;
+      var why = better
+        ? du + " + " + w + " = " + nd + ", which beats " + fmt(dv) + ". Distance " + nd + ", previous node " + u + "."
+        : du + " + " + w + " = " + nd + ", which is not shorter than " + dv + ". Keep " + dv + " and previous node " + expP + ".";
+      if (reveal) { fb.className = "ufb"; fb.textContent = why; }
+      else if (ok) { fb.className = "ufb ok"; fb.textContent = "✓ " + why; }
+      else { fb.className = "ufb no"; fb.textContent = "Not quite. " + why; allOk = false; }
+      results.push({ v: v, better: better, nd: nd, dv: dv });
+    });
+    if (reveal) {
+      document.getElementById("p-check").textContent = "Carry on";
+      return;
+    }
+    if (!allOk) return;
+    var changed = [], notes = [];
+    results.forEach(function (r) {
+      if (r.better) {
+        s.dist[r.v].push(r.nd); s.prev[r.v].push(u); changed.push(r.v);
+        notes.push(r.dv === INF ? r.v + " goes from ∞ to " + r.nd : r.v + " is overwritten: " + r.dv + " crossed out, " + r.nd + " written in");
+      } else {
+        notes.push(r.v + " stays at " + r.dv);
+      }
+    });
+    P.flash = changed;
+    P.msg = '<p class="msg good">All correct. ' + notes.join("; ") + ".</p>";
+    afterUpdate();
+  }
+
+  function checkPath() {
+    var g = P.g, s = P.s, exp = tracePath(g, s), total = last(s.dist[g.goal]);
+    var valid = names(g);
+    var got = (document.getElementById("in-route").value.toUpperCase().match(/[A-Z]/g) || [])
+      .filter(function (c) { return valid.indexOf(c) !== -1; });
+    var t = parseInt(document.getElementById("in-total").value, 10);
+    var okR = got.join("") === exp.join(""), okT = t === total;
+    var fb = document.getElementById("fb-path");
+    if (okR && okT) {
+      P.phase = "done";
+      P.msg = '<p class="msg good">Correct. The shortest route is ' + exp.join(" → ") + " with a total distance of " + total + ".</p>";
+      renderPractice();
+      return;
+    }
+    var bits = [];
+    if (!okR) {
+      if (got.slice().reverse().join("") === exp.join("")) bits.push("Your route is backwards. Write it from " + g.start + " to " + g.goal + ".");
+      else bits.push("Check the route. Start at " + g.goal + ", look at its previous node, then that node's previous node, and so on until you reach " + g.start + ".");
+    }
+    if (!okT) bits.push("The total distance is the final (not crossed out) value in " + g.goal + "'s row.");
+    fb.className = "ufb no";
+    fb.textContent = bits.join(" ");
+  }
+
+  pSvg.addEventListener("click", function (e) {
+    var node = e.target.closest("[data-node]");
+    if (node) practiceClick(node.getAttribute("data-node"));
+  });
+  pSvg.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var node = e.target.closest("[data-node]");
+    if (node) { e.preventDefault(); practiceClick(node.getAttribute("data-node")); }
+  });
+  document.querySelectorAll(".switcher [data-graph]").forEach(function (b) {
+    b.addEventListener("click", function () { startPractice(b.getAttribute("data-graph")); });
+  });
+  document.getElementById("p-restart").addEventListener("click", function () { startPractice(P.key); });
+
+  // ---------- tabs ----------
+  var tabs = document.querySelectorAll('[role="tab"]');
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () {
+      tabs.forEach(function (o) {
+        var on = o === t;
+        o.setAttribute("aria-selected", on ? "true" : "false");
+        document.getElementById(o.getAttribute("aria-controls")).hidden = !on;
+      });
+    });
+  });
+
+  renderKeys();
+  showLearn();
+  startPractice("p1");
+})();
+</script>
+</body>
+</html>

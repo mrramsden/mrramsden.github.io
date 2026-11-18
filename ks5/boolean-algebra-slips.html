@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Common slips in Boolean algebra</title>
+<style>
+/* Layout idea: one long workbook page; a slip index up top, then one tool per slip, each a card with controls on the left and live feedback on the right. */
+:root{
+  --paper:#f3f6fb;
+  --card:#ffffff;
+  --ink:#13233a;
+  --muted:#52627a;
+  --blue:#1d5fb4;
+  --blue-soft:#e0ebf9;
+  --line:#cdd9e8;
+  --good:#17784a;
+  --good-soft:#e1f3e9;
+  --bad:#b42318;
+  --bad-soft:#fbe8e6;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",Consolas,"Courier New",monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0d1623;--card:#142133;--ink:#e2eaf5;--muted:#9fb0c6;--blue:#6ea8ee;--blue-soft:#1a3150;--line:#2a3c55;
+    --good:#5dca95;--good-soft:#123527;--bad:#ff8b7c;--bad-soft:#3b1b18;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0d1623;--card:#142133;--ink:#e2eaf5;--muted:#9fb0c6;--blue:#6ea8ee;--blue-soft:#1a3150;--line:#2a3c55;
+  --good:#5dca95;--good-soft:#123527;--bad:#ff8b7c;--bad-soft:#3b1b18;color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--body)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.6rem;font-weight:800}
+h3{font-size:1.1rem;font-weight:600}
+p{margin:0}
+code,.mono{font-family:var(--mono)}
+a{color:var(--blue)}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+header.top{padding:40px 0 24px;border-bottom:1px solid var(--line);background:var(--card)}
+.eyebrow{font-family:var(--mono);font-size:.8rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+.lede{max-width:65ch;margin-top:12px;color:var(--muted);font-size:1.05rem}
+nav.jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+nav.jump a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink);font-size:.9rem;background:var(--paper)}
+nav.jump a:hover{border-color:var(--blue);color:var(--blue)}
+
+section{padding:40px 0 8px}
+.sec-head{display:grid;gap:8px;margin-bottom:18px;max-width:70ch}
+.sec-head .tag{font-family:var(--mono);font-size:.78rem;color:var(--blue);text-transform:uppercase;letter-spacing:.05em}
+.sec-head p{color:var(--muted)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:820px){.split{grid-template-columns:1fr}}
+
+.slips{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.slip{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:8px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.slip h3{font-size:1rem}
+.slip p{font-size:.92rem;color:var(--muted)}
+.slip a{font-size:.88rem;font-weight:600}
+
+.btn{border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:6px;padding:7px 14px;cursor:pointer;font-weight:600}
+:root[data-theme="dark"] .btn{color:#0d1623}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{color:#0d1623}}
+.btn.ghost{background:transparent;color:var(--blue)}
+.btn.small{padding:4px 10px;font-size:.85rem}
+.btn:hover{filter:brightness(1.08)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.stack{display:grid;gap:12px;align-content:start}
+label{font-weight:600;font-size:.92rem}
+.hint{font-size:.88rem;color:var(--muted)}
+input[type=text],textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 11px;background:var(--paper);font-family:var(--mono);font-size:1rem}
+textarea{min-height:190px;line-height:1.7;resize:vertical}
+.symbar{display:flex;flex-wrap:wrap;gap:6px}
+.symbar button{font-family:var(--mono);min-width:38px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);cursor:pointer;font-size:1rem}
+.symbar button:hover{border-color:var(--blue)}
+
+.result{display:grid;gap:8px}
+.line{display:grid;grid-template-columns:28px 1fr;gap:8px;padding:9px 10px;border-radius:6px;border:1px solid var(--line);background:var(--paper)}
+.line .mark{font-weight:700;text-align:center}
+.line.ok{border-color:var(--good);background:var(--good-soft)}
+.line.ok .mark{color:var(--good)}
+.line.bad{border-color:var(--bad);background:var(--bad-soft)}
+.line.bad .mark{color:var(--bad)}
+.line .ex{font-family:var(--mono)}
+.line .why{font-size:.9rem;color:var(--muted)}
+.verdict{padding:10px 12px;border-radius:6px;font-weight:600}
+.verdict.ok{background:var(--good-soft);color:var(--good)}
+.verdict.bad{background:var(--bad-soft);color:var(--bad)}
+.verdict.info{background:var(--blue-soft);color:var(--ink);font-weight:400}
+
+table.laws{width:100%;border-collapse:collapse;font-size:.95rem}
+table.laws th,table.laws td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.laws th{font-family:var(--display);font-weight:600;font-size:.85rem;color:var(--muted)}
+table.laws td.mono{white-space:nowrap}
+.scrollx{overflow-x:auto}
+.callout{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 14px;border-radius:0 6px 6px 0;font-size:.95rem}
+
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:.9rem;font-variant-numeric:tabular-nums}
+table.tt th,table.tt td{border:1px solid var(--line);padding:6px 10px;text-align:center}
+table.tt th{background:var(--blue-soft);font-weight:600;white-space:nowrap}
+table.tt th.colnum{background:transparent;color:var(--muted);font-weight:400;font-size:.78rem;border:none;padding-bottom:2px}
+table.tt td.final{font-weight:700}
+table.tt td.yes{color:var(--good);font-weight:700}
+table.tt td.no{color:var(--bad);font-weight:700;background:var(--bad-soft)}
+
+.toggles{display:flex;flex-wrap:wrap;gap:10px}
+.tog{display:grid;justify-items:center;gap:4px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--paper);cursor:pointer;min-width:120px}
+.tog b{font-family:var(--mono);font-size:1.3rem}
+.tog span{font-size:.8rem;color:var(--muted);text-align:center}
+.tog[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.cands{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.cand{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:8px;background:var(--paper)}
+.cand .ex{font-family:var(--mono);font-size:1.05rem}
+.lamp{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem}
+.lamp i{width:16px;height:16px;border-radius:50%;background:#c0392b;display:inline-block;box-shadow:0 0 0 2px var(--card),0 0 0 3px var(--line)}
+.lamp.on i{background:#22a35a}
+.cand.right{border-color:var(--good);background:var(--good-soft)}
+.cand.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.prob{display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--line)}
+.prob:first-child{border-top:none;padding-top:0}
+.prob .vars{font-size:.88rem;color:var(--muted)}
+
+/* K-map */
+.kwrap{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:820px){.kwrap{grid-template-columns:1fr}}
+.kmap{position:relative;padding:0 28px 28px 0;display:grid;grid-template-columns:56px repeat(4,64px);grid-template-rows:44px repeat(4,64px);font-family:var(--mono);user-select:none;width:max-content}
+.kmap .corner{position:relative;border-bottom:1px solid var(--line)}
+.kmap .corner svg{position:absolute;inset:0}
+.kmap .corner .cd{position:absolute;right:4px;top:2px;font-size:.78rem;color:var(--muted)}
+.kmap .corner .ab{position:absolute;left:4px;bottom:2px;font-size:.78rem;color:var(--muted)}
+.kmap .hd{display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--muted)}
+.kcell{border:1px solid var(--line);background:var(--card);font-size:1.25rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--mono);padding:0;margin:-1px 0 0 -1px}
+.kcell.sel{background:var(--blue-soft);outline:2px solid var(--blue);outline-offset:-4px}
+.kcell.miss{background:var(--bad-soft);outline:2px dashed var(--bad);outline-offset:-4px}
+.kcell.extra{background:var(--bad-soft);color:var(--bad)}
+.gbox{position:absolute;border:3px solid;border-radius:14px;pointer-events:none}
+.glist{display:grid;gap:6px}
+.gitem{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.95rem}
+.gitem i{width:14px;height:14px;border-radius:4px;display:inline-block;flex:none}
+.gitem button{margin-left:auto}
+.modes{display:inline-flex;border:1px solid var(--blue);border-radius:6px;overflow:hidden}
+.modes button{border:none;background:transparent;padding:7px 12px;cursor:pointer;color:var(--blue);font-weight:600}
+.modes button[aria-pressed="true"]{background:var(--blue);color:var(--card)}
+select{border:1px solid var(--line);border-radius:6px;padding:7px 10px;background:var(--paper)}
+.expr-show{font-family:var(--mono);font-size:.95rem;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:8px 10px;word-break:break-word}
+
+/* Adders */
+.fa{display:grid;grid-template-columns:auto auto;gap:18px;align-items:center}
+@media (max-width:560px){.fa{grid-template-columns:1fr}}
+.outs{display:flex;gap:12px}
+.out{border:2px solid var(--line);border-radius:8px;padding:8px 14px;text-align:center;min-width:80px}
+.out b{display:block;font-family:var(--mono);font-size:1.6rem}
+.out span{font-size:.8rem;color:var(--muted)}
+table.rip{border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums}
+table.rip th,table.rip td{border:1px solid var(--line);padding:6px 12px;text-align:center}
+table.rip th{background:var(--blue-soft);font-family:var(--body);font-weight:600;font-size:.88rem}
+table.rip tr.now td{background:var(--good-soft)}
+.readout{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:var(--mono)}
+.bitchip{border:1px solid var(--blue);border-radius:6px;padding:4px 8px;text-align:center;line-height:1.2}
+.bitchip small{display:block;font-size:.7rem;color:var(--muted)}
+.mk{display:grid;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.mk:first-of-type{border-top:none}
+.mk blockquote{margin:0;font-style:italic}
+.mk .fb{font-size:.92rem}
+
+ol.check{display:grid;gap:10px;padding-left:1.3em;margin:0;max-width:70ch}
+ol.check li::marker{font-family:var(--mono);color:var(--blue)}
+footer{padding:36px 0 48px;color:var(--muted);font-size:.85rem}
+</style>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Key Stage 5</a></nav>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">A Level · Boolean algebra</p>
+    <h1>Common slips in Boolean algebra</h1>
+    <p class="lede">The same few slips cost marks in Boolean algebra questions again and again. Each tool on this page targets one of them. Start with the ones you recognise, then work through the rest.</p>
+    <nav class="jump" aria-label="Sections">
+      <a href="#slips">The slips</a>
+      <a href="#steps">Algebra step checker</a>
+      <a href="#laws">The laws</a>
+      <a href="#tables">Truth tables</a>
+      <a href="#words">Words to logic</a>
+      <a href="#kmaps">K-maps</a>
+      <a href="#adders">Adders</a>
+      <a href="#checklist">Exam checklist</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section id="slips">
+  <div class="sec-head">
+    <span class="tag">Where the marks went</span>
+    <h2>The slips that came up most</h2>
+    <p>Pick the ones you recognise, then use the link to practise.</p>
+  </div>
+  <div class="slips">
+    <div class="slip"><h3>De Morgan's law</h3><p>Break the line, change the sign. ¬(A ∧ B) becomes ¬A ∨ ¬B: the NOT goes onto each letter <em>and</em> the operator flips. ¬(B ∧ C ∧ D) is not the same as ¬B ∧ ¬C ∧ ¬D.</p><a href="#steps">Try the step checker</a></div>
+    <div class="slip"><h3>The distributive law</h3><p>(¬A ∨ ¬B) ∧ (¬A ∨ B) becomes ¬A ∨ (¬B ∧ B). The shared term keeps its own operator; it does not swap with the one in the brackets.</p><a href="#laws">See the laws</a></div>
+    <div class="slip"><h3>Show each stage</h3><p>"Show each stage of your working" means one law per line. A correct answer with no working only earns the answer mark.</p><a href="#steps">Check your lines</a></div>
+    <div class="slip"><h3>Building a truth table</h3><p>One column per piece of the expression, and every piece must be used. If the question says the two are equivalent and yours do not match, go back and look.</p><a href="#tables">Build a table</a></div>
+    <div class="slip"><h3>Words into logic</h3><p>"No vehicles approaching" means ¬V. "Either ... or" means OR unless the question says "but not both".</p><a href="#words">Practise translating</a></div>
+    <div class="slip"><h3>K-maps</h3><p>Write the 1s in. Loop every 1, singles included. Wrap round the edges. Never put a 0 inside a group.</p><a href="#kmaps">Use the trainer</a></div>
+    <div class="slip"><h3>What does a full adder do?</h3><p>It adds three bits (A, B and the carry in) and outputs a sum and a carry out. Say what goes in and what comes out, not how it is built.</p><a href="#adders">Mark some answers</a></div>
+    <div class="slip"><h3>Reading the result</h3><p>Read the answer from the S column as S3 S2 S1 S0, most significant bit first. Your table is usually right; the slip is copying it out.</p><a href="#adders">Step through an addition</a></div>
+    <div class="slip"><h3>Drawing gates</h3><p>OCR uses four gates: AND, OR, NOT and XOR. Draw the NOT gate as a symbol; never write a word in its place, and do not use NAND or NOR.</p><a href="#checklist">Exam checklist</a></div>
+  </div>
+</section>
+
+<section id="steps">
+  <div class="sec-head">
+    <span class="tag">Tool 1</span>
+    <h2>Algebra step checker</h2>
+    <p>Type your working one line at a time, starting with the question. The checker tests whether each line still means the same as the line before, and shows you a set of inputs that proves it if not.</p>
+  </div>
+  <div class="split">
+    <div class="card stack">
+      <div class="row">
+        <span class="hint">Load an example:</span>
+        <button class="btn ghost small" data-ex="dm">De Morgan slip</button>
+        <button class="btn ghost small" data-ex="dist">Distributive slip</button>
+        <button class="btn ghost small" data-ex="good">A worked simplification</button>
+        <button class="btn ghost small" data-ex="blank">Blank</button>
+      </div>
+      <label for="stepsIn">Your working (one expression per line)</label>
+      <div class="symbar" data-for="stepsIn"></div>
+      <textarea id="stepsIn" class="expr-input" spellcheck="false"></textarea>
+      <p class="hint">Add a reason after <code>#</code> if you like, for example <code># De Morgan</code>. A line with an equals sign in it, like <code>B ∨ ¬B = 1</code>, is checked as a fact on its own. You can type <code>^</code> for ∧, <code>v</code> for ∨ and <code>~</code> for ¬.</p>
+      <div class="row"><button class="btn" id="stepsGo">Check my working</button></div>
+    </div>
+    <div class="card stack">
+      <h3>Feedback</h3>
+      <div class="result" id="stepsOut" aria-live="polite"></div>
+      <p class="callout">The checker can tell you whether two lines are equal. It cannot tell you whether you used the right law to get there: a wrong law can land on a right answer by luck. In an exam, name the law for each step.</p>
+    </div>
+  </div>
+</section>
+
+<section id="laws">
+  <div class="sec-head">
+    <span class="tag">Reference</span>
+    <h2>The laws you need</h2>
+    <p>Every law comes in two forms: swap each ∧ for ∨ and each 0 for 1 to get its partner. Press <b>Test it</b> to prove a law with a truth table below.</p>
+  </div>
+  <div class="card scrollx">
+    <table class="laws">
+      <thead><tr><th>Law</th><th>AND form</th><th>OR form</th><th></th></tr></thead>
+      <tbody id="lawRows"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="tables">
+  <div class="sec-head">
+    <span class="tag">Tool 2</span>
+    <h2>Truth table builder</h2>
+    <p>One column for each piece of the expression, built up from the inside out. Add a second expression to see whether the two are equivalent.</p>
+  </div>
+  <div class="card stack">
+    <div class="split">
+      <div class="stack">
+        <label for="ttA">Expression</label>
+        <div class="symbar" data-for="ttA"></div>
+        <input type="text" id="ttA" class="expr-input" spellcheck="false" value="¬(A ∨ ¬(B ∧ C))">
+      </div>
+      <div class="stack">
+        <label for="ttB">Compare with (optional)</label>
+        <div class="symbar" data-for="ttB"></div>
+        <input type="text" id="ttB" class="expr-input" spellcheck="false" value="¬A ∧ B ∧ C">
+      </div>
+    </div>
+    <div class="row"><button class="btn" id="ttGo">Build the table</button></div>
+    <div id="ttMsg"></div>
+    <div class="scrollx" id="ttOut"></div>
+    <p class="hint">Look at the column just before the last one: <code>A ∨ ¬(B ∧ C)</code> is everything inside the outer NOT. The final column is that column flipped.</p>
+  </div>
+</section>
+
+<section id="words">
+  <div class="sec-head">
+    <span class="tag">Tool 3</span>
+    <h2>Words to logic</h2>
+    <p>A greenhouse sprinkler switches on if it is evening and EITHER the soil is not damp, OR the plants have not been watered for over a day. Set the inputs, then pick the circuit that always matches the description.</p>
+  </div>
+  <div class="card stack">
+    <div class="toggles" id="q3Toggles"></div>
+    <div class="cands" id="q3Cands"></div>
+    <div id="q3Msg" aria-live="polite"></div>
+  </div>
+  <div class="card stack" style="margin-top:14px">
+    <h3>Now write your own</h3>
+    <p class="hint">Type a Boolean expression for each one, using the letters given.</p>
+    <div id="probs"></div>
+  </div>
+</section>
+
+<section id="kmaps">
+  <div class="sec-head">
+    <span class="tag">Tool 4</span>
+    <h2>K-map trainer</h2>
+    <p>Step 1: click cells to place the 1s, then check them. Step 2: switch to grouping, click the cells for a group and add it. Groups can wrap round the edges, so the left and right columns are neighbours, and so are the top and bottom rows.</p>
+  </div>
+  <div class="card stack">
+    <div class="row">
+      <label for="kPuz">Puzzle</label>
+      <select id="kPuz"></select>
+      <div class="modes" role="group" aria-label="Mode">
+        <button id="kModePlace" aria-pressed="true">1. Place the 1s</button>
+        <button id="kModeGroup" aria-pressed="false">2. Draw groups</button>
+      </div>
+    </div>
+    <div class="expr-show" id="kExpr"></div>
+    <div class="kwrap">
+      <div class="kmap" id="kmap"></div>
+      <div class="stack">
+        <div class="row" id="kPlaceBtns">
+          <button class="btn" id="kCheck1s">Check my 1s</button>
+          <button class="btn ghost" id="kClear1s">Clear</button>
+        </div>
+        <div class="row" id="kGroupBtns" hidden>
+          <button class="btn" id="kAdd">Add this group</button>
+          <button class="btn ghost" id="kClearSel">Clear selection</button>
+          <button class="btn" id="kCheckG">Check my groups</button>
+          <button class="btn ghost" id="kShow">Show an answer</button>
+        </div>
+        <div id="kMsg" aria-live="polite"></div>
+        <div class="glist" id="kGroups"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="adders">
+  <div class="sec-head">
+    <span class="tag">Tool 5</span>
+    <h2>Adders</h2>
+    <p>A full adder adds three bits: A, B and the carry in from the bit before. It outputs a sum bit and a carry out. A quick check: count the 1s going in and write that number in binary. The right-hand digit is S, the left-hand digit is the carry out.</p>
+  </div>
+  <div class="split">
+    <div class="card stack">
+      <h3>One full adder</h3>
+      <div class="fa">
+        <div class="toggles" id="faToggles"></div>
+        <div class="outs">
+          <div class="out"><span>Sum</span><b id="faS">0</b></div>
+          <div class="out"><span>Carry out</span><b id="faC">0</b></div>
+        </div>
+      </div>
+      <p id="faWhy" class="verdict info"></p>
+    </div>
+    <div class="card stack">
+      <h3>Four full adders in a chain</h3>
+      <div class="row">
+        <label for="ripA">A</label><input type="text" id="ripA" value="0110" maxlength="4" style="width:90px">
+        <label for="ripB">B</label><input type="text" id="ripB" value="0111" maxlength="4" style="width:90px">
+      </div>
+      <div class="row">
+        <button class="btn" id="ripNext">Next bit</button>
+        <button class="btn ghost" id="ripAll">Show all</button>
+        <button class="btn ghost" id="ripReset">Start again</button>
+      </div>
+      <div class="scrollx"><table class="rip" id="ripTable"></table></div>
+      <div id="ripOut"></div>
+    </div>
+  </div>
+  <div class="card stack" style="margin-top:14px">
+    <h3>Mark these answers</h3>
+    <p class="hint">A common question: "What is the function of a full adder?" [2 marks]. One mark for adding three bits including a carry in, one mark for the sum and carry out. Decide how many marks each answer gets, then check.</p>
+    <div id="mkList"></div>
+  </div>
+</section>
+
+<section id="checklist">
+  <div class="sec-head">
+    <span class="tag">Before you hand in</span>
+    <h2>Exam checklist</h2>
+  </div>
+  <div class="card">
+    <ol class="check">
+      <li>Every simplification shows one law per line, and you can name each law.</li>
+      <li>When you use De Morgan's law, you have flipped the operator <em>and</em> put a NOT on each letter.</li>
+      <li>Every truth table column uses every part of its expression. If the question says two things are equivalent, your last two columns match.</li>
+      <li>Any word like "no", "not" or "isn't" in a scenario has become a NOT gate.</li>
+      <li>Your circuits only use AND, OR, NOT and XOR, drawn as gate symbols with the inputs labelled.</li>
+      <li>On a K-map you have written the 1s, looped every 1 in the largest group you can, checked for wrap-round groups, and no group contains a 0.</li>
+      <li>Each K-map group gives one term, with a NOT on each letter that is 0 for the whole group.</li>
+      <li>Adder answers say what goes in and what comes out.</li>
+      <li>Binary results are read S3 S2 S1 S0, and you have checked the answer in denary.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+<footer class="wrap">Boolean algebra · notation follows OCR: ∧ AND, ∨ OR, ¬ NOT, ⊻ XOR.</footer>
+
+<script>
+"use strict";
+/* ---------- Expression engine ---------- */
+const SYM = {and:"∧", or:"∨", xor:"⊻"};
+function tokenize(s){
+  const t=[]; let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(/\s/.test(c)){i++;continue;}
+    const w=s.slice(i).match(/^(AND|OR|NOT|XOR)(?![A-Za-z])/);
+    if(w){t.push({k:w[1].toLowerCase()}); i+=w[1].length; continue;}
+    if("¬~!".includes(c)){t.push({k:"not"});i++;continue;}
+    if("∧^&·*.".includes(c)){t.push({k:"and"});i++;continue;}
+    if("∨v|+".includes(c)){t.push({k:"or"});i++;continue;}
+    if("⊻⊕".includes(c)){t.push({k:"xor"});i++;continue;}
+    if(c==="("||c===")"){t.push({k:c});i++;continue;}
+    if(c==="0"||c==="1"){t.push({k:"const",v:+c});i++;continue;}
+    if(/[A-Z]/.test(c)){t.push({k:"var",v:c});i++;continue;}
+    throw new Error('I do not recognise "'+c+'". Use capital letters for inputs and ∧ ∨ ¬ ⊻ for the operators.');
+  }
+  return t;
+}
+function parse(src){
+  const toks=tokenize(src); let p=0;
+  const peek=()=>toks[p], next=()=>toks[p++];
+  if(!toks.length) throw new Error("Type an expression first.");
+  function pOr(){let n=pXor(); while(peek()&&peek().k==="or"){next(); n={t:"or",a:n,b:pXor()};} return n;}
+  function pXor(){let n=pAnd(); while(peek()&&peek().k==="xor"){next(); n={t:"xor",a:n,b:pAnd()};} return n;}
+  function pAnd(){let n=pNot(); while(peek()&&peek().k==="and"){next(); n={t:"and",a:n,b:pNot()};} return n;}
+  function pNot(){ if(peek()&&peek().k==="not"){next(); return {t:"not",a:pNot()};} return pAtom(); }
+  function pAtom(){
+    const tk=next();
+    if(!tk) throw new Error("The expression stops too early. Is something missing after an operator?");
+    if(tk.k==="var") return {t:"var",v:tk.v};
+    if(tk.k==="const") return {t:"const",v:tk.v};
+    if(tk.k==="("){ const n=pOr(); const c=next(); if(!c||c.k!==")") throw new Error("A bracket is opened but never closed."); return n; }
+    if(tk.k===")") throw new Error("There is a closing bracket with nothing inside it, or one too many.");
+    throw new Error("Two operators are next to each other. Check for a missing letter.");
+  }
+  const tree=pOr();
+  if(p<toks.length){
+    if(toks[p].k===")") throw new Error("There is one closing bracket too many.");
+    throw new Error("Two letters or brackets sit side by side with no operator between them. Write A ∧ B, not AB.");
+  }
+  return tree;
+}
+function ev(n,env){
+  switch(n.t){
+    case "var": return env[n.v];
+    case "const": return n.v;
+    case "not": return 1-ev(n.a,env);
+    case "and": return ev(n.a,env)&ev(n.b,env);
+    case "or": return ev(n.a,env)|ev(n.b,env);
+    case "xor": return ev(n.a,env)^ev(n.b,env);
+  }
+}
+function varsOf(n,s){ s=s||new Set(); if(n.t==="var") s.add(n.v); if(n.a) varsOf(n.a,s); if(n.b) varsOf(n.b,s); return s; }
+const isBin=n=>n.t==="and"||n.t==="or"||n.t==="xor";
+function fmt(n){
+  if(n.t==="var") return n.v;
+  if(n.t==="const") return String(n.v);
+  if(n.t==="not"){ const s=fmt(n.a); return "¬"+(isBin(n.a)?"("+s+")":s); }
+  const w=c=>(isBin(c)&&c.t!==n.t)?"("+fmt(c)+")":fmt(c);
+  return w(n.a)+" "+SYM[n.t]+" "+w(n.b);
+}
+function envs(vars){
+  const out=[]; const n=vars.length;
+  for(let i=0;i<(1<<n);i++){ const e={}; vars.forEach((v,j)=>{ e[v]=(i>>(n-1-j))&1; }); out.push(e); }
+  return out;
+}
+function sortedVars(...trees){ const s=new Set(); trees.forEach(t=>varsOf(t,s)); return [...s].sort(); }
+function counterexample(a,b){
+  const vars=sortedVars(a,b);
+  for(const e of envs(vars)){ if(ev(a,e)!==ev(b,e)) return {env:e,vars,a:ev(a,e),b:ev(b,e)}; }
+  return null;
+}
+const envText=(e,vars)=>vars.map(v=>v+" = "+e[v]).join(", ");
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+/* ---------- Symbol bars ---------- */
+let lastField=null;
+document.querySelectorAll(".expr-input").forEach(el=>el.addEventListener("focus",()=>{lastField=el;}));
+document.querySelectorAll(".symbar").forEach(bar=>{
+  [["∧","AND"],["∨","OR"],["¬","NOT"],["⊻","XOR"],["(","open bracket"],[")","close bracket"]].forEach(([s,name])=>{
+    const b=document.createElement("button"); b.type="button"; b.textContent=s; b.title="Insert "+name; b.setAttribute("aria-label","Insert "+name);
+    b.addEventListener("click",()=>{
+      const f=document.getElementById(bar.dataset.for);
+      const st=f.selectionStart??f.value.length, en=f.selectionEnd??f.value.length;
+      f.value=f.value.slice(0,st)+s+f.value.slice(en); f.focus(); f.selectionStart=f.selectionEnd=st+s.length;
+    });
+    bar.appendChild(b);
+  });
+});
+
+/* ---------- Tool 1: step checker ---------- */
+const EXAMPLES={
+  dm:"(¬A ∨ ¬B) ∧ B\n¬(A ∨ B) ∧ B   # De Morgan?\n¬A ∧ ¬B ∧ B",
+  dist:"(A ∨ B) ∧ (A ∨ C)\nA ∧ (B ∨ C)   # distributive?",
+  good:"¬(¬A ∨ B) ∨ (A ∧ B)\n(¬¬A ∧ ¬B) ∨ (A ∧ B)   # De Morgan\n(A ∧ ¬B) ∨ (A ∧ B)   # double negation\nA ∧ (¬B ∨ B)   # distributive\nA ∧ 1   # ¬B ∨ B = 1\nA   # X ∧ 1 = X",
+  blank:""
+};
+const stepsIn=document.getElementById("stepsIn"), stepsOut=document.getElementById("stepsOut");
+function lineBox(cls,mark,ex,why){
+  return '<div class="line '+cls+'"><span class="mark" aria-hidden="true">'+mark+'</span><div><div class="ex">'+esc(ex)+'</div>'+(why?'<div class="why">'+why+'</div>':'')+'</div></div>';
+}
+function checkSteps(){
+  let html=""; let first=null, prev=null, broken=false, count=0;
+  stepsIn.value.split("\n").forEach(raw=>{
+    let s=raw.replace(/(#|\/\/).*$/,"").trim().replace(/^=+\s*/,"");
+    if(!s) return;
+    if(s.includes("=")){
+      const k=s.indexOf("="), L=s.slice(0,k), R=s.slice(k+1);
+      try{
+        const a=parse(L), b=parse(R), ce=counterexample(a,b);
+        html+= ce ? lineBox("bad","✗",s,"This fact is not true. Try "+envText(ce.env,ce.vars)+": the left gives "+ce.a+", the right gives "+ce.b+".")
+                  : lineBox("ok","✓",s,"A true fact.");
+      }catch(e){ html+=lineBox("bad","?",s,esc(e.message)); }
+      return;
+    }
+    let t;
+    try{ t=parse(s); }catch(e){ html+=lineBox("bad","?",s,esc(e.message)); return; }
+    count++;
+    if(!prev){ html+=lineBox("","1",fmt(t),"Starting expression."); first=t; prev=t; return; }
+    const ce=counterexample(prev,t);
+    if(ce){ broken=true; html+=lineBox("bad","✗",s,"Not equal to the line before. Try "+envText(ce.env,ce.vars)+": the line before gives "+ce.a+", this line gives "+ce.b+"."); }
+    else html+=lineBox("ok","✓",s,"Equal to the line before.");
+    prev=t;
+  });
+  if(count>1){
+    const ce=counterexample(first,prev);
+    if(!ce) html+='<div class="verdict ok">Your last line, '+esc(fmt(prev))+', is equal to the starting expression.'+(broken?' A step along the way was wrong, so check the crosses.':'')+'</div>';
+    else html+='<div class="verdict bad">Your last line is not equal to the starting expression. Fix the first cross and carry on from there.</div>';
+  }
+  if(!html) html='<div class="verdict info">Type your working on the left and press Check.</div>';
+  stepsOut.innerHTML=html;
+}
+document.querySelectorAll("[data-ex]").forEach(b=>b.addEventListener("click",()=>{stepsIn.value=EXAMPLES[b.dataset.ex]; checkSteps(); if(b.dataset.ex==="blank") stepsIn.focus();}));
+document.getElementById("stepsGo").addEventListener("click",checkSteps);
+
+/* ---------- Laws ---------- */
+const LAWS=[
+  ["Complement","A ∧ ¬A = 0","A ∨ ¬A = 1"],
+  ["Identity","A ∧ 1 = A","A ∨ 0 = A"],
+  ["Null (annulment)","A ∧ 0 = 0","A ∨ 1 = 1"],
+  ["Idempotent","A ∧ A = A","A ∨ A = A"],
+  ["Double negation","¬¬A = A",""],
+  ["Commutative","A ∧ B = B ∧ A","A ∨ B = B ∨ A"],
+  ["Associative","(A ∧ B) ∧ C = A ∧ (B ∧ C)","(A ∨ B) ∨ C = A ∨ (B ∨ C)"],
+  ["Distributive","A ∧ (B ∨ C) = (A ∧ B) ∨ (A ∧ C)","A ∨ (B ∧ C) = (A ∨ B) ∧ (A ∨ C)"],
+  ["Absorption","A ∧ (A ∨ B) = A","A ∨ (A ∧ B) = A"],
+  ["De Morgan","¬(A ∧ B) = ¬A ∨ ¬B","¬(A ∨ B) = ¬A ∧ ¬B"]
+];
+const lawRows=document.getElementById("lawRows");
+LAWS.forEach(([name,x,y])=>{
+  const tr=document.createElement("tr");
+  tr.innerHTML="<td><b>"+name+"</b></td><td class='mono'>"+x+"</td><td class='mono'>"+y+"</td><td></td>";
+  const td=tr.lastChild, row=document.createElement("div"); row.className="row";
+  [x,y].filter(Boolean).forEach((law,i)=>{
+    const b=document.createElement("button"); b.className="btn ghost small"; b.textContent="Test "+(i?"OR":"AND")+" form";
+    if(!y) b.textContent="Test it";
+    b.addEventListener("click",()=>{ const [l,r]=law.split("="); ttA.value=l.trim(); ttB.value=r.trim(); buildTT(); document.getElementById("tables").scrollIntoView(); });
+    row.appendChild(b);
+  });
+  td.appendChild(row); lawRows.appendChild(tr);
+});
+
+/* ---------- Tool 2: truth tables ---------- */
+const ttA=document.getElementById("ttA"), ttB=document.getElementById("ttB"), ttOut=document.getElementById("ttOut"), ttMsg=document.getElementById("ttMsg");
+function subexprs(n,list,seen){
+  if(n.a) subexprs(n.a,list,seen); if(n.b) subexprs(n.b,list,seen);
+  if(n.t!=="var"&&n.t!=="const"){ const k=fmt(n); if(!seen.has(k)){seen.add(k); list.push(n);} }
+  return list;
+}
+function buildTT(){
+  ttOut.innerHTML=""; ttMsg.innerHTML="";
+  let a,b=null;
+  try{ a=parse(ttA.value); }catch(e){ ttMsg.innerHTML='<div class="verdict bad">Expression: '+esc(e.message)+'</div>'; return; }
+  if(ttB.value.trim()){ try{ b=parse(ttB.value); }catch(e){ ttMsg.innerHTML='<div class="verdict bad">Compare with: '+esc(e.message)+'</div>'; return; } }
+  const vars=b?sortedVars(a,b):sortedVars(a);
+  if(vars.length>5){ ttMsg.innerHTML='<div class="verdict bad">That uses more than five inputs. Keep it to five or fewer.</div>'; return; }
+  const cols=subexprs(a,[],new Set());
+  const nCols=vars.length+cols.length+(b?2:0);
+  let h="<table class='tt'><thead><tr>";
+  for(let i=1;i<=nCols;i++) h+="<th class='colnum'>"+i+"</th>";
+  h+="</tr><tr>"+vars.map(v=>"<th>"+v+"</th>").join("")+cols.map(c=>"<th>"+esc(fmt(c))+"</th>").join("");
+  if(b) h+="<th>"+esc(fmt(b))+"</th><th>Match?</th>";
+  h+="</tr></thead><tbody>";
+  let allMatch=true;
+  envs(vars).forEach(e=>{
+    h+="<tr>"+vars.map(v=>"<td>"+e[v]+"</td>").join("");
+    cols.forEach((c,i)=>{ h+="<td"+(i===cols.length-1?" class='final'":"")+">"+ev(c,e)+"</td>"; });
+    if(b){ const x=ev(a,e), y=ev(b,e); if(x!==y) allMatch=false; h+="<td class='final'>"+y+"</td><td class='"+(x===y?"yes":"no")+"'>"+(x===y?"✓":"✗")+"</td>"; }
+    h+="</tr>";
+  });
+  h+="</tbody></table>";
+  ttOut.innerHTML=h;
+  if(b) ttMsg.innerHTML= allMatch ? '<div class="verdict ok">Every row matches, so the two expressions are equivalent.</div>'
+                                  : '<div class="verdict bad">The rows marked ✗ do not match, so the two expressions are not equivalent.</div>';
+}
+document.getElementById("ttGo").addEventListener("click",buildTT);
+[ttA,ttB].forEach(f=>f.addEventListener("keydown",e=>{if(e.key==="Enter")buildTT();}));
+
+/* ---------- Tool 3: words to logic ---------- */
+const Q3MEAN={E:["not evening","evening"],D:["soil not damp","soil damp"],T:["watered within a day","not watered for over a day"]};
+const q3State={E:1,D:1,T:0};
+const Q3TRUE=parse("E ∧ (¬D ∨ T)");
+const Q3C=[
+  {e:"E ∧ (D ∨ T)", note:"This uses D where the description says the soil is <i>not</i> damp. It needs ¬D."},
+  {e:"E ∧ (D ⊻ T)", note:"Two slips: D needs a NOT, and \"either ... or\" here is an ordinary OR. XOR is 0 when both inputs are 1, so with damp soil and over a day since watering it leaves the sprinkler off, when it should be on."},
+  {e:"E ∧ (¬D ∨ T)", note:null},
+  {e:"(E ∧ ¬D) ∨ T", note:"The brackets are in the wrong place: this switches on whenever it is over a day since watering, even when it is not evening."}
+];
+const q3T=document.getElementById("q3Toggles"), q3Cd=document.getElementById("q3Cands"), q3Msg=document.getElementById("q3Msg");
+function q3Render(){
+  q3T.innerHTML="";
+  ["E","D","T"].forEach(k=>{
+    const b=document.createElement("button"); b.type="button"; b.className="tog"; b.setAttribute("aria-pressed",q3State[k]?"true":"false");
+    b.innerHTML="<b>"+k+" = "+q3State[k]+"</b><span>"+Q3MEAN[k][q3State[k]]+"</span>";
+    b.addEventListener("click",()=>{q3State[k]^=1; q3Render();});
+    q3T.appendChild(b);
+  });
+  q3Cd.querySelectorAll(".cand").forEach((c,i)=>{
+    const g=ev(parse(Q3C[i].e),q3State), l=c.querySelector(".lamp");
+    l.className="lamp"+(g?" on":""); l.lastChild.textContent=g?"S = 1, on":"S = 0, off";
+  });
+}
+function words(env,vars,mean){ return vars.map(v=>mean[v][env[v]]).join(", "); }
+Q3C.forEach((c,i)=>{
+  const d=document.createElement("div"); d.className="cand";
+  d.innerHTML="<div class='ex'>S = "+c.e+"</div><span class='lamp'><i></i><span></span></span>";
+  const b=document.createElement("button"); b.className="btn ghost small"; b.textContent="This one matches";
+  b.addEventListener("click",()=>{
+    q3Cd.querySelectorAll(".cand").forEach(x=>x.classList.remove("right","wrong"));
+    if(!c.note){ d.classList.add("right"); q3Msg.innerHTML='<div class="verdict ok">Correct. S = E ∧ (¬D ∨ T): evening AND (soil not damp OR over a day since watering).</div>'; return; }
+    d.classList.add("wrong");
+    const ce=counterexample(Q3TRUE,parse(c.e));
+    q3Msg.innerHTML='<div class="verdict bad">Not quite. '+c.note+' For example, with '+words(ce.env,ce.vars,Q3MEAN)+', the sprinkler should be '+(ce.a?"on":"off")+' but this circuit makes it '+(ce.b?"on":"off")+'.</div>';
+  });
+  d.appendChild(b); q3Cd.appendChild(d);
+});
+q3Render();
+
+const PROBS=[
+  {q:"A heater (H) comes on when it is cold and the window is not open.",vars:{C:"it is cold",W:"the window is open"},out:"H",ans:"C ∧ ¬W",
+   mean:{C:["not cold","cold"],W:["window shut","window open"]}},
+  {q:"An alarm (S) sounds if the door is opened while the system is armed, or if the panic button is pressed.",vars:{D:"the door is open",A:"the system is armed",P:"the panic button is pressed"},out:"S",ans:"(D ∧ A) ∨ P",
+   mean:{D:["door shut","door open"],A:["system not armed","system armed"],P:["panic button not pressed","panic button pressed"]}},
+  {q:"A ride (R) lets you on if you are tall enough and either you have a wristband or you are with an adult.",vars:{T:"you are tall enough",W:"you have a wristband",A:"you are with an adult"},out:"R",ans:"T ∧ (W ∨ A)",
+   mean:{T:["not tall enough","tall enough"],W:["no wristband","wristband"],A:["no adult","with an adult"]}},
+  {q:"A fan (F) runs when exactly one of the two switches X and Y is on, but not both.",vars:{X:"switch X is on",Y:"switch Y is on"},out:"F",ans:"X ⊻ Y",
+   mean:{X:["X off","X on"],Y:["Y off","Y on"]}}
+];
+const probs=document.getElementById("probs");
+PROBS.forEach((p,i)=>{
+  const id="prob"+i, d=document.createElement("div"); d.className="prob";
+  d.innerHTML="<p><b>"+(i+1)+".</b> "+p.q+"</p><p class='vars'>"+Object.entries(p.vars).map(([k,v])=>"<code>"+k+"</code> = 1 when "+v).join(" · ")+"</p>"+
+    "<label for='"+id+"'>"+p.out+" =</label><div class='symbar' data-for='"+id+"'></div><input type='text' id='"+id+"' class='expr-input' spellcheck='false' placeholder='Type your expression'>"+
+    "<div class='row'><button class='btn small'>Check</button><button class='btn ghost small'>Show answer</button></div><div aria-live='polite'></div>";
+  probs.appendChild(d);
+  const inp=d.querySelector("input"), [chk,show]=d.querySelectorAll(".row button"), msg=d.lastChild;
+  const check=()=>{
+    let t; try{ t=parse(inp.value); }catch(e){ msg.innerHTML='<div class="verdict bad">'+esc(e.message)+'</div>'; return; }
+    const extra=[...varsOf(t)].filter(v=>!(v in p.vars));
+    if(extra.length){ msg.innerHTML='<div class="verdict bad">Only use the letters '+Object.keys(p.vars).join(", ")+'. You used '+extra.join(", ")+'.</div>'; return; }
+    const ce=counterexample(parse(p.ans),t);
+    msg.innerHTML= ce ? '<div class="verdict bad">Not yet. With '+words(ce.env,ce.vars,p.mean)+', '+p.out+' should be '+ce.a+' but yours gives '+ce.b+'.</div>'
+                      : '<div class="verdict ok">Correct.</div>';
+  };
+  chk.addEventListener("click",check); inp.addEventListener("keydown",e=>{if(e.key==="Enter")check();});
+  show.addEventListener("click",()=>{ msg.innerHTML='<div class="verdict info">'+p.out+' = '+p.ans+'</div>'; });
+});
+// symbol bars for problems were created after the generic pass
+probs.querySelectorAll(".symbar").forEach(bar=>{
+  [["∧","AND"],["∨","OR"],["¬","NOT"],["⊻","XOR"],["(","open bracket"],[")","close bracket"]].forEach(([s,name])=>{
+    const b=document.createElement("button"); b.type="button"; b.textContent=s; b.setAttribute("aria-label","Insert "+name);
+    b.addEventListener("click",()=>{ const f=document.getElementById(bar.dataset.for); const st=f.selectionStart??f.value.length, en=f.selectionEnd??f.value.length; f.value=f.value.slice(0,st)+s+f.value.slice(en); f.focus(); f.selectionStart=f.selectionEnd=st+s.length; });
+    bar.appendChild(b);
+  });
+});
+
+/* ---------- Tool 4: K-map trainer ---------- */
+const GRAY=[0,1,3,2], GLAB=["00","01","11","10"];
+const GCOL=["#1d5fb4","#c2410c","#15803d","#7c3aed","#be185d","#0e7490"];
+const PUZ=[
+  {name:"Two wraps and a single",ms:[1,4,6,9,15],model:[[4,6],[1,9],[15]]},
+  {name:"Four corners",ms:[0,2,8,10],model:[[0,2,8,10]]},
+  {name:"Middle square",ms:[5,7,13,15],model:[[5,7,13,15]]},
+  {name:"Overlapping groups",ms:[4,5,6,7,12,13],model:[[4,5,6,7],[4,5,12,13]]},
+  {name:"A wrap and a single",ms:[1,3,9,11,14],model:[[1,3,9,11],[14]]}
+];
+const mPos=m=>({r:GRAY.indexOf(m>>2),c:GRAY.indexOf(m&3)});
+const posM=(r,c)=>(GRAY[r]<<2)|GRAY[c];
+const LET=["A","B","C","D"];
+function mintermText(m){ return "("+LET.map((L,i)=>((m>>(3-i))&1)?L:"¬"+L).join(" ∧ ")+")"; }
+function termOf(cells){
+  const lits=[];
+  LET.forEach((L,i)=>{ const bits=new Set([...cells].map(m=>(m>>(3-i))&1)); if(bits.size===1) lits.push(bits.has(1)?L:"¬"+L); });
+  return lits.length?lits.join(" ∧ "):"1";
+}
+function cyclicOK(set){
+  const a=[...set].sort((x,y)=>x-y);
+  if(a.length===1||a.length===4) return true;
+  if(a.length!==2) return false;
+  return a[1]-a[0]===1||(a[0]===0&&a[1]===3);
+}
+function groupError(cells,target){
+  const n=cells.size;
+  if(!n) return "Click some cells first.";
+  if(![1,2,4,8,16].includes(n)) return "A group must contain 1, 2, 4, 8 or 16 cells. Yours has "+n+".";
+  const rows=new Set(), cols=new Set();
+  cells.forEach(m=>{const p=mPos(m); rows.add(p.r); cols.add(p.c);});
+  if(rows.size*cols.size!==n||!cyclicOK(rows)||!cyclicOK(cols)) return "A group must be a rectangle of neighbouring cells. Remember it can wrap round the edges, but it cannot skip a row or column.";
+  for(const m of cells) if(!target.has(m)) return "Every cell in a group must contain a 1. This group includes a 0.";
+  return null;
+}
+function canGrow(cells,target){
+  const rows=new Set(), cols=new Set();
+  cells.forEach(m=>{const p=mPos(m); rows.add(p.r); cols.add(p.c);});
+  const tryRect=(R,C)=>{ for(const r of R) for(const c of C) if(!target.has(posM(r,c))) return false; return true; };
+  const grow=set=>{
+    const a=[...set];
+    if(a.length===4) return [];
+    if(a.length===1) return [[a[0],(a[0]+1)%4],[a[0],(a[0]+3)%4]];
+    return [[0,1,2,3]];
+  };
+  for(const R of grow(rows)) if(tryRect(R,cols)) return true;
+  for(const C of grow(cols)) if(tryRect(rows,C)) return true;
+  return false;
+}
+const K={puz:0,mode:"place",placed:new Set(),sel:new Set(),groups:[]};
+const kmap=document.getElementById("kmap"), kMsg=document.getElementById("kMsg"), kGroups=document.getElementById("kGroups");
+const kPuz=document.getElementById("kPuz");
+PUZ.forEach((p,i)=>{const o=document.createElement("option"); o.value=i; o.textContent=p.name; kPuz.appendChild(o);});
+const target=()=>new Set(PUZ[K.puz].ms);
+function kBuild(){
+  kmap.innerHTML="";
+  const corner=document.createElement("div"); corner.className="corner";
+  corner.innerHTML="<svg viewBox='0 0 56 44' preserveAspectRatio='none' aria-hidden='true'><line x1='0' y1='0' x2='56' y2='44' stroke='currentColor' stroke-opacity='.35'/></svg><span class='cd'>CD</span><span class='ab'>AB</span>";
+  kmap.appendChild(corner);
+  GLAB.forEach(l=>{const h=document.createElement("div"); h.className="hd"; h.textContent=l; kmap.appendChild(h);});
+  for(let r=0;r<4;r++){
+    const h=document.createElement("div"); h.className="hd"; h.textContent=GLAB[r]; kmap.appendChild(h);
+    for(let c=0;c<4;c++){
+      const m=posM(r,c), b=document.createElement("button");
+      b.type="button"; b.className="kcell"; b.dataset.m=m;
+      b.setAttribute("aria-label","AB = "+GLAB[r]+", CD = "+GLAB[c]);
+      b.addEventListener("click",()=>kClick(m));
+      kmap.appendChild(b);
+    }
+  }
+}
+function kDraw(){
+  const shown=K.mode==="place"?K.placed:target();
+  kmap.querySelectorAll(".kcell").forEach(b=>{
+    const m=+b.dataset.m; b.textContent=shown.has(m)?"1":(K.mode==="group"?"0":"");
+    b.classList.toggle("sel",K.sel.has(m));
+  });
+  kmap.querySelectorAll(".gbox").forEach(x=>x.remove());
+  K.groups.forEach((g,gi)=>{
+    const rows=new Set(), cols=new Set(); g.cells.forEach(m=>{const p=mPos(m); rows.add(p.r); cols.add(p.c);});
+    const runs=s=>{ const a=[...s].sort((x,y)=>x-y), out=[]; a.forEach(v=>{ const last=out[out.length-1]; if(last&&v===last[last.length-1]+1) last.push(v); else out.push([v]); }); return out; };
+    const inset=4+gi*4, OPEN=16;
+    const wraps=s=>s.size===2&&s.has(0)&&s.has(3);
+    const wr=wraps(rows), wc=wraps(cols);
+    runs(rows).forEach(R=>runs(cols).forEach(C=>{
+      const tl=kmap.querySelector('.kcell[data-m="'+posM(R[0],C[0])+'"]'), br=kmap.querySelector('.kcell[data-m="'+posM(R[R.length-1],C[C.length-1])+'"]');
+      let L=tl.offsetLeft+inset, T=tl.offsetTop+inset, Rr=br.offsetLeft+br.offsetWidth-inset, B=br.offsetTop+br.offsetHeight-inset;
+      const box=document.createElement("div"); box.className="gbox"; box.style.borderColor=g.col;
+      // a group that wraps round an edge is drawn open on that edge, like a loop going off the map and coming back
+      if(wc&&C[0]===0){ L-=OPEN+inset; box.style.borderLeftStyle="none"; box.style.borderTopLeftRadius=box.style.borderBottomLeftRadius="0"; }
+      if(wc&&C[C.length-1]===3){ Rr+=OPEN+inset; box.style.borderRightStyle="none"; box.style.borderTopRightRadius=box.style.borderBottomRightRadius="0"; }
+      if(wr&&R[0]===0){ T-=OPEN+inset; box.style.borderTopStyle="none"; box.style.borderTopLeftRadius=box.style.borderTopRightRadius="0"; }
+      if(wr&&R[R.length-1]===3){ B+=OPEN+inset; box.style.borderBottomStyle="none"; box.style.borderBottomLeftRadius=box.style.borderBottomRightRadius="0"; }
+      box.style.left=L+"px"; box.style.top=T+"px"; box.style.width=(Rr-L)+"px"; box.style.height=(B-T)+"px";
+      kmap.appendChild(box);
+    }));
+  });
+  kGroups.innerHTML="";
+  K.groups.forEach((g,gi)=>{
+    const d=document.createElement("div"); d.className="gitem";
+    d.innerHTML="<i style='background:"+g.col+"'></i><span>"+esc(termOf(g.cells))+"</span>";
+    const x=document.createElement("button"); x.className="btn ghost small"; x.textContent="Remove";
+    x.addEventListener("click",()=>{K.groups.splice(gi,1); recolour(); kDraw(); kMsg.innerHTML="";});
+    d.appendChild(x); kGroups.appendChild(d);
+  });
+}
+function recolour(){ K.groups.forEach((g,i)=>g.col=GCOL[i%GCOL.length]); }
+function kClick(m){
+  kmap.querySelectorAll(".kcell").forEach(b=>b.classList.remove("miss","extra"));
+  if(K.mode==="place"){ K.placed.has(m)?K.placed.delete(m):K.placed.add(m); }
+  else { K.sel.has(m)?K.sel.delete(m):K.sel.add(m); }
+  kDraw();
+}
+function kSetMode(mode){
+  K.mode=mode; K.sel.clear();
+  document.getElementById("kModePlace").setAttribute("aria-pressed",mode==="place");
+  document.getElementById("kModeGroup").setAttribute("aria-pressed",mode==="group");
+  document.getElementById("kPlaceBtns").hidden=mode!=="place";
+  document.getElementById("kGroupBtns").hidden=mode!=="group";
+  kMsg.innerHTML="";
+  if(mode==="group"){
+    const t=target(), same=t.size===K.placed.size&&[...t].every(m=>K.placed.has(m));
+    if(!same) kMsg.innerHTML='<div class="verdict info">Your 1s did not match the expression yet, so the correct 1s are shown here for grouping practice. Go back to step 1 to try placing them again.</div>';
+  }
+  kmap.querySelectorAll(".kcell").forEach(b=>b.classList.remove("miss","extra"));
+  kDraw();
+}
+function kLoad(i){
+  K.puz=i; K.placed=new Set(); K.sel.clear(); K.groups=[];
+  document.getElementById("kExpr").textContent=PUZ[i].ms.map(mintermText).join(" ∨ ");
+  kSetMode("place");
+}
+document.getElementById("kModePlace").addEventListener("click",()=>kSetMode("place"));
+document.getElementById("kModeGroup").addEventListener("click",()=>kSetMode("group"));
+kPuz.addEventListener("change",()=>kLoad(+kPuz.value));
+document.getElementById("kClear1s").addEventListener("click",()=>{K.placed.clear(); kMsg.innerHTML=""; kmap.querySelectorAll(".kcell").forEach(b=>b.classList.remove("miss","extra")); kDraw();});
+document.getElementById("kCheck1s").addEventListener("click",()=>{
+  const t=target(); let miss=0, extra=0;
+  kmap.querySelectorAll(".kcell").forEach(b=>{
+    const m=+b.dataset.m; b.classList.remove("miss","extra");
+    if(t.has(m)&&!K.placed.has(m)){ b.classList.add("miss"); miss++; }
+    if(!t.has(m)&&K.placed.has(m)){ b.classList.add("extra"); extra++; }
+  });
+  if(!miss&&!extra) kMsg.innerHTML='<div class="verdict ok">Every 1 is in the right place. Move on to step 2 and draw the groups.</div>';
+  else kMsg.innerHTML='<div class="verdict bad">'+(miss?miss+" missing (dashed cells). ":"")+(extra?extra+" in the wrong place (red cells). ":"")+'Check each term against both the row label (AB) and the column label (CD).</div>';
+});
+document.getElementById("kClearSel").addEventListener("click",()=>{K.sel.clear(); kDraw();});
+document.getElementById("kAdd").addEventListener("click",()=>{
+  const err=groupError(K.sel,target());
+  if(err){ kMsg.innerHTML='<div class="verdict bad">'+err+'</div>'; return; }
+  const key=[...K.sel].sort((a,b)=>a-b).join(",");
+  if(K.groups.some(g=>[...g.cells].sort((a,b)=>a-b).join(",")===key)){ kMsg.innerHTML='<div class="verdict bad">You already have that group.</div>'; return; }
+  K.groups.push({cells:new Set(K.sel)}); recolour(); K.sel.clear();
+  kMsg.innerHTML='<div class="verdict ok">Group added: '+esc(termOf(K.groups[K.groups.length-1].cells))+'</div>';
+  kDraw();
+});
+document.getElementById("kCheckG").addEventListener("click",()=>{
+  const t=target(), covered=new Set(); K.groups.forEach(g=>g.cells.forEach(m=>covered.add(m)));
+  const left=[...t].filter(m=>!covered.has(m));
+  if(!K.groups.length){ kMsg.innerHTML='<div class="verdict bad">Add at least one group first.</div>'; return; }
+  if(left.length){ kMsg.innerHTML='<div class="verdict bad">'+left.length+' of the 1s '+(left.length===1?"is":"are")+' not in any group yet. Every 1 must be looped, even if it is on its own.</div>'; return; }
+  const growable=K.groups.filter(g=>canGrow(g.cells,t)).map(g=>termOf(g.cells));
+  const expr=K.groups.map(g=>K.groups.length>1?"("+termOf(g.cells)+")":termOf(g.cells)).join(" ∨ ");
+  const best=PUZ[K.puz].model.length;
+  let msg='<div class="verdict ok">Every 1 is covered. Your simplified expression is '+esc(expr)+'</div>';
+  if(growable.length) msg+='<div class="verdict bad">This group could be bigger: '+esc(growable.join(", "))+'. Bigger groups give shorter terms.</div>';
+  else if(K.groups.length>best) msg+='<div class="verdict bad">Correct, but it can be done with '+best+' group'+(best>1?"s":"")+'. Look for a group you do not need.</div>';
+  else msg+='<div class="verdict ok">That is as simple as it gets.</div>';
+  kMsg.innerHTML=msg;
+});
+document.getElementById("kShow").addEventListener("click",()=>{
+  K.groups=PUZ[K.puz].model.map(a=>({cells:new Set(a)})); recolour(); K.sel.clear(); kDraw();
+  kMsg.innerHTML='<div class="verdict info">One answer: '+esc(K.groups.map(g=>K.groups.length>1?"("+termOf(g.cells)+")":termOf(g.cells)).join(" ∨ "))+'</div>';
+});
+window.addEventListener("resize",()=>kDraw());
+kBuild(); kLoad(0);
+
+/* ---------- Tool 5: adders ---------- */
+const fa={A:1,B:1,Cin:1};
+function faRender(){
+  const t=document.getElementById("faToggles"); t.innerHTML="";
+  [["A","A"],["B","B"],["Cin","Carry in"]].forEach(([k,lab])=>{
+    const b=document.createElement("button"); b.type="button"; b.className="tog"; b.setAttribute("aria-pressed",fa[k]?"true":"false");
+    b.innerHTML="<b>"+fa[k]+"</b><span>"+lab+"</span>"; b.addEventListener("click",()=>{fa[k]^=1; faRender();}); t.appendChild(b);
+  });
+  const n=fa.A+fa.B+fa.Cin, S=n&1, C=n>>1;
+  document.getElementById("faS").textContent=S; document.getElementById("faC").textContent=C;
+  document.getElementById("faWhy").textContent="There "+(n===1?"is ":"are ")+n+" one"+(n===1?"":"s")+" going in. "+n+" in binary is "+C+S+", so the carry out is "+C+" and the sum is "+S+".";
+}
+faRender();
+const R={step:0};
+function ripBits(){
+  const a=document.getElementById("ripA").value.trim(), b=document.getElementById("ripB").value.trim();
+  if(!/^[01]{4}$/.test(a)||!/^[01]{4}$/.test(b)) return null;
+  const rows=[]; let c=0;
+  for(let i=0;i<4;i++){ const x=+a[3-i], y=+b[3-i], n=x+y+c; rows.push({i,x,y,cin:c,s:n&1,cout:n>>1}); c=n>>1; }
+  return {a,b,rows};
+}
+function ripRender(){
+  const d=ripBits(), tbl=document.getElementById("ripTable"), out=document.getElementById("ripOut");
+  if(!d){ tbl.innerHTML=""; out.innerHTML='<div class="verdict bad">Type each number as four bits, for example 0011.</div>'; return; }
+  let h="<thead><tr><th>Full adder</th><th>A</th><th>B</th><th>Carry in</th><th>S</th><th>Carry out</th></tr></thead><tbody>";
+  d.rows.forEach(r=>{
+    const show=r.i<R.step;
+    h+="<tr class='"+(r.i===R.step-1?"now":"")+"'><th>Bit "+r.i+"</th><td>"+r.x+"</td><td>"+r.y+"</td><td>"+(show?r.cin:"")+"</td><td>"+(show?r.s:"")+"</td><td>"+(show?r.cout:"")+"</td></tr>";
+  });
+  tbl.innerHTML=h+"</tbody>";
+  if(R.step<4){
+    out.innerHTML= R.step===0 ? '<div class="verdict info">Bit 0 starts with a carry in of 0. Press Next bit.</div>'
+      : '<div class="verdict info">The carry out of bit '+(R.step-1)+' becomes the carry in of bit '+R.step+'.</div>';
+    return;
+  }
+  const S=[3,2,1,0].map(i=>d.rows[i].s), c4=d.rows[3].cout, av=parseInt(d.a,2), bv=parseInt(d.b,2);
+  out.innerHTML='<div class="stack"><p><b>Read the S column from the bottom up:</b></p><div class="readout">'+[3,2,1,0].map(i=>'<span class="bitchip">'+d.rows[i].s+'<small>S'+i+'</small></span>').join("")+
+    '<span>= '+S.join("")+'</span></div><p class="hint">Check in denary: '+av+' + '+bv+' = '+(av+bv)+(c4?'. The final carry out is 1, so the true answer needs five bits ('+c4+S.join("")+'): that is overflow.':', and '+S.join("")+' = '+parseInt(S.join(""),2)+'. The final carry out is 0, so there is no overflow.')+'</p></div>';
+}
+document.getElementById("ripNext").addEventListener("click",()=>{ if(R.step<4) R.step++; ripRender(); });
+document.getElementById("ripAll").addEventListener("click",()=>{ R.step=4; ripRender(); });
+document.getElementById("ripReset").addEventListener("click",()=>{ R.step=0; ripRender(); });
+["ripA","ripB"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{R.step=0; ripRender();}));
+ripRender();
+
+const MK=[
+  {a:"To add 3 bit numbers together.",m:0,why:"It does not say one of the three bits is a carry in, and it does not mention the outputs."},
+  {a:"It is made from two half adders and an OR gate.",m:0,why:"This says how it is built, not what it does. The question asks for its function."},
+  {a:"It adds three bits: A, B and the carry in from the previous adder.",m:1,why:"The first mark is there. It needs to finish by saying it outputs a sum and a carry out."},
+  {a:"It adds A, B and a carry in, and outputs a sum bit and a carry out bit, so adders can be chained to add longer numbers.",m:2,why:"Both marks: three bits in including the carry in, and the sum and carry out."}
+];
+const mkList=document.getElementById("mkList");
+MK.forEach((x,i)=>{
+  const d=document.createElement("div"); d.className="mk";
+  d.innerHTML="<blockquote>\""+x.a+"\"</blockquote><div class='row'><span class='hint'>Your mark:</span></div><div class='fb' aria-live='polite'></div>";
+  const row=d.querySelector(".row"), fb=d.querySelector(".fb");
+  [0,1,2].forEach(n=>{
+    const b=document.createElement("button"); b.className="btn ghost small"; b.textContent=n+(n===1?" mark":" marks");
+    b.addEventListener("click",()=>{ fb.innerHTML='<div class="verdict '+(n===x.m?"ok":"bad")+'">'+(n===x.m?"Agreed: ":"This one gets "+x.m+". ")+x.why+'</div>'; });
+    row.appendChild(b);
+  });
+  mkList.appendChild(d);
+});
+
+/* ---------- Start states ---------- */
+stepsIn.value=EXAMPLES.dm; checkSteps(); buildTT();
+</script>
+</body>
+</html>

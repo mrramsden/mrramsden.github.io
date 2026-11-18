@@ -1,7 +1,7 @@
 import json, re, sys, importlib
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
-SITE = os.path.join(HERE, "..", "python")
+SITE = os.path.join(HERE, "..", "ks3")
 sys.path.insert(0, HERE)
 PART = sys.argv[1] if len(sys.argv) > 1 else "3"
 NAMES = {"1": "escape-the-dungeon-1", "2": "escape-the-dungeon-2", "3": "escape-the-dungeon-3"}
@@ -294,7 +294,7 @@ rep(".gut div.err{", """.ig{display:inline-block;white-space:pre;box-shadow:inse
 # ---------- link back to the site menu ----------
 _m = re.search(r'(<div class="brand">.*?</div>)', src, re.S)
 assert _m, "brand not found"
-src = src[:_m.end()] + '\n  <a class="homelink" href="../" title="Back to all of Mr Ramsden\'s resources">&larr; All resources</a>' + src[_m.end():]
+src = src[:_m.end()] + '\n  <a class="homelink" href="./" title="Back to the Key Stage 3 resources">&larr; Key Stage 3</a>' + src[_m.end():]
 rep(".gut div.err{", "HOMECSS\n.gut div.err{".replace("HOMECSS", '.homelink{color:#fff;background:rgba(255,255,255,.12);border-radius:999px;padding:6px 14px;font-weight:600;text-decoration:none;font-size:.9rem;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.homelink:hover{background:rgba(255,255,255,.24)}.homelink:focus-visible{outline:3px solid var(--amber);outline-offset:2px}'))
 
 open(OUT, "w", encoding="utf-8").write(src)
