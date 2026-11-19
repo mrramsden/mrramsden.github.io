@@ -2,7 +2,7 @@
 
     python3 add_static.py SOURCE.html SECTION NAME.html
 
-SECTION is ks3, ks4 or ks5. The source is kept in src/static/ and the page is
+SECTION is ks3, ks4, ks5, digital-futures/year-8 or digital-futures/year-9. The source is kept in src/static/ and the page is
 written to ../SECTION/NAME.html. The script:
   - swaps Google Fonts links for the fonts hosted in assets/fonts (no outside requests),
   - adds a small back link to the section page at the top,
@@ -13,7 +13,8 @@ import os, re, shutil, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
-LABELS = {"ks3": "Key Stage 3", "ks4": "Key Stage 4", "ks5": "Key Stage 5"}
+LABELS = {"ks3": "Key Stage 3", "ks4": "Key Stage 4", "ks5": "Key Stage 5",
+          "digital-futures/year-8": "Year 8 Digital Futures", "digital-futures/year-9": "Year 9 Digital Futures"}
 
 BACK = (
     '<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,\'Segoe UI\',Roboto,Arial,sans-serif;'
@@ -29,8 +30,9 @@ BACK_SCRIPT = (
 
 
 def prepare(html, section, shared=False):
+    up = "../" * (section.count("/") + 1)  # path from the page back to the site root
     html = re.sub(r'\s*<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>', "", html)
-    html = html.replace("</head>", '<link rel="stylesheet" href="../assets/fonts/fonts.css">\n<link rel="icon" href="data:,">\n</head>', 1)
+    html = html.replace("</head>", '<link rel="stylesheet" href="' + up + 'assets/fonts/fonts.css">\n<link rel="icon" href="data:,">\n</head>', 1)
     back = BACK.format(label=LABELS[section]) + (BACK_SCRIPT if shared else "")
     html, n = re.subn(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + back, html, count=1)
     assert n == 1, "no <body> tag"

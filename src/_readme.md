@@ -1,15 +1,16 @@
 # Source for mrramsden.github.io
 
-Pupils only ever see the site. Everything in `src/` is how its pages are made and tested. Never hand-edit the pages in `ks3/`, `ks4/` or `ks5/`: change the source here, rebuild, test, then commit both.
+Pupils only ever see the site. Everything in `src/` is how its pages are made and tested. Never hand-edit the pages in `ks3/`, `ks4/`, `ks5/` or `digital-futures/`: change the source here, rebuild, test, then commit both.
 
 ## Site layout
 
 | Path | What it is |
 |---|---|
-| `index.html` | Welcome page with three cards: Key Stage 3, 4 and 5. |
+| `index.html` | Welcome page with four cards: Key Stage 3, 4 and 5, and Digital Futures. |
 | `ks3/` | Escape the Dungeon 1 to 3 and Python Rescue (built), plus the HTML setup guide and HTML reference sheet (single-file). Section page `ks3/index.html`. |
 | `ks4/` | GCSE (OCR J277): the pseudocode playground, Python challenge boards (Neko Neko Café, Pocket Pet, Station X, Crystal Caves, The Dungeon Architect), the sorting visualiser and Revision Jeopardy. Also links to the procedural Robot Game in `ks5/`. Section page `ks4/index.html`. |
 | `ks5/` | A Level (OCR H446): algorithms lab, merge sort recursion, Dijkstra and A* table methods, Boolean algebra slips, Python challenge boards (The Robot Game procedural and object-oriented, The Shelter Project, Ashwood Manor, Little Ashford Noticeboard) and Revision Jeopardy. Also links to the playground, sorting visualiser and Crystal Caves in `ks4/`. |
+| `digital-futures/` | Year 8 and Year 9 Digital Futures. `digital-futures/index.html` links to the two year pages, `year-8/index.html` and `year-9/index.html`, which hold the lesson cards. Year 8: Lesson 6 Fact-Check Challenge. Year 9: none yet. |
 | `python/` | Redirect stubs only. The Escape the Dungeon pages used to live here, so old links forward to `ks3/`. |
 | `assets/site.css` | Styles for the welcome and section pages. |
 | `assets/fonts/` | Fonts hosted on the site (Fontsource, SIL Open Font Licence), so pages never call Google Fonts. |
@@ -28,7 +29,7 @@ To add a resource: put the page in the right section (see below), add a card to 
 | `build.py` | Builds one Escape the Dungeon part: `python3 build.py 1` (or 2, 3). Writes `../ks3/escape-the-dungeon-N.html`. |
 | `pack_content.py` | All the Python Rescue content: topics, puzzles, Fix it and Test it tasks with their checks, quizzes, Error doctor. |
 | `build_pack.py` | Builds `../ks3/python-rescue.html`. Uses the runner and styles in `base/`. |
-| `add_static.py` | Publishes a single-file HTML resource: `python3 add_static.py SOURCE.html ks5 name.html` (add `--shared` if more than one section links to it). Keeps the source in `static/`, swaps Google Fonts for `assets/fonts`, adds a back link and refuses pages that still load from other sites. If a page needs a font that is not in `assets/fonts/fonts.css`, add it from Fontsource first. |
+| `add_static.py` | Publishes a single-file HTML resource: `python3 add_static.py SOURCE.html ks5 name.html` (the section can also be `digital-futures/year-8` or `digital-futures/year-9`) (add `--shared` if more than one section links to it). Keeps the source in `static/`, swaps Google Fonts for `assets/fonts`, adds a back link and refuses pages that still load from other sites. If a page needs a font that is not in `assets/fonts/fonts.css`, add it from Fontsource first. |
 | `static/` | Sources of the single-file pages (all three key stages). Edit these, then rerun `add_static.py` with the same arguments (`--shared` for pages linked from more than one section). |
 | `harness.py` | Runs every check against its model answers and mistakes in normal Python: `python3 harness.py 1` (or 2, 3). |
 | `test_pack.py` | Tests all Python Rescue content: examples, puzzles, checks, quiz answers, Error doctor. |

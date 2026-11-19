@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Year 8 Digital Futures | Lesson 6: Fact-Check Challenge</title>
+<style>
+  :root{
+    --blue:#1f5fa8; --navy:#0f2f57; --sky:#e8f1fb; --ink:#1d2733; --muted:#5b6876;
+    --good:#1e8a4c; --goodbg:#e3f5ea; --bad:#c0392b; --badbg:#fbe7e4; --amber:#b9770e; --amberbg:#fdf3dc;
+    --gold:#d4a017; --silver:#9aa4ad; --bronze:#b06a2c; --line:#d5dde6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#f3f6fa;color:var(--ink);font-size:17px;line-height:1.5}
+  header{background:var(--navy);color:#fff;padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+  header .title{font-weight:700;font-size:18px}
+  header .who{margin-left:auto;font-size:15px;opacity:.9}
+  header .pts{background:#fff;color:var(--navy);border-radius:20px;padding:3px 12px;font-weight:700;font-size:15px}
+  main{max-width:900px;margin:18px auto;padding:0 14px 60px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+  h1{font-size:28px;margin:0 0 6px;color:var(--navy)}
+  h2{font-size:23px;margin:0 0 8px;color:var(--navy)}
+  h3{font-size:19px;margin:0 0 4px;color:var(--navy)}
+  .muted{color:var(--muted)}
+  .small{font-size:14px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:16px;font-weight:600;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .center{text-align:center}
+  input[type=text],textarea{width:100%;font:inherit;font-size:16px;padding:8px 10px;border:1px solid #b9c5d2;border-radius:8px}
+  textarea{min-height:90px;resize:vertical}
+  .mission{display:flex;gap:16px;align-items:center}
+  .mission .num{width:52px;height:52px;border-radius:50%;background:var(--sky);color:var(--blue);font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
+  .mission.locked{opacity:.55}
+  .mission .grow{flex:1}
+  .trophy{font-size:30px;line-height:1}
+  .t-gold{color:var(--gold)} .t-silver{color:var(--silver)} .t-bronze{color:var(--bronze)}
+  .bar{height:8px;background:#e3e9f0;border-radius:6px;overflow:hidden;margin:6px 0 14px}
+  .bar div{height:100%;background:var(--blue)}
+  .quote{font-size:21px;font-style:italic;background:var(--sky);border-left:5px solid var(--blue);padding:14px 16px;border-radius:8px;margin:10px 0 16px}
+  .opts{display:grid;gap:10px}
+  .opt{background:#fff;border:2px solid #b9c5d2;border-radius:10px;padding:11px 14px;text-align:left;font:inherit;cursor:pointer}
+  .opt:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
+  .opt.right{background:var(--goodbg);border-color:var(--good)}
+  .opt.wrong{background:var(--badbg);border-color:var(--bad)}
+  .opt:disabled{cursor:default}
+  .two{grid-template-columns:1fr 1fr}
+  .fb{border-radius:10px;padding:12px 14px;margin-top:14px}
+  .fb.good{background:var(--goodbg);border:1px solid var(--good)}
+  .fb.bad{background:var(--badbg);border:1px solid var(--bad)}
+  .fb.info{background:var(--sky);border:1px solid var(--blue)}
+  .verdict{display:inline-block;font-weight:800;letter-spacing:.5px;padding:3px 10px;border-radius:6px;margin-bottom:6px}
+  .v-true{background:var(--good);color:#fff} .v-hall{background:var(--bad);color:#fff}
+  .src{font-size:14px;color:var(--muted);margin-top:6px}
+  .learn ul{margin:6px 0 0 0;padding-left:22px}
+  .learn li{margin-bottom:6px}
+  .chip{display:inline-block;padding:4px 10px;border-radius:14px;font-weight:600;margin:2px 4px 2px 0}
+  .chip.likely{background:var(--badbg);color:var(--bad)} .chip.true{background:var(--goodbg);color:var(--good)}
+  .kinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+  .kinds div{background:var(--sky);border-radius:10px;padding:10px 12px;font-size:15px}
+  .kinds b{display:block;color:var(--navy);font-size:16px}
+  .big{font-size:40px;font-weight:800;color:var(--blue);line-height:1}
+  .choose{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choose button{text-align:left}
+  .choose .letter{font-size:26px;font-weight:800;color:var(--blue);margin-right:8px}
+  .answer{background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .answer .prompt{font-style:italic;color:var(--muted);margin-bottom:8px}
+  .claim{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0;background:#fff}
+  .claim.star{border-left:6px solid var(--amber)}
+  .claim .ctext{font-weight:600;margin-bottom:8px}
+  .claim .cnum{display:inline-block;min-width:30px;color:var(--blue)}
+  .tip{background:var(--amberbg);border-radius:8px;padding:6px 10px;font-size:14px;margin-bottom:8px}
+  .vbtns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .vbtn{border:2px solid #b9c5d2;background:#fff;border-radius:8px;padding:6px 12px;font:inherit;font-size:15px;cursor:pointer}
+  .vbtn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .vbtn:disabled{cursor:default}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .fields label{font-size:13px;color:var(--muted)}
+  .result{margin-top:8px;border-radius:8px;padding:8px 10px;font-size:15px}
+  .result.good{background:var(--goodbg)} .result.ok{background:var(--amberbg)} .result.bad{background:var(--badbg)}
+  .hints{background:var(--sky);border-radius:10px;padding:10px 14px;font-size:15px}
+  .hints ul{margin:4px 0 0;padding-left:20px}
+  .warn{background:var(--amberbg);border:1px solid var(--amber);border-radius:10px;padding:10px 14px}
+  .err{color:var(--bad);font-weight:600;margin-top:8px}
+  .cab{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:10px 0}
+  .cab div{background:var(--sky);border-radius:10px;padding:12px;text-align:center}
+  .cert{border:4px double var(--gold);border-radius:14px;padding:22px;text-align:center;background:#fffdf5}
+  .wc{font-size:13px;color:var(--muted);text-align:right}
+  @media (max-width:640px){.two,.choose,.fields{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Year 8 Digital Futures</a></nav>
+<header>
+  <span class="title">Fact-Check Challenge</span>
+  <span class="who" id="who"></span>
+  <span class="pts" id="pts">0 points</span>
+</header>
+<main id="app"></main>
+
+<script>
+/* ===================== CONTENT ===================== */
+
+const CARDS = [
+  {q:"Octopuses have three hearts.", a:"T",
+   tag:"Weird things can be true. Search \"octopus hearts\": ocean science organisations all agree.",
+   why:"Two hearts pump blood through the gills to pick up oxygen. The third pumps it round the rest of the body.",
+   src:"NOAA Ocean Service (oceanservice.noaa.gov)"},
+  {q:"The Great Wall of China is the only human-made thing you can see from the Moon.", a:"H",
+   tag:"AI repeats it because it's in loads of old quiz books and websites, so it sounds \"likely\".",
+   why:"An old myth. NASA says the wall certainly isn't visible from the Moon, and it's hard to see with the naked eye even from the Space Station.",
+   src:"NASA, \"China's Wall Less Great in View from Space\"; Britannica"},
+  {q:"Isaac Newton discovered gravity in 1687 when an apple fell on his head at Cambridge University.", a:"H",
+   tag:"Half-right is the sneakiest kind of wrong: the true bits make you trust the false bits.",
+   why:"Real pieces, stitched together wrongly. Newton saw an apple fall around 1666 at Woolsthorpe Manor, his family home (Cambridge was closed by plague). There's no evidence it hit his head. 1687 is when his book Principia came out.",
+   src:"History.com; Newton's own account, recorded by William Stukeley"},
+  {q:"A day on Venus is longer than a year on Venus.", a:"T",
+   tag:"Sounds made up, but it's true. Check, don't guess.",
+   why:"Venus takes about 243 Earth days to spin once, but only about 225 Earth days to go round the Sun.",
+   src:"NASA Space Place (spaceplace.nasa.gov)"},
+  {q:"A 2021 University of Oxford study found that Year 8 pupils who use AI for homework get 23% higher grades.", a:"H",
+   tag:"Real AIs invent studies, books and court cases just like this. Can't find the original? Don't trust it.",
+   why:"This study doesn't exist. It was made up for this lesson, with everything that makes a claim feel true: a famous university, a year and an exact number.",
+   src:"None: invented for this lesson"}
+];
+
+const QUIZ = [
+  {q:"Why does a chatbot sometimes say false things so confidently?",
+   o:["It predicts the most likely next words, and it doesn't know when it's wrong","It is trying to trick you on purpose","Someone has hacked it","It always looks facts up, but the internet is wrong"],
+   a:0, why:"A chatbot is like a super-powered autocomplete. Sounding right and being right aren't the same thing, and it sounds just as sure either way."},
+  {q:"Which kind of mistake is this? \"The Great Wall of China is visible from the Moon.\"",
+   o:["Made-up fact","Invented source","One-sided (bias)","Can't be checked"],
+   a:0, why:"It simply isn't true, but it's said with total confidence."},
+  {q:"Which kind of mistake is this? \"Newton saw the apple fall in 1687 at Cambridge.\"",
+   o:["Wrong details","Invented source","One-sided (bias)","Can't be checked"],
+   a:0, why:"The story is real, but the date and place are wrong. Real facts with the wrong date, number, name or place."},
+  {q:"Which kind of mistake is this? \"A 2021 University of Oxford study found...\" (the study doesn't exist)",
+   o:["Invented source","Wrong details","Made-up fact","Can't be checked"],
+   a:0, why:"Studies, books, reports and quotes that don't exist. Search for the exact name: if nothing comes up, be suspicious."},
+  {q:"Which kind of mistake is this? \"Everyone agrees that the Romans were the greatest builders ever.\"",
+   o:["One-sided (bias)","Wrong details","Invented source","Made-up fact"],
+   a:0, why:"Watch for words like \"all\", \"alone\", \"never\" and \"everyone agrees\". AI learns from human writing, so it copies human bias too."},
+  {q:"Which kind of mistake is this? \"Most Victorians thought trains were frightening.\"",
+   o:["Can't be checked","Invented source","Wrong details","Made-up fact"],
+   a:0, why:"Nobody asked every Victorian. Words like \"most people believed\", \"exactly\" and predictions about the future are often impossible to check."},
+  {q:"You want to check where Franz Ferdinand was assassinated. What's the best thing to type into a search engine?",
+   o:["Franz Ferdinand assassinated where","The whole sentence the AI wrote","Ask another chatbot","Is this AI answer true?"],
+   a:0, why:"Search the key words. Pasting the whole AI sentence often finds pages that copied the same mistake."},
+  {q:"Which of these is the best place to check a science fact?",
+   o:["NASA or BBC Bitesize","The AI summary at the top of the search results","A random blog","A comment on social media"],
+   a:0, why:"Use reliable sources: BBC Bitesize, Britannica, gov.uk, the Met Office, NASA, museum websites. Checking AI with AI isn't checking."},
+  {q:"ChatGPT can now search the web and give you a link. What should you do?",
+   o:["Click the link and check the page really says what the AI says","Trust it: it has a link, so it must be right","Ignore the link","Ask the AI if it's sure"],
+   a:0, why:"A link is not proof. In 2025, a BBC and EBU study found 31% of AI news answers had problems with their sources."}
+];
+
+/* verdicts: C correct, W wrong, X can't check. alt = also accepted */
+const ANSWERS = {
+ A:{title:"The causes of the First World War", subj:"History",
+  prompt:"Explain the causes of the First World War for a Year 8 student.",
+  open:"Great question! Here's a clear summary of how the First World War started.",
+  close:"I hope this helps with your homework!",
+  claims:[
+   {t:"The First World War began in 1914 and ended in 1918.", v:"C", star:"First World War start and end dates", why:"Correct. War began in 1914; the Armistice was signed on 11 November 1918.", src:"Imperial War Museums; BBC Bitesize"},
+   {t:"Historians often remember the long-term causes with the word MAIN: Militarism, Alliances, Imperialism and Nationalism.", v:"C", why:"Correct. MAIN is the standard memory aid used in school history.", src:"BBC Bitesize"},
+   {t:"The spark was the assassination of Archduke Franz Ferdinand, heir to the Austro-Hungarian throne, in Vienna on 28 June 1914.", v:"W", star:"where was Franz Ferdinand assassinated", why:"Wrong place. He was shot in Sarajevo, in Bosnia, not Vienna. The date is right.", src:"Imperial War Museums; BBC Bitesize"},
+   {t:"He was shot by Gavrilo Princip, a young Bosnian Serb.", v:"C", why:"Correct. Princip was 19 and a Bosnian Serb.", src:"Imperial War Museums"},
+   {t:"Before the war, Germany, Austria-Hungary and Russia had formed the Triple Alliance.", v:"W", star:"Triple Alliance countries 1914", why:"Wrong. The Triple Alliance was Germany, Austria-Hungary and Italy. Russia was on the other side, in the Triple Entente with Britain and France.", src:"BBC Bitesize"},
+   {t:"Britain declared war on Germany on 4 August 1914, after Germany invaded Belgium.", v:"C", why:"Correct.", src:"Imperial War Museums; National Archives"},
+   {t:"Most soldiers in 1914 believed the war would be \"over by Christmas\".", v:"X", alt:"W", why:"Can't check. It was a popular saying, but nobody measured what most soldiers believed. \"Wrong\" is accepted too, because the \"most\" is unproven.", src:"n/a"},
+   {t:"Around 40 million soldiers were killed in the war.", v:"W", star:"how many soldiers died in WW1", why:"Wrong. About 9 to 11 million soldiers died. Around 40 million is the total casualties (dead and wounded, soldiers and civilians). A classic AI mix-up of two real numbers.", src:"Imperial War Museums; Encyclopaedia Britannica"},
+   {t:"Historians agree that Germany alone caused the war.", v:"W", why:"One-sided (bias). The 1919 Treaty of Versailles blamed Germany, but historians still argue about how much blame each country deserves. Watch for \"agree\" and \"alone\".", src:"BBC Bitesize; Imperial War Museums"}
+  ]},
+ B:{title:"Climate change", subj:"Geography and Science",
+  prompt:"Summarise climate change for a Year 8 Geography lesson.",
+  open:"Of course! Here's a short, student-friendly summary of climate change.",
+  close:"Let me know if you'd like this as a mind map!",
+  claims:[
+   {t:"Climate change means long-term changes in the Earth's temperature and weather patterns.", v:"C", why:"Correct.", src:"Met Office; NASA Climate"},
+   {t:"The main cause of recent warming is burning fossil fuels such as coal, oil and gas, which releases carbon dioxide.", v:"C", star:"main cause of climate change Met Office", why:"Correct.", src:"Met Office; NASA Climate"},
+   {t:"Carbon dioxide makes up about 20% of the air we breathe.", v:"W", star:"percentage of carbon dioxide in the air", why:"Wrong. Carbon dioxide is only about 0.04% of the air (roughly 420 parts per million). Oxygen is about 21%: the AI has mixed them up.", src:"NASA Climate; Met Office"},
+   {t:"The ten warmest years ever recorded have all happened since 2015.", v:"C", why:"Correct. The World Meteorological Organization says 2015 to 2025 were the 11 warmest years on record.", src:"World Meteorological Organization (wmo.int); Met Office"},
+   {t:"In 2005, countries agreed the Paris Agreement, which aims to keep warming well below 2°C.", v:"W", star:"Paris Agreement year", why:"Wrong date. The Paris Agreement was agreed in 2015. (2005 is when the older Kyoto Protocol came into force.) The aim is right.", src:"United Nations (un.org); BBC Bitesize"},
+   {t:"Sea levels are rising because ice on land is melting and because seawater expands as it warms.", v:"C", why:"Correct.", src:"NASA Climate; Met Office"},
+   {t:"A 2022 report by the UK Climate Office found that the UK will have no snow at all by 2040.", v:"W", alt:"X", star:"\"UK Climate Office\" (with the quote marks)", why:"Invented source. There is no \"UK Climate Office\": the UK's weather and climate service is the Met Office, and there's no report like this. \"Can't check\" is accepted too.", src:"Searching for the report finds nothing; metoffice.gov.uk"},
+   {t:"Electric cars cause no pollution at all.", v:"W", why:"One-sided. They have no exhaust fumes, but making batteries, generating electricity, and tyre and brake dust all cause some pollution.", src:"BBC Bitesize"},
+   {t:"Polar bears will be extinct in the wild by 2050.", v:"X", why:"Can't check. It's a prediction about the future. Scientists warn polar bears are at serious risk, but nobody can prove what will happen by 2050.", src:"n/a"}
+  ]},
+ C:{title:"Isambard Kingdom Brunel", subj:"Local history",
+  prompt:"Write a short biography of Isambard Kingdom Brunel.",
+  open:"Certainly! Here's a short biography of one of Britain's most famous engineers.",
+  close:"Brunel truly was a genius who changed Britain forever!",
+  claims:[
+   {t:"Brunel was born in Portsmouth in 1806.", v:"C", star:"Brunel born", why:"Correct. Born 9 April 1806 in Portsea, Portsmouth.", src:"SS Great Britain Trust (ssgreatbritain.org); Institution of Civil Engineers"},
+   {t:"As a young man, he worked with his father on the Thames Tunnel in London.", v:"C", why:"Correct. He was resident engineer on the Thames Tunnel and nearly drowned when it flooded in 1828.", src:"SS Great Britain Trust"},
+   {t:"He became chief engineer of the Great Western Railway, which linked London and Bristol.", v:"C", why:"Correct. Appointed in 1833, aged 27.", src:"SS Great Britain Trust; Institution of Civil Engineers"},
+   {t:"The railway runs through Box Tunnel, between Bath and Chippenham, and Brunel designed it so the sun shines all the way through on his birthday every year.", v:"W", alt:"X", star:"Box Tunnel Brunel birthday sun", why:"Legend, not fact. Network Rail says research shows it isn't true; the sun lines up on other days in April. When GWR tested it on 9 April 2017, the sunlight didn't reach all the way through. \"Can't check\" is accepted too. (Box Tunnel runs between Box and Corsham.)", src:"Network Rail, \"The history of Box Tunnel\"; SS Great Britain Trust blog"},
+   {t:"Brunel smoked exactly 40 cigars every day.", v:"X", why:"Can't check. He was a famously heavy cigar smoker, but sources give different numbers (40, 48, \"almost 50\") and nobody counted. \"Exactly\" is the giveaway.", src:"SS Great Britain Trust (his cigar case held about 48)"},
+   {t:"He was guest of honour at the opening of the Clifton Suspension Bridge in Bristol in 1864.", v:"W", star:"when did Brunel die (then check when the bridge opened)", why:"Impossible. Brunel died on 15 September 1859. The bridge was finished in 1864, after his death.", src:"Institution of Civil Engineers; SS Great Britain Trust"},
+   {t:"His ship, the SS Great Britain, was launched in Bristol in 1843, and you can still visit it there today.", v:"C", why:"Correct. Launched 19 July 1843; now a museum ship in Bristol.", src:"SS Great Britain Trust"},
+   {t:"In a 2002 BBC vote, the public named Brunel the Greatest Briton of all time.", v:"W", star:"100 Greatest Britons 2002 results", why:"Wrong. Brunel came second. Winston Churchill came first.", src:"Royal Museums Greenwich (rmg.co.uk); BBC"},
+   {t:"Brunel built all of these amazing projects by himself.", v:"W", why:"One-sided. Thousands of workers built them. Box Tunnel alone had up to 4,000 workers, and an estimated 100 died building it.", src:"SS Great Britain Trust blog; Network Rail"}
+  ]},
+ D:{title:"The first Moon landing", subj:"Science",
+  prompt:"Tell me about the first Moon landing.",
+  open:"Absolutely! The first Moon landing is one of the most exciting moments in history.",
+  close:"It truly was one giant leap for mankind!",
+  claims:[
+   {t:"Apollo 11 landed on the Moon on 20 July 1969.", v:"C", star:"Apollo 11 landing date", why:"Correct.", src:"NASA (nasa.gov); Royal Museums Greenwich"},
+   {t:"Neil Armstrong was the first person to step onto the Moon, followed by Buzz Aldrin.", v:"C", why:"Correct.", src:"NASA"},
+   {t:"The third astronaut, Michael Collins, stayed in orbit in the lunar module, Columbia.", v:"W", star:"Apollo 11 Columbia Eagle", why:"Wrong name. Columbia was the command module, which Collins flew. The lunar module that landed was called Eagle.", src:"NASA, Apollo 11 mission overview"},
+   {t:"Armstrong and Aldrin spent about three days walking on the Moon's surface.", v:"W", star:"Apollo 11 moonwalk how long", why:"Wrong. Their moonwalk lasted about 2 hours 31 minutes. They were on the surface for about 21 and a half hours in total, mostly inside Eagle.", src:"NASA"},
+   {t:"Armstrong had secretly written his famous \"one small step\" words months before the mission.", v:"X", why:"Can't check: disputed. Armstrong always said he decided after landing. His brother later said Neil showed him the line months before. Historians disagree.", src:"Space.com; Smithsonian Magazine"},
+   {t:"Only 12 people have ever walked on the Moon, all between 1969 and 1972.", v:"C", why:"Correct (as of November 2026). NASA's next crewed landing is planned for no earlier than 2028.", src:"NASA; Royal Museums Greenwich"},
+   {t:"NASA's 2019 \"Lunar Footprint Survey\" found the astronauts' footprints have already been blown away by wind on the Moon.", v:"W", why:"Invented source, and impossible: the Moon has no air, so no wind. The footprints are very likely still there. There's no such report.", src:"NASA; searching for the report finds nothing"},
+   {t:"The Moon landing was achieved by just three astronauts.", v:"W", star:"how many people worked on Apollo", why:"One-sided. Around 400,000 people worked on the Apollo programme: engineers, scientists, seamstresses, mechanics and more.", src:"Smithsonian Magazine; The Planetary Society"},
+   {t:"The astronauts brought back about 21.5 kg of Moon rock and soil.", v:"C", why:"Correct.", src:"NASA"}
+  ]}
+};
+const VNAME = {C:"Correct", W:"Wrong", X:"Can't check"};
+
+const MISSIONS = [
+  {id:"m1", num:1, title:"True or hallucination?", sub:"Five \"facts\" an AI might tell you. Which ones are real?", mins:"8 minutes"},
+  {id:"m2", code:"CHECK", num:2, title:"How AI gets it wrong", sub:"Why chatbots make things up, the five kinds of mistake, and how to check.", mins:"10 minutes"},
+  {id:"m3", code:"SOURCE", num:3, title:"The Fact-Check Challenge", sub:"Pick an AI answer, check every claim, then fix it.", mins:"25 minutes"},
+  {id:"m4", code:"SHAME", num:4, title:"Hall of Shame and exit task", sub:"Nominate the sneakiest claim, answer three questions, hand in your work.", mins:"10 minutes"}
+];
+
+/* ===================== STATE ===================== */
+const KEY = "y8l6_factcheck_v1";
+let S = load();
+function blank(){ return {name:"", unlocked:{}, m1:{votes:[]}, m2:{ans:[]}, m3:{pick:"", help:false, marks:{}, srcs:{}, fixes:{}, checked:false, fixText:""}, m4:{shame1:"",shame2:"",shame3:"",ex1:"",ex2:"",ex3:"",extCase:"",ext:"", done:false}}; }
+function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s && s.m1){ s.unlocked=s.unlocked||{}; return s; } }catch(e){} return blank(); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} hdr(); }
+
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+
+/* ===================== SCORING ===================== */
+function m1Score(){ return S.m1.votes.filter((v,i)=>v===CARDS[i].a).length; }
+function m1Done(){ return S.m1.votes.length===CARDS.length; }
+function m2Score(){ return S.m2.ans.filter((v,i)=>v===QUIZ[i].a).length; }
+function m2Done(){ return S.m2.ans.length===QUIZ.length; }
+function claimOK(c,i){ const m=S.m3.marks[i]; if(!m) return 0; if(m===c.v) return 2; if(c.alt && m===c.alt) return 1; return 0; }
+function m3Score(){ if(!S.m3.checked) return 0; return ANSWERS[S.m3.pick].claims.filter((c,i)=>claimOK(c,i)>0).length; }
+function m3Done(){ return S.m3.checked && wc(S.m3.fixText)>=20; }
+function m4Done(){ return S.m4.done; }
+const DONE = {m1:m1Done, m2:m2Done, m3:m3Done, m4:m4Done};
+function unlocked(id){ return id==="m1" || !!S.unlocked[id]; }
+function trophy(id){
+  if(id==="m1"){ if(!m1Done()) return null; const s=m1Score(); return s===5?"gold":s>=3?"silver":"bronze"; }
+  if(id==="m2"){ if(!m2Done()) return null; const s=m2Score(); return s>=8?"gold":s>=6?"silver":"bronze"; }
+  if(id==="m3"){ if(!m3Done()) return null; const s=m3Score(); return s>=8?"gold":s>=6?"silver":"bronze"; }
+  if(id==="m4"){ if(!m4Done()) return null; return S.m4.ext.trim().length>0 ? "gold" : "silver"; }
+}
+function points(){
+  let p = m1Score()*10 + m2Score()*10 + m3Score()*15;
+  if(m3Done()) p+=30; if(m4Done()) p+=30; if(S.m4.ext.trim()) p+=20;
+  return p;
+}
+function wc(t){ return (t||"").trim().split(/\s+/).filter(Boolean).length; }
+const TROPHY = {gold:"&#127942;", silver:"&#129352;", bronze:"&#129353;"};
+function tIcon(t){ return t?`<span class="trophy t-${t}" title="${t}">${TROPHY[t]}</span>`:""; }
+
+function hdr(){
+  document.getElementById("who").textContent = S.name ? S.name : "";
+  document.getElementById("pts").textContent = points()+" points";
+}
+
+/* ===================== SCREENS ===================== */
+function start(){
+  hdr();
+  if(!S.name){
+    app.innerHTML = `<div class="card">
+      <div class="muted">Year 8 Digital Futures | Lesson 6</div>
+      <h1>Fact-Check Challenge</h1>
+      <p><b>AI sounds just as confident when it's wrong.</b> Today you are a fact-checker: you'll spot the claims an AI got wrong, check them against reliable sources, and fix them.</p>
+      <div class="warn"><b>No ChatGPT or other AI today.</b> It's for ages 13+, and checking AI with AI isn't checking. You will need a <b>second browser tab</b> open for searching in Mission 3.</div>
+      <p>There are four missions. Missions 2, 3 and 4 need a code from your teacher, so when you finish one, stop and listen.</p>
+      <p style="margin-top:16px"><label for="nm"><b>Type your first name and form to start</b></label></p>
+      <div class="row"><input type="text" id="nm" placeholder="e.g. Sam, 8H" style="max-width:320px"><button class="btn" id="go">Start</button></div>
+      <div class="err" id="nmerr"></div>
+    </div>`;
+    const go=()=>{ const v=document.getElementById("nm").value.trim(); if(!v){document.getElementById("nmerr").textContent="Type your name first.";return;} S.name=v; save(); menu(); };
+    document.getElementById("go").onclick=go;
+    document.getElementById("nm").onkeydown=e=>{ if(e.key==="Enter") go(); };
+    return;
+  }
+  menu();
+}
+
+function menu(){
+  hdr(); window.scrollTo(0,0);
+  let h = `<div class="card"><h2>Your missions</h2><p class="muted">Work through them in order. Missions 2, 3 and 4 need a code from your teacher: when you finish a mission, stop and wait for the code. Your progress saves on this computer.</p></div>`;
+  for(const m of MISSIONS){
+    const open=unlocked(m.id), done=DONE[m.id](), t=trophy(m.id);
+    h += `<div class="card mission ${open?"":"locked"}">
+      <div class="num">${m.num}</div>
+      <div class="grow"><h3>Mission ${m.num}: ${m.title}</h3><div class="muted">${m.sub}</div><div class="small muted">About ${m.mins}</div></div>
+      ${tIcon(t)}
+      ${open?`<button class="btn ${done?"ghost":""}" data-go="${m.id}">${done?"Look back":"Go"}</button>`:`<div><div class="row" style="flex-wrap:nowrap"><input type="text" id="code_${m.id}" placeholder="Code" style="width:110px"><button class="btn" data-unlock="${m.id}">Unlock</button></div><div class="err small" id="err_${m.id}"></div></div>`}
+    </div>`;
+  }
+  h += `<div class="center"><button class="btn" id="cab">Trophy cabinet and hand in</button></div>`;
+  app.innerHTML = h;
+  app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>({m1:m1,m2:m2,m3:m3,m4:m4})[b.dataset.go]());
+  app.querySelectorAll("[data-unlock]").forEach(b=>b.onclick=()=>tryUnlock(b.dataset.unlock));
+  app.querySelectorAll("[id^=code_]").forEach(inp=>inp.onkeydown=e=>{ if(e.key==="Enter") tryUnlock(inp.id.slice(5)); });
+  document.getElementById("cab").onclick=cabinet;
+}
+function tryUnlock(id){
+  const m=MISSIONS.find(x=>x.id===id), v=document.getElementById("code_"+id).value.trim().toUpperCase();
+  if(v===m.code){ S.unlocked[id]=true; save(); menu(); }
+  else document.getElementById("err_"+id).textContent="Not quite. Wait for your teacher to give you the code.";
+}
+function onTo(id){ return unlocked(id) ? ({m2:m2,m3:m3,m4:m4})[id]() : menu(); }
+function onLabel(id,n){ return unlocked(id) ? "On to Mission "+n : "Back to missions (wait for the Mission "+n+" code)"; }
+function backBtn(){ return `<button class="btn ghost" id="back">Back to missions</button>`; }
+function wireBack(){ const b=document.getElementById("back"); if(b) b.onclick=menu; }
+
+/* ---------- Mission 1 ---------- */
+function m1(i){
+  hdr(); window.scrollTo(0,0);
+  if(i===undefined) i = Math.min(S.m1.votes.length, CARDS.length);
+  if(i>=CARDS.length){ return m1End(); }
+  const c=CARDS[i], voted=S.m1.votes[i];
+  let h = `<div class="card"><div class="muted">Mission 1: True or hallucination? &nbsp;|&nbsp; Card ${i+1} of 5</div>
+    <div class="bar"><div style="width:${(i)/5*100}%"></div></div>`;
+  if(i===0 && voted===undefined) h += `<p>A <b>hallucination</b> is when an AI confidently says something false. Each card below is the kind of thing a chatbot says. Go with your gut: <b>no searching</b> for this one.</p>`;
+  h += `<div class="quote">"${esc(c.q)}"</div>
+    <div class="opts two"><button class="opt" data-v="T">True</button><button class="opt" data-v="H">Hallucination</button></div>
+    <div id="rev"></div></div>`;
+  app.innerHTML = h;
+  const reveal=()=>{
+    const v=S.m1.votes[i];
+    app.querySelectorAll(".opt").forEach(b=>{ b.disabled=true; if(b.dataset.v===c.a) b.classList.add("right"); else if(b.dataset.v===v) b.classList.add("wrong"); });
+    const ok = v===c.a;
+    document.getElementById("rev").innerHTML = `<div class="fb ${ok?"good":"bad"}">
+      <span class="verdict ${c.a==="T"?"v-true":"v-hall"}">${c.a==="T"?"TRUE":"HALLUCINATION"}</span> ${ok?"<b>You got it.</b>":"<b>Not this time.</b>"}
+      <p style="margin:6px 0"><b>What's actually true:</b> ${esc(c.why)}</p>
+      <p style="margin:6px 0">${esc(c.tag)}</p>
+      <div class="src">Source: ${esc(c.src)}</div></div>
+      <div class="row" style="margin-top:14px">${i>0?`<button class="btn ghost" id="prev">Previous card</button>`:""}<button class="btn" id="next">${i<4?"Next card":"Finish Mission 1"}</button></div>`;
+    document.getElementById("next").onclick=()=>m1(i+1);
+    const p=document.getElementById("prev"); if(p) p.onclick=()=>m1(i-1);
+  };
+  if(voted!==undefined) reveal();
+  else app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{ S.m1.votes[i]=b.dataset.v; save(); reveal(); });
+}
+function m1End(){
+  const s=m1Score(), t=trophy("m1");
+  app.innerHTML = `<div class="card center">${tIcon(t)}<h2>Mission 1 complete: ${s} out of 5</h2>
+    <p>Most people fall for card 5. That's the point: <b>the false ones sound just as convincing as the true ones.</b></p>
+    <p>The sneakiest is card 3: real pieces (Newton, an apple, 1687) stitched together wrongly. <b>Half-right is the most dangerous kind of wrong</b>, because the true bits make you trust the false bits.</p>
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="again">Look at the cards again</button><button class="btn" id="on">${onLabel("m2",2)}</button></div></div>`;
+  document.getElementById("again").onclick=()=>m1(0);
+  document.getElementById("on").onclick=()=>onTo("m2");
+}
+
+/* ---------- Mission 2 ---------- */
+const LEARN = [
+  ()=>`<h2>Why does AI get things wrong?</h2>
+    <p>A chatbot <b>predicts the next most likely word</b>, like a super-powered autocomplete.</p>
+    <div class="quote" style="font-style:normal">"The capital of Australia is ..."<br>
+      <span class="chip likely">Sydney: sounds likely</span> <span class="chip true">Canberra: actually true</span></div>
+    <div class="learn"><ul>
+      <li>It learned from huge amounts of human writing, <b>mistakes and myths included</b>.</li>
+      <li>Unless it searches the web, <b>it isn't looking anything up</b>.</li>
+      <li>It <b>doesn't know when it's wrong</b>, so it sounds just as sure either way.</li></ul></div>
+    <div class="fb info"><b>Key word: hallucination.</b> When an AI confidently says something false. It's a wrong prediction, not a lie: the AI isn't trying to trick you. But the result is the same if you believe it.</div>
+    <p class="small muted">Today's chatbots get famous facts like this one right most of the time. They mostly slip up on details: exact numbers, dates, local facts, quotes and sources.</p>`,
+  ()=>`<h2>Five kinds of AI mistake</h2>
+    <div class="kinds">
+      <div><b>Made-up facts</b>Things that simply aren't true, said with confidence</div>
+      <div><b>Wrong details</b>Real facts with the wrong date, number, name or place</div>
+      <div><b>Invented sources</b>Studies, books, reports and quotes that don't exist</div>
+      <div><b>One-sided (bias)</b>Watch for "all", "alone", "never" and "everyone agrees"</div>
+      <div><b>Can't be checked</b>Predictions, "exactly", "most people believed"</div>
+    </div>
+    <div class="fb info"><b>Key word: bias.</b> AI learns from what people have written. If most writing tells a story one way, the AI tends to tell it that way too.</div>`,
+  ()=>`<h2>But doesn't AI search the web now?</h2>
+    <p>Yes. ChatGPT can search the web and show links. That helps, but it still gets things wrong. In 2025, the BBC and other broadcasters tested four AI assistants on news questions:</p>
+    <div class="row" style="gap:30px;margin:10px 0 14px">
+      <div><div class="big">45%</div><div class="small">of answers had at least one significant problem</div></div>
+      <div><div class="big">31%</div><div class="small">had problems with their sources: missing, misleading or wrong</div></div>
+    </div>
+    <p class="src">Source: EBU and BBC study of ChatGPT, Copilot, Gemini and Perplexity, October 2025</p>
+    <div class="fb info"><b>Real world:</b> in 2025, the High Court in London warned lawyers after made-up legal cases, some created with AI, were put in front of judges. Nobody checked.</div>
+    <p><b>A link is not proof.</b> Click it, and check the page really says what the AI says it does.</p>`,
+  ()=>`<h2>How to check a claim: cross-reference</h2>
+    <p><b>Cross-referencing</b> means checking a claim against a second, independent, reliable source.</p>
+    <div class="learn"><ul>
+      <li><b>1. Pick out one claim.</b> One fact at a time: a date, a number, a name.</li>
+      <li><b>2. Search the key words,</b> not the whole sentence: <i>Franz Ferdinand assassinated where</i>.</li>
+      <li><b>3. Find two reliable sources that agree.</b> Different websites, not one copying the other.</li>
+      <li><b>4. Mark it:</b> Correct, Wrong, or Can't check. Note the source.</li></ul></div>
+    <div class="row" style="align-items:stretch;margin-top:10px">
+      <div class="fb good" style="flex:1;margin:0"><b>Good places to check</b><br>BBC Bitesize, Britannica<br>gov.uk, Met Office, NASA<br>Museum websites<br>Wikipedia: a start, then follow its references</div>
+      <div class="fb bad" style="flex:1;margin:0"><b>Be careful with</b><br>Another chatbot<br>The AI summary at the top of search results<br>Random blogs and social media</div>
+    </div>`
+];
+function m2(step){
+  hdr(); window.scrollTo(0,0);
+  if(step===undefined) step = S.m2.ans.length>0 ? LEARN.length + Math.min(S.m2.ans.length, QUIZ.length) : 0;
+  if(step < LEARN.length){
+    app.innerHTML = `<div class="card"><div class="muted">Mission 2: How AI gets it wrong &nbsp;|&nbsp; Read ${step+1} of ${LEARN.length}</div>
+      <div class="bar"><div style="width:${step/(LEARN.length+QUIZ.length)*100}%"></div></div>
+      ${LEARN[step]()}
+      <div class="row" style="margin-top:16px">${step>0?`<button class="btn ghost" id="prev">Back</button>`:""}<button class="btn" id="next">${step<LEARN.length-1?"Next":"Start the quiz"}</button></div></div>`;
+    document.getElementById("next").onclick=()=>m2(step+1);
+    const p=document.getElementById("prev"); if(p) p.onclick=()=>m2(step-1);
+    return;
+  }
+  const qi = step - LEARN.length;
+  if(qi>=QUIZ.length) return m2End();
+  const q=QUIZ[qi];
+  // shuffle options with a fixed order per question so it stays the same on revisit
+  const order = q.o.map((_,k)=>k).sort((a,b)=>((a*7+qi*3)%5)-((b*7+qi*3)%5));
+  app.innerHTML = `<div class="card"><div class="muted">Mission 2: Quiz &nbsp;|&nbsp; Question ${qi+1} of ${QUIZ.length}</div>
+    <div class="bar"><div style="width:${step/(LEARN.length+QUIZ.length)*100}%"></div></div>
+    <h3 style="margin-bottom:12px">${esc(q.q)}</h3>
+    <div class="opts">${order.map(k=>`<button class="opt" data-k="${k}">${esc(q.o[k])}</button>`).join("")}</div>
+    <div id="rev"></div></div>`;
+  const reveal=()=>{
+    const v=S.m2.ans[qi];
+    app.querySelectorAll(".opt").forEach(b=>{ b.disabled=true; const k=+b.dataset.k; if(k===q.a) b.classList.add("right"); else if(k===v) b.classList.add("wrong"); });
+    const ok=v===q.a;
+    document.getElementById("rev").innerHTML = `<div class="fb ${ok?"good":"bad"}"><b>${ok?"Correct.":"Not quite."}</b> ${esc(q.why)}</div>
+      <div class="row" style="margin-top:14px"><button class="btn" id="next">${qi<QUIZ.length-1?"Next question":"Finish Mission 2"}</button></div>`;
+    document.getElementById("next").onclick=()=>m2(step+1);
+  };
+  if(S.m2.ans[qi]!==undefined) reveal();
+  else app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{ S.m2.ans[qi]=+b.dataset.k; save(); reveal(); });
+}
+function m2End(){
+  const s=m2Score(), t=trophy("m2");
+  app.innerHTML = `<div class="card center">${tIcon(t)}<h2>Mission 2 complete: ${s} out of ${QUIZ.length}</h2>
+    <p>You know the five kinds of mistake and how to cross-reference. Now use them for real.</p>
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="again">Read the notes again</button><button class="btn" id="on">${onLabel("m3",3)}</button></div></div>`;
+  document.getElementById("again").onclick=()=>m2(0);
+  document.getElementById("on").onclick=()=>onTo("m3");
+}
+
+/* ---------- Mission 3 ---------- */
+function m3(){
+  hdr(); window.scrollTo(0,0);
+  if(!S.m3.pick) return m3Pick();
+  const A=ANSWERS[S.m3.pick], chk=S.m3.checked, help=S.m3.help;
+  let h = `<div class="card"><div class="muted">Mission 3: The Fact-Check Challenge</div>
+    <h2>AI Answer ${S.m3.pick}: ${esc(A.title)}</h2>
+    <p><b>This answer was made with AI for this lesson, and it contains mistakes.</b> Some claims are correct, some are wrong, and some can't be checked. Not every claim is wrong.</p>
+    <div class="answer"><div class="prompt">The prompt: "${esc(A.prompt)}"</div>
+      <p style="margin:0 0 6px">${esc(A.open)}</p>
+      <p style="margin:0 0 6px">${A.claims.map((c,i)=>`<b>[${i+1}]</b> ${esc(c.t)}`).join(" ")}</p>
+      <p style="margin:0">${esc(A.close)}</p></div>
+  </div>
+  <div class="card">
+    <h3>Your job</h3>
+    <div class="learn"><ul>
+      <li>Open a <b>second tab</b> and search for each claim. <b>No ChatGPT, and skip the AI summary at the top of the search results.</b></li>
+      <li>Mark every claim <b>Correct</b>, <b>Wrong</b> or <b>Can't check</b>.</li>
+      <li>Write the <b>website you used</b> for at least three claims. If a claim is wrong, write what's actually true.</li></ul></div>
+    ${chk?"":`<label class="row small" style="margin-top:8px;cursor:pointer"><input type="checkbox" id="help" ${help?"checked":""}> Show me which claims to start with, with a search tip for each</label>`}
+  </div>`;
+  A.claims.forEach((c,i)=>{
+    const m=S.m3.marks[i]||"", st=help&&c.star&&!chk;
+    h += `<div class="claim ${st?"star":""}">
+      <div class="ctext"><span class="cnum">[${i+1}]</span>${st?"&#9733; ":""}${esc(c.t)}</div>
+      ${st?`<div class="tip">Search tip: <i>${esc(c.star)}</i></div>`:""}
+      <div class="vbtns">${["C","W","X"].map(v=>`<button class="vbtn ${m===v?"on":""}" data-i="${i}" data-v="${v}" ${chk?"disabled":""}>${VNAME[v]}</button>`).join("")}</div>
+      <div class="fields">
+        <div><label>Website I used</label><input type="text" data-src="${i}" value="${esc(S.m3.srcs[i]||"")}" placeholder="e.g. bbc.co.uk/bitesize"></div>
+        <div><label>What's actually true? (if wrong)</label><input type="text" data-fix="${i}" value="${esc(S.m3.fixes[i]||"")}"></div>
+      </div>`;
+    if(chk){
+      const ok=claimOK(c,i);
+      const cls = ok===2?"good":ok===1?"ok":"bad";
+      const lead = ok===2?"&#10003; Spot on.":ok===1?"&#10003; Accepted.":`&#10007; The answer is <b>${VNAME[c.v]}</b>.`;
+      h += `<div class="result ${cls}">${lead} ${esc(c.why)}<div class="src">Source: ${esc(c.src)}</div></div>`;
+    }
+    h += `</div>`;
+  });
+  if(!chk){
+    h += `<div class="card center"><p>When you've marked all nine and written at least three websites, check your answers.</p>
+      <button class="btn" id="check">Check my answers</button><div class="err" id="cerr"></div>
+      <p class="small muted" style="margin-top:12px">Picked the wrong one? <a href="#" id="repick">Choose a different answer</a> (this clears your marks).</p></div>`;
+  } else {
+    const s=m3Score();
+    h += `<div class="card"><h3>You got ${s} out of 9</h3>
+      <p>Every answer was built the same way: <b>four correct, four wrong, and one you can't check.</b> The sneakiest wrong claims are usually mostly true with one wrong detail, or come with a source that doesn't exist.</p>
+      <h3 style="margin-top:14px">Fix it</h3>
+      <p>Rewrite the AI's answer in <b>about 80 words</b>, using only facts you have checked. Fix the mistakes and leave out anything you couldn't check.</p>
+      <textarea id="fixText" style="min-height:160px">${esc(S.m3.fixText)}</textarea>
+      <div class="wc" id="wc">${wc(S.m3.fixText)} words</div>
+      <div class="row" style="margin-top:10px">${backBtn()}<button class="btn" id="fin">Finish Mission 3</button></div>
+      <div class="err" id="ferr"></div></div>`;
+  }
+  app.innerHTML = h;
+  app.querySelectorAll(".vbtn").forEach(b=>b.onclick=()=>{ S.m3.marks[b.dataset.i]=b.dataset.v; save(); b.parentNode.querySelectorAll(".vbtn").forEach(x=>x.classList.toggle("on",x===b)); });
+  app.querySelectorAll("[data-src]").forEach(inp=>inp.oninput=()=>{ S.m3.srcs[inp.dataset.src]=inp.value; save(); });
+  app.querySelectorAll("[data-fix]").forEach(inp=>inp.oninput=()=>{ S.m3.fixes[inp.dataset.fix]=inp.value; save(); });
+  const hb=document.getElementById("help"); if(hb) hb.onchange=()=>{ S.m3.help=hb.checked; save(); const y=window.scrollY; m3(); window.scrollTo(0,y); };
+  const ck=document.getElementById("check");
+  if(ck) ck.onclick=()=>{
+    const marked=A.claims.filter((c,i)=>S.m3.marks[i]).length;
+    const srcs=A.claims.filter((c,i)=>(S.m3.srcs[i]||"").trim().length>=3).length;
+    if(marked<9){ document.getElementById("cerr").textContent=`You've marked ${marked} of 9 claims. Mark them all first.`; return; }
+    if(srcs<3){ document.getElementById("cerr").textContent=`You've written ${srcs} website${srcs===1?"":"s"}. Write at least three first.`; return; }
+    S.m3.checked=true; save(); m3();
+  };
+  const rp=document.getElementById("repick"); if(rp) rp.onclick=e=>{ e.preventDefault(); S.m3={pick:"",help:S.m3.help,marks:{},srcs:{},fixes:{},checked:false,fixText:""}; save(); m3(); };
+  const ft=document.getElementById("fixText"); if(ft) ft.oninput=()=>{ S.m3.fixText=ft.value; save(); document.getElementById("wc").textContent=wc(ft.value)+" words"; };
+  const fn=document.getElementById("fin"); if(fn) fn.onclick=()=>{ if(wc(S.m3.fixText)<20){ document.getElementById("ferr").textContent="Write your corrected version first (about 80 words)."; return; } m3End(); };
+  wireBack();
+}
+function m3Pick(){
+  app.innerHTML = `<div class="card"><div class="muted">Mission 3: The Fact-Check Challenge</div>
+    <h2>Choose one AI answer to check</h2>
+    <p>Each one has nine numbered claims. Your job: find out which are correct, which are wrong, and which can't be checked.</p>
+    <div class="choose">${Object.entries(ANSWERS).map(([k,a])=>`<button class="opt" data-pick="${k}"><span class="letter">${k}</span><b>${esc(a.title)}</b><br><span class="small muted">${esc(a.subj)}</span></button>`).join("")}</div>
+    <p class="small muted" style="margin-top:12px">C has a local twist: Box Tunnel is just down the road.</p>
+    <div class="row" style="margin-top:10px">${backBtn()}</div></div>`;
+  app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ S.m3.pick=b.dataset.pick; save(); m3(); });
+  wireBack();
+}
+function m3End(){
+  const t=trophy("m3");
+  window.scrollTo(0,0);
+  app.innerHTML = `<div class="card center">${tIcon(t)}<h2>Mission 3 complete: ${m3Score()} out of 9</h2>
+    <p>You checked an AI answer and wrote a version you can trust. That's exactly the job.</p>
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="look">Look back at my checking</button><button class="btn" id="on">${onLabel("m4",4)}</button></div></div>
+    ${unlocked("m4")?"":`<p class="center muted">Waiting for the next code? Try the bonus below.</p>`}
+    ${extBlock()}`;
+  wireExt();
+  document.getElementById("look").onclick=m3;
+  document.getElementById("on").onclick=()=>onTo("m4");
+}
+
+/* ---------- Mission 4 ---------- */
+function m4(){
+  hdr(); window.scrollTo(0,0);
+  const f=(id,label,rows)=>`<p style="margin:12px 0 4px"><b>${label}</b></p><textarea data-f="${id}" style="min-height:${rows||70}px">${esc(S.m4[id])}</textarea>`;
+  app.innerHTML = `<div class="card"><div class="muted">Mission 4</div>
+    <h2>The AI Hall of Shame</h2>
+    <p>Nominate the <b>sneakiest wrong claim</b> you found today: the one most people would have believed. Sneaky clues: an exact number, a famous name, mostly true with one wrong detail.</p>
+    ${f("shame1","What did the AI say?")}
+    ${f("shame2","What's actually true, and how do you know?")}
+    ${f("shame3","Why might people believe it?")}
+  </div>
+  <div class="card"><h2>Exit task</h2>
+    ${f("ex1","1. Why does AI sometimes say false things so confidently? Answer in one sentence.")}
+    ${f("ex2","2. An AI says: \"A 2023 Cambridge study found ...\" What two things would you do before believing it?")}
+    ${f("ex3","3. Which claim did you prove wrong today? Name the source that proved it.")}
+  </div>
+  ${extBlock()}
+  <div class="card center"><div class="row" style="justify-content:center">${backBtn()}<button class="btn" id="fin">Finish and see my trophies</button></div><div class="err" id="err"></div></div>`;
+  wireExt();
+  app.querySelectorAll("[data-f]").forEach(t=>t.oninput=()=>{ S.m4[t.dataset.f]=t.value; save(); });
+  document.getElementById("fin").onclick=()=>{
+    const need=["shame1","ex1","ex2","ex3"].filter(k=>!S.m4[k].trim());
+    if(need.length){ document.getElementById("err").textContent="Fill in your Hall of Shame claim and all three exit questions first."; return; }
+    S.m4.done=true; save(); cabinet();
+  };
+  wireBack();
+}
+function extBlock(){
+  return `<div class="card"><h2>Extension: when AI got it wrong for real</h2>
+    <p class="muted">Optional, for a gold trophy in Mission 4. Choose one case. Write about 100 words: what did the AI get wrong, who was affected, and how could checking have stopped it?</p>
+    <div class="fb info"><b>Case 1: Air Canada's chatbot (2024).</b> A customer asked the airline's website chatbot about cheaper fares for travelling to a family funeral. The chatbot told him he could claim money back after his trip. That wasn't the airline's real policy. A tribunal in Canada ruled that Air Canada was responsible for what its chatbot said, and had to pay him.</div>
+    <div class="fb info"><b>Case 2: Fake cases in the High Court (2025).</b> In London, lawyers put legal cases in front of judges that didn't exist, some made up by AI tools. Senior judges warned every lawyer in England and Wales that checking AI research is part of their job.</div>
+    <p style="margin:12px 0 4px"><b>My case</b></p>
+    <div class="row"><button class="vbtn ${S.m4.extCase==="Air Canada"?"on":""}" data-case="Air Canada">Air Canada</button><button class="vbtn ${S.m4.extCase==="High Court"?"on":""}" data-case="High Court">High Court</button></div>
+    <p style="margin:12px 0 4px"><b>My answer</b></p><textarea id="extText" style="min-height:130px">${esc(S.m4.ext)}</textarea>
+    <div class="wc" id="extwc">${wc(S.m4.ext)} words</div>
+  </div>`;
+}
+function wireExt(){
+  const t=document.getElementById("extText");
+  t.oninput=()=>{ S.m4.ext=t.value; document.getElementById("extwc").textContent=wc(t.value)+" words"; save(); };
+  app.querySelectorAll("[data-case]").forEach(b=>b.onclick=()=>{ S.m4.extCase=b.dataset.case; save(); app.querySelectorAll("[data-case]").forEach(x=>x.classList.toggle("on",x===b)); });
+}
+
+/* ---------- Trophy cabinet ---------- */
+function cabinet(){
+  hdr(); window.scrollTo(0,0);
+  const all = MISSIONS.every(m=>DONE[m.id]());
+  const golds = MISSIONS.filter(m=>trophy(m.id)==="gold").length;
+  let h = `<div class="card"><h2>Trophy cabinet</h2><div class="cab">${MISSIONS.map(m=>{
+    const t=trophy(m.id); return `<div>${t?tIcon(t):'<span class="trophy muted">&#9711;</span>'}<div><b>Mission ${m.num}</b></div><div class="small">${esc(m.title)}</div><div class="small muted">${t?t[0].toUpperCase()+t.slice(1):"Not finished"}</div></div>`;}).join("")}</div></div>`;
+  if(all){
+    h += `<div class="card cert"><div class="muted">Year 8 Digital Futures | Lesson 6</div>
+      <h1>Certified Fact-Checker</h1><p style="font-size:20px"><b>${esc(S.name)}</b></p>
+      <p>${points()} points &nbsp;|&nbsp; ${golds} gold troph${golds===1?"y":"ies"}</p>
+      ${golds===4?"<p><b>Super trophy: gold in every mission.</b></p>":""}
+      <p class="small muted">Don't believe everything AI tells you.</p></div>`;
+  }
+  h += `<div class="card"><h3>Hand in your work</h3>
+    <p>Click <b>Download my work</b>. It saves a file to your Downloads folder. Hand that file in on the Teams assignment.</p>
+    <div class="row">${backBtn()}<button class="btn" id="dl">Download my work</button></div></div>`;
+  app.innerHTML = h;
+  document.getElementById("dl").onclick=download;
+  wireBack();
+}
+function download(){
+  const L=[]; const line=s=>L.push(s);
+  line("Year 8 Digital Futures | Lesson 6: Fact-Check Challenge");
+  line("Name: "+S.name); line("Saved: "+new Date().toLocaleString("en-GB")); line("Points: "+points()); line("");
+  line("MISSION 1: True or hallucination?  Score: "+(m1Done()?m1Score()+"/5":"not finished"));
+  line("MISSION 2: How AI gets it wrong quiz  Score: "+(m2Done()?m2Score()+"/"+QUIZ.length:"not finished")); line("");
+  if(S.m3.pick){
+    const A=ANSWERS[S.m3.pick];
+    line("MISSION 3: Fact-Check Challenge, AI Answer "+S.m3.pick+": "+A.title+(S.m3.checked?"  Score: "+m3Score()+"/9":"  (not checked yet)"));
+    A.claims.forEach((c,i)=>{
+      line(`[${i+1}] ${c.t}`);
+      line(`    My verdict: ${VNAME[S.m3.marks[i]]||"-"}${S.m3.checked?"   (answer: "+VNAME[c.v]+(c.alt?", "+VNAME[c.alt]+" accepted":"")+")":""}`);
+      if((S.m3.srcs[i]||"").trim()) line("    Website I used: "+S.m3.srcs[i].trim());
+      if((S.m3.fixes[i]||"").trim()) line("    What's actually true: "+S.m3.fixes[i].trim());
+    });
+    line(""); line("My corrected version ("+wc(S.m3.fixText)+" words):"); line(S.m3.fixText.trim()||"-"); line("");
+  } else { line("MISSION 3: not started"); line(""); }
+  line("MISSION 4: Hall of Shame");
+  line("What did the AI say? "+(S.m4.shame1.trim()||"-"));
+  line("What's actually true, and how do you know? "+(S.m4.shame2.trim()||"-"));
+  line("Why might people believe it? "+(S.m4.shame3.trim()||"-")); line("");
+  line("Exit task");
+  line("1. Why does AI sometimes say false things so confidently? "+(S.m4.ex1.trim()||"-"));
+  line("2. What two things would you do before believing the Cambridge study? "+(S.m4.ex2.trim()||"-"));
+  line("3. Which claim did you prove wrong, and what source proved it? "+(S.m4.ex3.trim()||"-"));
+  if(S.m4.ext.trim()){ line(""); line("Extension ("+(S.m4.extCase||"case not chosen")+", "+wc(S.m4.ext)+" words):"); line(S.m4.ext.trim()); }
+  const blob=new Blob([L.join("\r\n")],{type:"text/plain"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="FactCheck_"+S.name.replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,"")+".txt";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+start();
+</script>
+</body>
+</html>

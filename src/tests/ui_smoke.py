@@ -19,6 +19,9 @@ from solutions2 import GOOD as G2         # noqa: E402
 SECTIONS = {
     "ks3/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "python-rescue.html", "html-setup.html", "html-reference.html"],
     "ks4/": ["pseudocode-playground.html", "neko-cafe.html", "pocket-pet.html", "station-x.html", "crystal-caves.html", "dungeon-architect.html", "../ks5/robot-game-procedural.html", "sorting-visualiser.html", "gcse-jeopardy.html"],
+    "digital-futures/": ["year-8/", "year-9/"],
+    "digital-futures/year-8/": ["fact-check-challenge.html"],
+    "digital-futures/year-9/": [],
     "ks5/": ["algorithms-lab.html", "merge-sort-recursion.html", "dijkstra-table-method.html", "a-star-table-method.html", "../ks4/sorting-visualiser.html", "boolean-algebra-slips.html", "../ks4/pseudocode-playground.html", "robot-game-procedural.html", "robot-game-oop.html", "shelter-project.html", "ashwood-manor.html", "../ks4/crystal-caves.html", "noticeboard.html", "alevel-jeopardy.html"],
 }
 MOVED = ["escape-the-dungeon-1", "escape-the-dungeon-2", "escape-the-dungeon-3", "python-rescue"]
@@ -59,16 +62,19 @@ async def main(base):
 
         await pg.goto(base)
         cards = await pg.locator("a.card").count()
-        print("welcome page cards:", cards); problems += cards != 3
+        print("welcome page cards:", cards); problems += cards != 4
         await pg.screenshot(path=os.path.join(HERE, "smoke_menu.png"), full_page=True)
         for sec, pages in SECTIONS.items():
-            await pg.goto(base); await pg.click(f'a.card[href="{sec}"]'); await pg.wait_for_load_state("load")
+            # reach each section page the way a pupil would: by clicking its card on the page above
+            parent = sec.rstrip("/").rpartition("/")[0]
+            parent = parent + "/" if parent else ""
+            await pg.goto(base + parent); await pg.click(f'a.card[href="{sec[len(parent):]}"]'); await pg.wait_for_load_state("load")
             hrefs = await pg.locator("a.card").evaluate_all("els => els.map(e => e.getAttribute('href'))")
             if hrefs != pages: print("  card list differs:", sec, hrefs); problems += 1
-            await pg.screenshot(path=os.path.join(HERE, "smoke_" + sec.strip("/") + ".png"), full_page=True)
+            await pg.screenshot(path=os.path.join(HERE, "smoke_" + sec.strip("/").replace("/", "_") + ".png"), full_page=True)
             await pg.click("a.homelink"); await pg.wait_for_load_state("load")
-            back_home = await pg.locator("a.card").count() == 3
-            print(f"{sec:5} {len(hrefs)} cards | All key stages link returns home: {back_home}"); problems += not back_home
+            back_home = pg.url == base + parent
+            print(f"{sec:5} {len(hrefs)} cards | top link returns to the page above: {back_home}"); problems += not back_home
             for href in pages:
                 await pg.goto(base + sec); await pg.click(f'a.card[href="{href}"]'); await pg.wait_for_load_state("load")
                 await pg.wait_for_timeout(300)
