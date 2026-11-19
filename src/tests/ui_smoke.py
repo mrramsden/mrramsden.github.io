@@ -17,7 +17,7 @@ from solutions2 import GOOD as G2         # noqa: E402
 
 # section page -> the pages its cards should open
 SECTIONS = {
-    "ks3/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "python-rescue.html", "html-setup.html", "html-reference.html"],
+    "ks3/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "python-rescue.html", "html-setup.html", "html-reference.html", "storage-through-time.html"],
     "ks4/": ["pseudocode-playground.html", "neko-cafe.html", "pocket-pet.html", "station-x.html", "crystal-caves.html", "dungeon-architect.html", "../ks5/robot-game-procedural.html", "sorting-visualiser.html", "bitmap-images.html", "gcse-jeopardy.html"],
     "digital-futures/": ["year-8/", "year-9/"],
     "digital-futures/year-8/": ["fact-check-challenge.html"],
