@@ -8,7 +8,7 @@ Pupils only ever see the site. Everything in `src/` is how its pages are made an
 |---|---|
 | `index.html` | Welcome page with four cards: Key Stage 3, 4 and 5, and Digital Futures. |
 | `ks3/` | Escape the Dungeon 1 to 3 and Python Rescue (built), plus the HTML setup guide and HTML reference sheet (single-file). Section page `ks3/index.html`. |
-| `ks4/` | GCSE (OCR J277): the pseudocode playground, Python challenge boards (Neko Neko Café, Pocket Pet, Station X, Crystal Caves, The Dungeon Architect), the sorting visualiser and Revision Jeopardy. Also links to the procedural Robot Game in `ks5/`. Section page `ks4/index.html`. |
+| `ks4/` | GCSE (OCR J277): the pseudocode playground, Python challenge boards (Neko Neko Café, Pocket Pet, Station X, Crystal Caves, The Dungeon Architect), the sorting visualiser, the Bitmap images unit (adapted from a colleague's resource, with permission; teacher notes and mark scheme removed) and Revision Jeopardy. Also links to the procedural Robot Game in `ks5/`. Section page `ks4/index.html`. |
 | `ks5/` | A Level (OCR H446): algorithms lab, merge sort recursion, Dijkstra and A* table methods, Boolean algebra slips, Python challenge boards (The Robot Game procedural and object-oriented, The Shelter Project, Ashwood Manor, Little Ashford Noticeboard) and Revision Jeopardy. Also links to the playground, sorting visualiser and Crystal Caves in `ks4/`. |
 | `digital-futures/` | Year 8 and Year 9 Digital Futures. `digital-futures/index.html` links to the two year pages, `year-8/index.html` and `year-9/index.html`, which hold the lesson cards. Year 8: Lesson 6 Fact-Check Challenge. Year 9: none yet. |
 | `python/` | Redirect stubs only. The Escape the Dungeon pages used to live here, so old links forward to `ks3/`. |
