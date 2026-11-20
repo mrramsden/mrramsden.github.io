@@ -21,7 +21,7 @@ SECTIONS = {
     "ks4/": ["pseudocode-playground.html", "neko-cafe.html", "pocket-pet.html", "station-x.html", "crystal-caves.html", "dungeon-architect.html", "../ks5/robot-game-procedural.html", "sorting-visualiser.html", "bitmap-images.html", "gcse-jeopardy.html"],
     "digital-futures/": ["year-8/", "year-9/"],
     "digital-futures/year-8/": ["fact-check-challenge.html"],
-    "digital-futures/year-9/": [],
+    "digital-futures/year-9/": ["ai-and-society-missions.html"],
     "ks5/": ["algorithms-lab.html", "merge-sort-recursion.html", "dijkstra-table-method.html", "a-star-table-method.html", "../ks4/sorting-visualiser.html", "boolean-algebra-slips.html", "../ks4/pseudocode-playground.html", "robot-game-procedural.html", "robot-game-oop.html", "shelter-project.html", "ashwood-manor.html", "../ks4/crystal-caves.html", "noticeboard.html", "alevel-jeopardy.html"],
 }
 MOVED = ["escape-the-dungeon-1", "escape-the-dungeon-2", "escape-the-dungeon-3", "python-rescue"]

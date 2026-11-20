@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI and Society: Missions</title>
+<style>
+  :root{
+    --navy:#0b2545; --blue:#1d4e89; --mid:#3a7bd5; --sky:#e8f1fb; --pale:#f5f9fe;
+    --gold:#e8b923; --silver:#a9b4c2; --bronze:#c27c3e;
+    --good:#1f8a4c; --goodbg:#e3f5ea; --bad:#c0392b; --badbg:#fbe9e7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;background:var(--pale);color:var(--navy);font-size:18px;line-height:1.45}
+  header{background:var(--navy);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+  header h1{font-size:20px;margin:0;flex:1;min-width:200px}
+  .pill{background:var(--blue);border-radius:999px;padding:6px 14px;font-weight:600;font-size:16px;white-space:nowrap}
+  .pill.gold{background:var(--gold);color:var(--navy)}
+  main{max-width:900px;margin:0 auto;padding:24px 16px 60px}
+  .card{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(11,37,69,.08);padding:22px;margin-bottom:18px}
+  h2{margin:0 0 10px;font-size:26px}
+  h3{margin:0 0 8px;font-size:20px}
+  .muted{color:#4a5d75}
+  button{font:inherit;cursor:pointer;border:none;border-radius:10px}
+  .btn{background:var(--blue);color:#fff;padding:12px 22px;font-weight:600}
+  .btn:hover{background:var(--mid)}
+  .btn.ghost{background:var(--sky);color:var(--navy)}
+  .btn.ghost:hover{background:#d4e5f8}
+  .btn:disabled{opacity:.5;cursor:default}
+  input[type=text],textarea{font:inherit;padding:10px 12px;border:2px solid #c9d8ea;border-radius:10px;width:100%}
+  textarea{min-height:80px;resize:vertical}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+  /* Missions menu */
+  .mission{border-left:8px solid var(--blue)}
+  .mission.locked{border-left-color:var(--silver);background:#f3f5f8}
+  .mission .acts{list-style:none;padding:0;margin:12px 0 0}
+  .mission .acts li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #e5edf6}
+  .mission .acts li:first-child{border-top:none}
+  .mission .acts li span.name{flex:1}
+  .tick{width:26px;height:26px;border-radius:50%;background:#dfe7f1;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
+  .tick.done{background:var(--good)}
+  .lockbox{display:flex;gap:8px;margin-top:12px;max-width:420px}
+  .lockbox input{flex:1}
+  .note{font-size:15px}
+  .err{color:var(--bad);font-size:15px;margin-top:6px}
+
+  /* Questions */
+  .progress{height:10px;background:#dfe7f1;border-radius:999px;overflow:hidden;margin:6px 0 18px}
+  .progress div{height:100%;background:var(--mid);transition:width .3s}
+  .qtext{font-size:22px;font-weight:600;margin-bottom:18px}
+  .opts{display:grid;gap:12px}
+  .opts.two{grid-template-columns:1fr 1fr}
+  @media (max-width:600px){.opts.two{grid-template-columns:1fr}}
+  .opt{background:var(--sky);color:var(--navy);padding:16px 18px;text-align:left;font-weight:600;border:3px solid transparent;transition:transform .08s}
+  .opt:hover:not(:disabled){border-color:var(--mid);transform:translateY(-1px)}
+  .opt:disabled{cursor:default}
+  .opt.right{background:var(--goodbg);border-color:var(--good)}
+  .opt.wrong{background:var(--badbg);border-color:var(--bad)}
+  .opt.sel{background:#d4e5f8;border-color:var(--blue)}
+  .feedback{margin-top:18px;padding:16px 18px;border-radius:12px;font-size:17px}
+  .feedback.good{background:var(--goodbg);border-left:6px solid var(--good)}
+  .feedback.bad{background:var(--badbg);border-left:6px solid var(--bad)}
+  .feedback.info{background:var(--sky);border-left:6px solid var(--blue)}
+  .feedback b.head{display:block;font-size:19px;margin-bottom:4px}
+  .intro p{margin:0 0 10px}
+  .keybox{background:var(--sky);border-radius:10px;padding:12px 16px;margin:10px 0}
+
+  /* Chart */
+  .chart{margin:0 0 18px}
+  .bar{display:grid;grid-template-columns:130px 1fr 60px;gap:10px;align-items:center;margin:6px 0;font-size:16px}
+  .bar .track{background:#eef3f9;border-radius:6px;height:24px;overflow:hidden}
+  .bar .fill{background:var(--blue);height:100%;min-width:3px}
+  .chart .cap{font-size:14px;color:#4a5d75;margin-top:6px}
+
+  /* Slider */
+  .slider-wrap{margin:14px 0 6px}
+  .slider-labels{display:flex;justify-content:space-between;font-weight:700;font-size:17px;margin-bottom:6px}
+  input[type=range]{width:100%;accent-color:var(--blue);height:30px}
+  .split{text-align:center;font-size:20px;font-weight:700;margin:8px 0 14px}
+
+  /* Trophies */
+  .trophy{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+  .trophy svg{width:90px;height:90px}
+  .trophy.big svg{width:150px;height:150px;animation:pop .6s ease-out}
+  .tname{font-weight:700}
+  .tier{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#4a5d75}
+  .cabinet{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px}
+  .slot{background:#fff;border-radius:12px;padding:12px 8px;box-shadow:0 1px 6px rgba(11,37,69,.08)}
+  .slot.empty{opacity:.35}
+  @keyframes pop{0%{transform:scale(.2) rotate(-20deg)}70%{transform:scale(1.15) rotate(4deg)}100%{transform:scale(1)}}
+
+  .confetti{position:fixed;top:-20px;width:10px;height:16px;z-index:50;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+  .cert{border:6px double var(--blue);text-align:center}
+  .cert h2{font-size:30px}
+  .center{text-align:center}
+  .spacer{height:10px}
+</style>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Year 9 Digital Futures</a></nav>
+<header>
+  <h1>AI and Society: Missions</h1>
+  <span class="pill" id="hdrName"></span>
+  <span class="pill gold" id="hdrPts">0 points</span>
+  <button class="btn ghost" id="hdrCab" style="padding:6px 14px;font-size:16px">Trophy cabinet</button>
+</header>
+<main id="app"></main>
+
+<script>
+/* ============================================================
+   CONTENT
+   Every fact is taken from the lesson's checked Evidence Pack
+   (November 2026). Missions 2 and 3 need an unlock code from
+   the teacher (not case sensitive).
+   ============================================================ */
+
+const BOT = ["Robot (automation)","Sidekick (augmentation)"];
+
+const MISSIONS = [
+ {
+  id:"m1", num:1, title:"Jobs", sub:"Will AI take our jobs?", code:null,
+  acts:[
+   {id:"grow", title:"Growing or shrinking?", trophy:"Job Oracle", two:true,
+    intro:`<p>These are six real starter jobs in the UK. The government and LinkedIn compared how many people were hired into each one in <b>April 2026</b> with a year earlier.</p><p>For each job: is it <b>growing</b> or <b>shrinking</b>? Go with your gut.</p>`,
+    qs:[
+     {q:"Accountant", o:["Growing","Shrinking"], c:1, e:"Shrinking: down 29% in a year."},
+     {q:"Retail assistant", o:["Growing","Shrinking"], c:0, e:"Growing: up 25%. Despite self-checkouts, face-to-face jobs grew."},
+     {q:"Software engineer", o:["Growing","Shrinking"], c:1, e:"Shrinking: down 27%. Most people guess computer jobs are growing. Surprised?"},
+     {q:"Graphic designer", o:["Growing","Shrinking"], c:1, e:"Shrinking: down 28%."},
+     {q:"Sales development rep (someone who finds and contacts new customers for a company)", o:["Growing","Shrinking"], c:0, e:"Growing: up 17%. Another job built on talking to people."},
+     {q:"Data engineer", o:["Growing","Shrinking"], c:1, e:"Shrinking: down 11%."},
+     {q:"Careful! All UK hiring fell 14% over the same year. So does this data prove AI caused these starter jobs to shrink?", o:["Yes, definitely","No: the report itself says it is not proof yet, because the wider economy matters too"], c:1,
+      e:"The report says starter jobs fell at about the same rate as all jobs. Spotting what a source <b>cannot</b> prove is a top skill. (Source: GOV.UK, June 2026)"}
+    ]},
+   {id:"robot", title:"Robot or sidekick?", trophy:"Robot Spotter", two:true,
+    intro:`<div class="keybox"><b>Automation (Robot):</b> AI or a machine does the task <b>instead of</b> a person.<br><b>Augmentation (Sidekick):</b> AI <b>helps</b> a person do the task better.</div><p>Decide which each one is.</p>`,
+    qs:[
+     {q:"Self-checkouts scan your shopping, so fewer cashiers are needed.", o:BOT, c:0, e:"Robot: the machine does the task instead of a person."},
+     {q:"AI suggests the next lines of code. The programmer checks them and decides what to keep.", o:BOT, c:1, e:"Sidekick: the person is still in charge and checks the work."},
+     {q:"A website chatbot answers customer questions instead of a call-centre worker.", o:BOT, c:0, e:"Robot: it replaces the person on the phone."},
+     {q:"A spell-checker underlines mistakes as you type your essay.", o:BOT, c:1, e:"Sidekick: you still write the essay and choose what to change."},
+     {q:"A robot vacuum cleans the office floor every night with no cleaner there.", o:BOT, c:0, e:"Robot: no person is doing the task."},
+     {q:"An app types up a doctor's spoken notes, and she checks them before saving.", o:BOT, c:1, e:"Sidekick: it saves her time, and she still checks."},
+     {q:"Number-plate cameras run a car park, so no attendant is needed.", o:BOT, c:0, e:"Robot: the attendant's job is automated."},
+     {q:"In an NHS study, AI read breast scans alongside the human experts and they found 10.4% more cancers.", o:BOT, c:1, e:"Sidekick: the AI helps the doctors, it does not replace them. (University of Aberdeen GEMINI study, Nature Cancer, March 2026)"}
+    ]},
+   {id:"proof", title:"Robot-proof?", trophy:"Future-Proof", two:true,
+    intro:`<p>The jobs that are <b>hardest</b> to automate need things AI is bad at:</p><div class="keybox">Skilled hands-on work &bull; Empathy and care &bull; Creativity &bull; People's trust</div><p>In each pair, pick the job that is <b>harder</b> for AI to take over.</p>`,
+    qs:[
+     {q:"Which is harder for AI to take over?", o:["Plumber","Typing data into spreadsheets"], c:0, e:"Plumber: every house is different and the work needs skilled hands."},
+     {q:"Which is harder for AI to take over?", o:["Sorting emails into folders","Care worker"], c:1, e:"Care worker: empathy, trust and physical care."},
+     {q:"Which is harder for AI to take over?", o:["Nurse","Writing first-draft product descriptions"], c:0, e:"Nurse: hands-on care and people's trust."},
+     {q:"Which is harder for AI to take over?", o:["Translating a simple instruction leaflet","Primary school teacher"], c:1, e:"Teacher: relationships, trust and reading a room of children."},
+     {q:"Which is harder for AI to take over?", o:["Electrician","Summarising meeting notes"], c:0, e:"Electrician: skilled, physical, and every job is different."}
+    ]},
+   {id:"nums", title:"Number check", trophy:"Number Ninja",
+    intro:`<p>A number is only evidence if you say <b>what it measures</b> and <b>where it came from</b>.</p><p>"Down 27%" means nothing on its own.</p>`,
+    qs:[
+     {q:"The World Economic Forum surveyed over 1,000 of the world's biggest employers. They expect about 170 million new jobs and 92 million lost between 2025 and 2030. What is the overall change?",
+      o:["92 million fewer jobs","78 million more jobs","262 million more jobs","No change"], c:1, e:"170 − 92 = 78 million more jobs overall, but different ones."},
+     {q:"Which one of these is actually evidence?",
+      o:["Down 27%!","Software jobs are dying","Starter software engineer jobs in the UK fell 27% in a year (GOV.UK, June 2026)","Everyone knows AI is taking jobs"], c:2, e:"It says what was measured, where, when, and who said it."},
+     {q:"The World Economic Forum figures are a forecast. What is the fairest thing to say about them?",
+      o:["They are guaranteed to happen","They are employers' predictions for the whole world, not facts about the UK","They are made up","They are only about AI jobs"], c:1,
+      e:"And AI is only one cause: the move to green energy and ageing populations matter too."},
+     {q:"Which jobs does the World Economic Forum say are growing fast?",
+      o:["Only AI and data jobs","AI and data jobs, but also care, teaching and farm work","Only farm work","None"], c:1, e:"It is not just tech jobs that are growing."}
+    ]}
+  ],
+  bonus:{id:"b1", title:"Bonus: Jobs deep dive", trophy:"Labour Market Legend", bonus:true,
+    intro:`<p>Finished early? Three tougher questions. Bonus points and a bonus trophy.</p>`,
+    qs:[
+     {q:"A survey found that just over a third of UK employers had cut entry-level jobs in the past year, partly because of AI. Which percentage is 'just over a third'?", o:["13%","36%","63%","83%"], c:1, e:"36%. (Work Foundation, Lancaster University, August 2026)"},
+     {q:"In that survey, which employers were MORE likely to have cut starter jobs?", o:["Small businesses","Bigger employers","They were exactly the same"], c:1, e:"Bigger employers were more likely to have cut them."},
+     {q:"The UK government tracked 38 types of entry-level job. How many were shrinking?", o:["8","18","30","38"], c:2, e:"30 out of 38 were shrinking. (GOV.UK, June 2026)"}
+    ]}
+ },
+ {
+  id:"m2", num:2, title:"Fairness and blame", sub:"Can AI be unfair? Who is to blame?", code:"BIAS",
+  acts:[
+   {id:"bias", title:"Bias buster", trophy:"Bias Buster",
+    intro:`<div class="keybox"><b>Algorithmic bias:</b> AI treating some groups unfairly, often because of the data it learned from.<br><b>Biased data in, biased results out.</b></div><p>Two real cases: a hiring AI at Amazon, and the face-matching system UK police use.</p>`,
+    qs:[
+     {q:"Amazon built an AI to score job applications. What did it learn from?", o:["A random sample of people from around the world","Ten years of past CVs, mostly from men","Its engineers' opinions","Social media posts"], c:1, e:"Most past applicants were men, so it learned that 'male-looking' CVs were better. (Reuters, October 2018)"},
+     {q:"It taught itself to mark down CVs containing one particular word. Which one?", o:["football","captain","women's","chess"], c:2, e:"As in 'women's chess club captain'. That is algorithmic bias."},
+     {q:"What did Amazon do with the tool?", o:["Sold it to other companies","Scrapped it","Made every recruiter use it","Nothing"], c:1, e:"Amazon scrapped it and said recruiters never relied on it alone."},
+     {chart:true, q:"Look at the chart. Which group was wrongly matched most often?", o:["White faces","Asian faces","Black faces","Black women"], c:3, e:"Black women: 9.9% at the lower setting."},
+     {chart:true, q:"Roughly how many times more often were Black faces wrongly matched than white faces?", o:["About 2 times","About 10 times","Over 100 times","The same"], c:2, e:"5.5 ÷ 0.04 = 137.5. Over 100 times more often."},
+     {q:"Why might a face-matching system be worse for some faces?", o:["It is completely random","Fewer pictures of those faces in the data it learned from or was tested on","Cameras cannot see some people","Some faces are harder for everyone to recognise"], c:1, e:"Biased data in, biased results out."},
+     {q:"What has happened since these tests?", o:["Nothing","Facial recognition was banned in the UK","Officers check every match, the setting was raised, and a new system with no significant bias in testing has been bought","Police stopped using cameras"], c:2, e:"Spotting the problem led to changes. (National Physical Laboratory tests for the Home Office, December 2025)"}
+    ]},
+   {id:"blame", title:"Blame-o-meter", trophy:"Fair Judge", blame:true,
+    intro:`<div class="keybox"><b>Accountability:</b> someone must answer for what happens, including with AI.</div><p>For each case, slide the Blame-o-meter to share out the blame. Then pick the strongest reason.</p><p>The first case is real. You will find out what the court decided.</p>`,
+    qs:[
+     {real:true, story:"A man's grandmother has just died. He asks an airline's website chatbot about cheaper bereavement fares. The chatbot gets the rules wrong and he pays hundreds of dollars more. The airline says the chatbot is responsible for its own actions.",
+      left:"The customer", right:"The airline", target:"right",
+      verdict:"<b>Real result:</b> Moffatt v Air Canada, February 2024. The tribunal said the airline was responsible and it had to pay him about 650 Canadian dollars plus fees. 100% the airline.",
+      q:"Why did the tribunal reject the airline's argument?", o:["The chatbot had been switched off","A chatbot is not a separate person: the company is responsible for everything on its website","The customer was a lawyer","Chatbots are always right"], c:1,
+      e:"If you choose to use AI, you answer for what it does. 'The computer did it' is not an excuse."},
+     {story:"A lorry driver follows his sat-nav down a narrow country lane. Signs at the start say 'Unsuitable for HGVs'. The lorry gets stuck and knocks down a wall.",
+      left:"The driver", right:"The sat-nav company",
+      verdict:"No single right answer here, but most people put most of the blame on the driver.",
+      q:"Which is the strongest reason?", o:["The sat-nav told him to go that way, so it is not his fault","The driver is in charge of the lorry, and the signs warned him","Sat-navs are annoying","The wall should not have been there"], c:1,
+      e:"The tool gave bad advice, but the human chose to ignore the warning signs."},
+     {story:"A 7-year-old asks the family's smart speaker for a doll's house. It orders one costing £170 using the saved bank card.",
+      left:"The parent", right:"The speaker company",
+      verdict:"No single right answer. This is a good one for shared blame.",
+      q:"Which is the strongest reason?", o:["The 7-year-old should pay it back","It was an accident, so nobody is to blame","Both share it: the company could ask for a PIN before buying, and the parent could switch on purchase controls","The doll's house shop"], c:2,
+      e:"Blame can be shared between the company and the user."},
+     {story:"A shop's AI camera wrongly flags a customer as a shoplifter. A security guard asks her to leave in front of everyone.",
+      left:"The shop", right:"The AI company",
+      verdict:"No single right answer, but remember the airline case.",
+      q:"Which is the strongest reason?", o:["The shop chose to use the AI, so a person should have checked before acting","The AI should be fined","Cameras are never wrong","Computers make mistakes, so it is nobody's fault"], c:0,
+      e:"A human should check before acting on an AI decision. And if the camera is worse for some faces, that is algorithmic bias too."}
+    ]}
+  ],
+  bonus:{id:"b2", title:"Bonus: Fairness deep dive", trophy:"Deep Diver", bonus:true,
+    intro:`<p>Finished early? Three tougher questions.</p>`,
+    qs:[
+     {q:"A Home Office survey asked people about police using facial recognition. How many supported it?", o:["1 in 10","1 in 3","2 in 3","Everyone"], c:2, e:"Two in three, although many worry about misuse or wrong matches. (Home Office, December 2025)"},
+     {q:"Amazon's engineers stopped the AI looking at the word 'women's'. Why did they still scrap it?", o:["It was too expensive","They could not be sure it would not find other ways to discriminate","It was too slow","Nobody applied for jobs"], c:1, e:"Removing one word does not remove the bias in the data."},
+     {q:"Which word means 'someone must answer for what happens'?", o:["Automation","Augmentation","Accountability","Algorithm"], c:2, e:"Accountability. A tool cannot be accountable; a person or organisation must be."}
+    ]}
+ },
+ {
+  id:"m3", num:3, title:"Rule makers", sub:"Who makes the rules?", code:"RULES",
+  acts:[
+   {id:"eu", title:"Risk ranker", trophy:"Risk Ranker",
+    intro:`<p>The EU AI Act (2024) was the world's first big AI law. It sorts AI by <b>risk</b>:</p><div class="keybox"><b>Banned:</b> too dangerous to allow (banned since February 2025).<br><b>High risk:</b> allowed, but with strict rules, because it affects people's lives (rules start December 2027).<br><b>Low risk:</b> few or no extra rules.</div><p>Sort each use of AI.</p>`,
+    qs:[
+     {q:"A government gives every citizen a 'social score' based on how they behave.", o:["Banned","High risk","Low risk"], c:0, e:"Banned: social scoring is one of the uses the EU has banned outright."},
+     {q:"An AI sorts CVs and decides who gets a job interview.", o:["Banned","High risk","Low risk"], c:1, e:"High risk: it affects people's jobs, so strict rules apply. Remember Amazon?"},
+     {q:"A spam filter moves junk emails out of your inbox.", o:["Banned","High risk","Low risk"], c:2, e:"Low risk: if it gets one wrong, not much harm is done."},
+     {q:"A school uses AI cameras to read pupils' emotions during lessons.", o:["Banned","High risk","Low risk"], c:0, e:"Banned: using AI to read emotions in schools and workplaces is banned in the EU."},
+     {q:"A bank uses AI to decide who can borrow money.", o:["Banned","High risk","Low risk"], c:1, e:"High risk: it affects people's lives and money."},
+     {q:"AI controls the enemy characters in a video game.", o:["Banned","High risk","Low risk"], c:2, e:"Low risk."},
+     {q:"An AI marks exams or decides who gets a place at a school.", o:["Banned","High risk","Low risk"], c:1, e:"High risk: education decisions shape people's futures."},
+     {q:"A streaming app recommends what to watch next.", o:["Banned","High risk","Low risk"], c:2, e:"Low risk."}
+    ]},
+   {id:"euuk", title:"EU or UK?", trophy:"Rule Spotter", two:true,
+    intro:`<p>The EU and the UK have taken very different approaches. Which one does each statement describe?</p>`,
+    qs:[
+     {q:"Has one big AI law that sorts AI by risk.", o:["EU","UK"], c:0, e:"The EU AI Act."},
+     {q:"Has no single AI law. Existing regulators (for data, health, money and so on) follow five principles.", o:["EU","UK"], c:1, e:"The UK's approach since 2023."},
+     {q:"Banned 'social scoring' in February 2025.", o:["EU","UK"], c:0, e:"The EU."},
+     {q:"Plans 'sandboxes', where companies can test new AI under relaxed rules.", o:["EU","UK"], c:1, e:"The UK's Regulating for Growth Bill, announced in the King's Speech, May 2026."},
+     {q:"Delayed its strict rules for high-risk AI to December 2027.", o:["EU","UK"], c:0, e:"The EU, because the technical standards were not ready."},
+     {q:"Plans new rules and a regulator for police facial recognition.", o:["EU","UK"], c:1, e:"The UK's Police Reform Bill. Announced, not yet law."}
+    ]},
+   {id:"princ", title:"The UK rulebook", trophy:"Principled",
+    intro:`<p>The UK says AI should follow <b>five principles</b>. Match each one to what it means.</p>`,
+    qs:[
+     {q:"Safety, security and robustness", o:["You can challenge an AI decision","AI should work properly and not be easy to break or hack","Someone must be responsible for the AI","AI should not treat people unfairly"], c:1, e:"It should work and be hard to break."},
+     {q:"Transparency and explainability", o:["People should know when AI is used and how it reached a decision","AI should be cheap","AI should work properly","You can get a mistake put right"], c:0, e:"No secret decisions."},
+     {q:"Fairness", o:["Everyone gets the same AI","AI should not treat people or groups unfairly","AI should be fast","AI must be made in the UK"], c:1, e:"Think back to Amazon and face matching."},
+     {q:"Accountability and governance", o:["AI should explain itself","A person or organisation must be responsible for what the AI does","AI should be safe","AI should be tested in a sandbox"], c:1, e:"'The chatbot did it' is not allowed."},
+     {q:"Contestability and redress", o:["AI must be fair","AI must be explained","You can challenge an AI decision and get it put right","AI must be checked by the government"], c:2, e:"Contest = challenge. Redress = put right."},
+     {q:"Which principle would have helped the Air Canada customer most?", o:["Safety, security and robustness","Fairness","Accountability and governance","Contestability and redress"], c:[2,3], e:"Either accountability (the airline must answer for its chatbot) or contestability and redress (he could challenge it and get his money back). Both are good answers."}
+    ]}
+  ],
+  bonus:{id:"b3", title:"Bonus: Safety inspector", trophy:"Safety Inspector", bonus:true,
+    intro:`<p>Finished early? Three questions on what the experts think.</p>`,
+    qs:[
+     {q:"Who wrote the International AI Safety Report 2026?", o:["One tech company","More than 100 experts, backed by over 30 countries","The EU only","A YouTuber"], c:1, e:"It was chaired by Yoshua Bengio, one of the best-known AI scientists."},
+     {q:"What did the report find about current safety measures?", o:["They are perfect","Determined attackers can often get around them","There are none at all","They make AI slower"], c:1, e:"AI is improving fast, and the safety measures have not fully kept up."},
+     {q:"Which of these is one of the risks the report lists?", o:["Scams and deepfakes","AI getting bored","Computers running out of numbers","Robots wanting holidays"], c:0, e:"It also lists AI that malfunctions and wider effects on jobs."}
+    ]}
+ }
+];
+
+const FACE = [["White faces",0.04],["Asian faces",4.0],["Black faces",5.5],["Black women",9.9]];
+
+/* ============================================================
+   STATE (saved in this browser only)
+   ============================================================ */
+const KEY = "y9l4_ai_missions_v1";
+let S = load();
+function fresh(){ return {name:"", pts:0, unlocked:{m1:true,m2:false,m3:false}, act:{}, trophies:{}, exit:{who:"",why:"",fact:""}}; }
+function load(){ try{ const t = JSON.parse(localStorage.getItem(KEY)); if(t && t.unlocked) return t; }catch(e){} return fresh(); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} hdr(); }
+
+function findAct(aid){
+  for(const m of MISSIONS){
+    for(const a of m.acts) if(a.id===aid) return {m,a};
+    if(m.bonus.id===aid) return {m,a:m.bonus};
+  }
+}
+function actState(a){ if(!S.act[a.id]) S.act[a.id]={ans:[],done:false,got:0,max:0}; return S.act[a.id]; }
+function maxPts(a){ return a.qs.reduce((t,q)=>t+(q.real?20:10),0); }
+function missionDone(m){ return m.acts.every(a=>S.act[a.id] && S.act[a.id].done); }
+function allDone(){ return MISSIONS.every(missionDone); }
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
+const app = document.getElementById("app");
+function esc(s){ return String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch])); }
+function hdr(){
+  document.getElementById("hdrName").textContent = S.name || "Welcome";
+  document.getElementById("hdrPts").textContent = S.pts + " points";
+}
+document.getElementById("hdrCab").onclick = ()=>{ if(S.name) cabinet(); };
+
+function trophySVG(tier){
+  const col = {gold:"#e8b923",silver:"#a9b4c2",bronze:"#c27c3e",star:"#3a7bd5",none:"#d5dde8"}[tier];
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M28 14h44v16c0 16-10 28-22 28S28 46 28 30z" fill="${col}"/>
+    <path d="M28 20H14c0 14 6 22 16 24M72 20h14c0 14-6 22-16 24" fill="none" stroke="${col}" stroke-width="6"/>
+    <rect x="44" y="56" width="12" height="14" fill="${col}"/>
+    <rect x="30" y="70" width="40" height="10" rx="3" fill="${col}"/>
+    <rect x="24" y="80" width="52" height="8" rx="3" fill="#0b2545"/>
+    <path d="M50 22l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#fff" opacity=".85"/>
+  </svg>`;
+}
+function confetti(){
+  const cols=["#e8b923","#3a7bd5","#1d4e89","#1f8a4c","#ffffff"];
+  for(let i=0;i<70;i++){
+    const d=document.createElement("div"); d.className="confetti";
+    d.style.left=Math.random()*100+"vw"; d.style.background=cols[i%cols.length];
+    d.style.animationDuration=(1.6+Math.random()*1.6)+"s"; d.style.animationDelay=(Math.random()*.4)+"s";
+    document.body.appendChild(d); setTimeout(()=>d.remove(),3800);
+  }
+}
+function toTop(){ window.scrollTo({top:0,behavior:"smooth"}); }
+
+/* ============================================================
+   SCREENS
+   ============================================================ */
+function home(){
+  hdr();
+  if(S.name) return menu();
+  app.innerHTML = `<div class="card center">
+    <h2>AI and Society</h2>
+    <p class="muted">Three missions. Short bursts. Trophies to win.</p>
+    <p>Type your first name to start.</p>
+    <div class="row" style="justify-content:center;max-width:420px;margin:0 auto">
+      <input type="text" id="nm" maxlength="20" placeholder="First name" style="flex:1">
+      <button class="btn" id="go">Start</button>
+    </div></div>`;
+  const go=()=>{ const v=document.getElementById("nm").value.trim(); if(v){ S.name=v; save(); menu(); } };
+  document.getElementById("go").onclick=go;
+  document.getElementById("nm").onkeydown=e=>{ if(e.key==="Enter") go(); };
+}
+
+function menu(){
+  hdr(); toTop();
+  let h = `<div class="card"><h2>Your missions</h2>
+    <p class="muted" style="margin:0">Do one mission at a time. When it is finished, stop and listen. Missions 2 and 3 need a code from your teacher.</p></div>`;
+  for(const m of MISSIONS){
+    const open = S.unlocked[m.id];
+    h += `<div class="card mission ${open?"":"locked"}">
+      <h3>Mission ${m.num}: ${m.title}</h3><div class="muted">${m.sub}</div>`;
+    if(!open){
+      h += `<div class="lockbox"><input type="text" id="code_${m.id}" placeholder="Unlock code"><button class="btn" data-unlock="${m.id}">Unlock</button></div><div class="err" id="err_${m.id}"></div>`;
+    } else {
+      h += `<ul class="acts">`;
+      for(const a of m.acts){
+        const st=S.act[a.id], done=st&&st.done;
+        h += `<li><span class="tick ${done?"done":""}">${done?"&#10003;":""}</span><span class="name">${a.title}</span>
+          <button class="btn ${done?"ghost":""}" data-act="${a.id}">${done?"Replay":(st&&st.ans.length?"Continue":"Start")}</button></li>`;
+      }
+      if(missionDone(m)){
+        const b=m.bonus, st=S.act[b.id], done=st&&st.done;
+        h += `<li><span class="tick ${done?"done":""}">${done?"&#10003;":"+"}</span><span class="name"><b>${b.title}</b></span>
+          <button class="btn ${done?"ghost":""}" data-act="${b.id}">${done?"Replay":"Try it"}</button></li>`;
+      }
+      h += `</ul>`;
+    }
+    h += `</div>`;
+  }
+  h += `<div class="center"><button class="btn" id="toCab">Trophy cabinet and exit ticket</button></div>`;
+  app.innerHTML = h;
+  app.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>startAct(b.dataset.act));
+  app.querySelectorAll("[data-unlock]").forEach(b=>b.onclick=()=>tryUnlock(b.dataset.unlock));
+  app.querySelectorAll(".lockbox input").forEach(inp=>inp.onkeydown=e=>{ if(e.key==="Enter") tryUnlock(inp.id.slice(5)); });
+  document.getElementById("toCab").onclick=cabinet;
+}
+
+function tryUnlock(mid){
+  const m = MISSIONS.find(x=>x.id===mid);
+  const v = document.getElementById("code_"+mid).value.trim().toUpperCase();
+  if(v===m.code){ S.unlocked[mid]=true; save(); menu(); }
+  else document.getElementById("err_"+mid).textContent = "Not quite. Wait for your teacher to give you the code.";
+}
+
+/* ---------- Activities ---------- */
+let cur = null; // {a, qi, replay, phase, slider}
+
+function startAct(aid){
+  const {a} = findAct(aid);
+  const st = actState(a);
+  const replay = st.done;
+  // Resume at the first question not fully answered. A Blame-o-meter case only
+  // counts once its reason is picked; if the slider was already locked, go
+  // straight to the reason so the slider points cannot be won twice.
+  let qi = 0, phase = "slide";
+  if(!replay){
+    while(qi < st.ans.length && st.ans[qi] !== undefined && !(a.blame && st.ans[qi].reason === undefined)) qi++;
+    if(a.blame && st.ans[qi] && st.ans[qi].slider !== undefined) phase = "reason";
+  }
+  cur = {a, qi, replay, phase, slider:50};
+  if(cur.qi===0) intro(); else question();
+}
+
+function intro(){
+  const a=cur.a; toTop();
+  app.innerHTML = `<div class="card intro">
+    <div class="muted">${a.bonus?"Bonus round":"Activity"}</div>
+    <h2>${a.title}</h2>${a.intro}
+    ${cur.replay?`<p class="note muted">Replay: your trophy and points are already safe. This is just practice.</p>`:""}
+    <div class="spacer"></div>
+    <div class="row"><button class="btn" id="st">Let's go</button><button class="btn ghost" id="bk">Back to missions</button></div></div>`;
+  document.getElementById("st").onclick=question;
+  document.getElementById("bk").onclick=menu;
+}
+
+function progressBar(){
+  const n=cur.a.qs.length;
+  return `<div class="row" style="justify-content:space-between"><b>${cur.a.title}</b><span class="muted">Question ${cur.qi+1} of ${n}</span></div>
+    <div class="progress"><div style="width:${(cur.qi/n)*100}%"></div></div>`;
+}
+
+function chartHTML(){
+  return `<div class="chart">${FACE.map(([l,v])=>`<div class="bar"><span>${l}</span><div class="track"><div class="fill" style="width:${v/10*100}%"></div></div><b>${v}%</b></div>`).join("")}
+  <div class="cap">How often UK police face matching wrongly matched each group, at a lower setting. Source: National Physical Laboratory tests for the Home Office, December 2025.</div></div>`;
+}
+
+function question(){
+  const a=cur.a, q=a.qs[cur.qi]; toTop();
+  if(a.blame && cur.phase==="slide") return blameSlide();
+  let h = `<div class="card">${progressBar()}`;
+  if(a.blame) h += `<p class="muted" style="margin-top:0">${esc(q.story)}</p>`;
+  if(q.chart) h += chartHTML();
+  h += `<div class="qtext">${esc(q.q)}</div><div class="opts ${a.two||q.o.length===2?"two":""}">`;
+  q.o.forEach((o,i)=> h += `<button class="opt" data-i="${i}">${esc(o)}</button>`);
+  h += `</div><div id="fb"></div></div>`;
+  app.innerHTML = h;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+}
+
+function answer(i){
+  const a=cur.a, q=a.qs[cur.qi], st=actState(a);
+  const correct = Array.isArray(q.c) ? q.c : [q.c];
+  const ok = correct.includes(i);
+  app.querySelectorAll(".opt").forEach(b=>{
+    const j=+b.dataset.i; b.disabled=true;
+    if(correct.includes(j)) b.classList.add("right");
+    else if(j===i) b.classList.add("wrong");
+  });
+  if(!cur.replay){
+    let gained = ok?10:0;
+    if(a.blame){
+      const prev = st.ans[cur.qi] || {};
+      prev.reason = ok; st.ans[cur.qi] = prev;
+    } else st.ans[cur.qi] = ok;
+    st.got += gained; S.pts += gained; save();
+  }
+  const fb=document.getElementById("fb");
+  fb.innerHTML = `<div class="feedback ${ok?"good":"bad"}"><b class="head">${ok?"Correct! +10":"Not this time"}</b>${q.e}</div>
+    <div class="spacer"></div><button class="btn" id="nx">${cur.qi+1<a.qs.length?"Next":"Finish"}</button>`;
+  document.getElementById("nx").onclick=next;
+  document.getElementById("nx").scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function next(){
+  cur.qi++; cur.phase="slide"; cur.slider=50;
+  if(cur.qi < cur.a.qs.length) question(); else finishAct();
+}
+
+/* ---------- Blame-o-meter ---------- */
+function blameSlide(){
+  const q=cur.a.qs[cur.qi];
+  app.innerHTML = `<div class="card">${progressBar()}
+    ${q.real?`<div class="pill" style="display:inline-block;margin-bottom:10px">Real case</div>`:`<div class="pill" style="display:inline-block;margin-bottom:10px;background:#4a5d75">Imagine this</div>`}
+    <div class="qtext">${esc(q.story)}</div>
+    <p><b>Who is to blame?</b> Slide to share it out.</p>
+    <div class="slider-wrap">
+      <div class="slider-labels"><span>${esc(q.left)}</span><span>${esc(q.right)}</span></div>
+      <input type="range" min="0" max="100" step="5" value="50" id="sl">
+    </div>
+    <div class="split" id="split"></div>
+    <button class="btn" id="lock">Lock in my verdict</button>
+    <div id="fb"></div></div>`;
+  const sl=document.getElementById("sl"), sp=document.getElementById("split");
+  const show=()=>{ const r=+sl.value; sp.textContent = `${100-r}% ${q.left}   |   ${r}% ${q.right}`; };
+  sl.oninput=show; show();
+  document.getElementById("lock").onclick=()=>{
+    const r=+sl.value; sl.disabled=true; document.getElementById("lock").disabled=true;
+    let msg = q.verdict, cls="info", head="Verdict locked";
+    if(q.real){
+      const near = q.target==="right" ? r>=70 : r<=30;
+      if(!cur.replay){
+        const st=actState(cur.a); st.ans[cur.qi]={slider:r};
+        if(near){ st.got+=10; S.pts+=10; }
+        save();
+      }
+      head = near ? "Good call! +10" : "The court saw it differently";
+      cls = near ? "good" : "bad";
+    }
+    document.getElementById("fb").innerHTML = `<div class="feedback ${cls}"><b class="head">${head}</b>${msg}</div>
+      <div class="spacer"></div><button class="btn" id="rs">Now pick the strongest reason</button>`;
+    document.getElementById("rs").onclick=()=>{ cur.phase="reason"; question(); };
+    document.getElementById("rs").scrollIntoView({behavior:"smooth",block:"center"});
+  };
+}
+
+/* ---------- Finish ---------- */
+function tierFor(pct){ return pct>=0.85?"gold":pct>=0.6?"silver":"bronze"; }
+
+function finishAct(){
+  const a=cur.a, st=actState(a); toTop();
+  if(cur.replay){
+    app.innerHTML = `<div class="card center"><h2>Practice done</h2><p>Your trophy for <b>${a.title}</b> is still safe in your cabinet.</p><button class="btn" id="bk">Back to missions</button></div>`;
+    document.getElementById("bk").onclick=menu; return;
+  }
+  st.done=true; st.max=maxPts(a);
+  const pct = st.got/st.max, tier = tierFor(pct);
+  S.trophies[a.id] = {name:a.trophy, tier, bonus:!!a.bonus};
+  let superNew = false;
+  if(allDone() && !S.trophies.super){ S.trophies.super={name:"AI Citizen", tier:"star", bonus:false}; superNew=true; }
+  save(); confetti();
+  const {m} = findAct(a.id);
+  const mDone = missionDone(m);
+  let h = `<div class="card center">
+    <div class="trophy big">${trophySVG(tier)}<div class="tier">${tier} trophy</div><h2 style="margin:0">${a.trophy}</h2></div>
+    <p>You scored <b>${st.got}</b> out of <b>${st.max}</b> on ${a.title}.</p>`;
+  if(superNew) h += `<div class="feedback good"><b class="head">Super trophy unlocked: AI Citizen</b>You have finished all three missions.</div>`;
+  if(a.bonus) h += `<p>Bonus complete. Now wait for your teacher.</p>`;
+  else if(mDone) h += `<div class="feedback info"><b class="head">Mission ${m.num} complete!</b>Wait for your teacher to call eyes to the front. Finished early? A bonus round has appeared in Mission ${m.num}.</div>`;
+  h += `<div class="spacer"></div><button class="btn" id="bk">Back to missions</button></div>`;
+  app.innerHTML = h;
+  document.getElementById("bk").onclick=menu;
+}
+
+/* ---------- Cabinet + exit ticket ---------- */
+function cabinet(){
+  hdr(); toTop();
+  const list = [];
+  MISSIONS.forEach(m=>{ m.acts.forEach(a=>list.push([a.id,a.trophy])); list.push([m.bonus.id,m.bonus.trophy]); });
+  list.push(["super","AI Citizen"]);
+  let h = `<div class="card"><h2>Trophy cabinet</h2><div class="cabinet">`;
+  list.forEach(([id,name])=>{
+    const t=S.trophies[id];
+    h += `<div class="slot trophy ${t?"":"empty"}">${trophySVG(t?t.tier:"none")}<div class="tname">${name}</div><div class="tier">${t?(t.tier==="star"?"super":t.tier):"locked"}</div></div>`;
+  });
+  h += `</div></div>`;
+
+  const e=S.exit;
+  const opts=["The company that made the tool","The school","The teacher","Shared between them"];
+  h += `<div class="card"><h2>Exit ticket</h2>
+    <p class="muted">On your own, in silence. Your teacher will tell you when.</p>
+    <p><b>1.</b> Which fact from today surprised you most, and why?</p><textarea id="fact" placeholder="I was surprised that...">${esc(e.fact)}</textarea>
+    <p><b>2.</b> A school's AI tool marks a pupil's test wrongly, and the pupil is moved down a set. Who should be accountable?</p>
+    <div class="opts two">${opts.map((o,i)=>`<button class="opt ${e.who===o?"sel":""}" data-who="${i}">${o}</button>`).join("")}</div>
+    <p><b>Give one reason:</b></p><textarea id="why" placeholder="Because...">${esc(e.why)}</textarea>
+    <div class="spacer"></div><button class="btn" id="sv">Save and make my certificate</button></div>
+    <div id="certBox"></div>
+    <div class="center"><button class="btn ghost" id="bk">Back to missions</button></div>
+    <div class="spacer"></div>
+    <div class="center note muted"><span id="rsWrap"><button class="btn ghost" id="rs" style="font-size:14px;padding:6px 12px">Start again (clears everything)</button></span></div>`;
+  app.innerHTML = h;
+  app.querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{
+    e.who = opts[+b.dataset.who]; save();
+    app.querySelectorAll("[data-who]").forEach(x=>x.classList.toggle("sel", x===b));
+  });
+  document.getElementById("why").oninput=ev=>{ e.why=ev.target.value; save(); };
+  document.getElementById("fact").oninput=ev=>{ e.fact=ev.target.value; save(); };
+  document.getElementById("sv").onclick=cert;
+  document.getElementById("bk").onclick=menu;
+  document.getElementById("rs").onclick=()=>{
+    document.getElementById("rsWrap").innerHTML = `Are you sure? All points and trophies will go. <button class="btn" id="rsYes" style="font-size:14px;padding:6px 12px;background:#c0392b">Yes, clear it</button> <button class="btn ghost" id="rsNo" style="font-size:14px;padding:6px 12px">No</button>`;
+    document.getElementById("rsYes").onclick=()=>{ S=fresh(); save(); home(); };
+    document.getElementById("rsNo").onclick=cabinet;
+  };
+  if(e.who || e.why || e.fact) cert(true);
+}
+
+function cert(quiet){
+  const e=S.exit, n=Object.keys(S.trophies).length;
+  const box=document.getElementById("certBox");
+  box.innerHTML = `<div class="card cert">
+    <div class="muted">Year 9 Digital Futures: AI and Society</div>
+    <h2>${esc(S.name)}</h2>
+    <p><b>${S.pts}</b> points &bull; <b>${n}</b> trophies${S.trophies.super?" &bull; <b>AI Citizen</b>":""}</p>
+    <div style="text-align:left">
+      <p><b>What surprised me:</b> ${esc(e.fact||"(not answered)")}</p>
+      <p><b>Who is accountable?</b> ${esc(e.who||"(not answered)")}<br><b>Reason:</b> ${esc(e.why||"(not answered)")}</p>
+    </div>
+    <p class="note muted">Take a screenshot of this certificate if your teacher asks you to hand it in.</p></div>`;
+  if(!quiet) box.scrollIntoView({behavior:"smooth"});
+}
+
+home();
+</script>
+</body>
+</html>
