@@ -1,7 +1,7 @@
 import json, re, sys
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
-SITE = os.path.join(HERE, "..", "ks3")
+SITE = os.path.join(HERE, "..", "ks3", "year-9")
 sys.path.insert(0, HERE)
 import importlib
 import pack_content
@@ -186,7 +186,7 @@ html = f"""<!DOCTYPE html>
 <header class="top">
   <div class="brand"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="3.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9" stroke="currentColor" stroke-width="2.2"/></svg>
     Python Rescue <small>15-minute help</small></div>
-  <a class="homelink" href="./" title="Back to the Key Stage 3 resources">&larr; Key Stage 3</a>
+  <a class="homelink" href="./" title="Back to the Year 9 resources">&larr; Year 9</a>
   <nav class="nav" aria-label="Topics">
     <button data-go="home">All topics</button>
     {"".join(f'<button data-go="{t["id"]}">{t["title"]}</button>' for t in TOPICS)}

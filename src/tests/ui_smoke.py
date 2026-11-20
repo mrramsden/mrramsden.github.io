@@ -17,7 +17,10 @@ from solutions2 import GOOD as G2         # noqa: E402
 
 # section page -> the pages its cards should open
 SECTIONS = {
-    "ks3/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "python-rescue.html", "html-setup.html", "html-reference.html", "storage-through-time.html"],
+    "ks3/": ["year-7/", "year-8/", "year-9/"],
+    "ks3/year-7/": ["html-setup.html", "html-reference.html"],
+    "ks3/year-8/": ["storage-through-time.html"],
+    "ks3/year-9/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "python-rescue.html"],
     "ks4/": ["pseudocode-playground.html", "neko-cafe.html", "pocket-pet.html", "station-x.html", "crystal-caves.html", "dungeon-architect.html", "../ks5/robot-game-procedural.html", "sorting-visualiser.html", "bitmap-images.html", "gcse-jeopardy.html"],
     "digital-futures/": ["year-8/", "year-9/"],
     "digital-futures/year-8/": ["fact-check-challenge.html"],
@@ -25,6 +28,9 @@ SECTIONS = {
     "ks5/": ["algorithms-lab.html", "merge-sort-recursion.html", "dijkstra-table-method.html", "a-star-table-method.html", "../ks4/sorting-visualiser.html", "boolean-algebra-slips.html", "../ks4/pseudocode-playground.html", "robot-game-procedural.html", "robot-game-oop.html", "shelter-project.html", "ashwood-manor.html", "../ks4/crystal-caves.html", "noticeboard.html", "alevel-jeopardy.html"],
 }
 MOVED = ["escape-the-dungeon-1", "escape-the-dungeon-2", "escape-the-dungeon-3", "python-rescue"]
+# KS3 pages that moved into year folders (Nov 2026): old ks3/ address -> new home
+KS3_MOVED = {"escape-the-dungeon-1": 9, "escape-the-dungeon-2": 9, "escape-the-dungeon-3": 9, "python-rescue": 9,
+             "html-setup": 7, "html-reference": 7, "storage-through-time": 8}
 
 
 def serve():
@@ -91,11 +97,15 @@ async def main(base):
         print("fonts loaded on the lab:", sorted(set(fonts))); problems += not any("Atkinson" in f for f in fonts)
         for old in MOVED:
             await pg.goto(base + "python/" + old + ".html#keep"); await pg.wait_for_load_state("load"); await pg.wait_for_timeout(200)
-            ok = pg.url == base + "ks3/" + old + ".html#keep"
+            ok = pg.url == base + "ks3/year-9/" + old + ".html#keep"
             print(f"old link python/{old}.html redirects: {ok}"); problems += not ok
+        for old, y in KS3_MOVED.items():
+            await pg.goto(base + "ks3/" + old + ".html#keep"); await pg.wait_for_load_state("load"); await pg.wait_for_timeout(200)
+            ok = pg.url == base + f"ks3/year-{y}/" + old + ".html#keep"
+            print(f"old link ks3/{old}.html redirects: {ok}"); problems += not ok
 
         # one real check per family, to prove Python loads from the hosted page
-        await pg.goto(base + "ks3/escape-the-dungeon-2.html")
+        await pg.goto(base + "ks3/year-9/escape-the-dungeon-2.html")
         await pg.click(".lvcard.lv-B")
         await pg.click('#dots [data-go="4"]')
         art = pg.locator('[data-part="p4b3"]')
@@ -105,7 +115,7 @@ async def main(base):
         msg = (await art.locator(".msg").first.inner_text()).replace("\n", " | ")
         print("Part 2 check:", msg[:60]); problems += "passed" not in msg
 
-        await pg.goto(base + "ks3/python-rescue.html#loop")
+        await pg.goto(base + "ks3/year-9/python-rescue.html#loop")
         fix = pg.locator("#fixslot .runner")
         await fix.locator(".run").click()
         await fix.locator(".msg").first.wait_for(timeout=90000)

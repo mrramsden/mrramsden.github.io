@@ -2,7 +2,7 @@
 
     python3 add_static.py SOURCE.html SECTION NAME.html
 
-SECTION is ks3, ks4, ks5, digital-futures/year-8 or digital-futures/year-9. The source is kept in src/static/ and the page is
+SECTION is ks3/year-7, ks3/year-8, ks3/year-9, ks4, ks5, digital-futures/year-8 or digital-futures/year-9. The source is kept in src/static/ and the page is
 written to ../SECTION/NAME.html. The script:
   - swaps Google Fonts links for the fonts hosted in assets/fonts (no outside requests),
   - adds a small back link to the section page at the top,
@@ -13,7 +13,7 @@ import os, re, shutil, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
-LABELS = {"ks3": "Key Stage 3", "ks4": "Key Stage 4", "ks5": "Key Stage 5",
+LABELS = {"ks3": "Key Stage 3", "ks3/year-7": "Year 7", "ks3/year-8": "Year 8", "ks3/year-9": "Year 9", "ks4": "Key Stage 4", "ks5": "Key Stage 5",
           "digital-futures/year-8": "Year 8 Digital Futures", "digital-futures/year-9": "Year 9 Digital Futures"}
 
 BACK = (
