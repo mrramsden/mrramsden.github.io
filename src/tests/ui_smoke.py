@@ -14,13 +14,14 @@ PYO = os.path.join(HERE, "node_modules", "pyodide") + "/"
 sys.path.insert(0, os.path.join(HERE, ".."))
 from solutions import GOOD as G3          # noqa: E402
 from solutions2 import GOOD as G2         # noqa: E402
+from solutions4 import GOOD as G4         # noqa: E402
 
 # section page -> the pages its cards should open
 SECTIONS = {
     "ks3/": ["year-7/", "year-8/", "year-9/"],
     "ks3/year-7/": ["html-setup.html", "html-reference.html"],
     "ks3/year-8/": ["storage-through-time.html"],
-    "ks3/year-9/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "python-rescue.html"],
+    "ks3/year-9/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "heroes-dictionary.html", "python-rescue.html"],
     "ks4/": ["pseudocode-playground.html", "neko-cafe.html", "pocket-pet.html", "station-x.html", "crystal-caves.html", "dungeon-architect.html", "../ks5/robot-game-procedural.html", "sorting-visualiser.html", "bitmap-images.html", "gcse-jeopardy.html"],
     "digital-futures/": ["year-8/", "year-9/"],
     "digital-futures/year-8/": ["fact-check-challenge.html"],
@@ -114,6 +115,16 @@ async def main(base):
         await art.locator(".msg.pass, .msg.warn, .msg.error").first.wait_for(timeout=90000)
         msg = (await art.locator(".msg").first.inner_text()).replace("\n", " | ")
         print("Part 2 check:", msg[:60]); problems += "passed" not in msg
+
+        await pg.goto(base + "ks3/year-9/heroes-dictionary.html")
+        await pg.click(".lvcard.lv-B")
+        await pg.click('#dots [data-go="3"]')
+        art = pg.locator('[data-part="h3b3"]')
+        await art.locator("textarea").fill(G4["h3b3"][0])
+        await art.locator(".check").click()
+        await art.locator(".msg.pass, .msg.warn, .msg.error").first.wait_for(timeout=90000)
+        msg = (await art.locator(".msg").first.inner_text()).replace("\n", " | ")
+        print("Heroes Dictionary check:", msg[:60]); problems += "passed" not in msg
 
         await pg.goto(base + "ks3/year-9/python-rescue.html#loop")
         fix = pg.locator("#fixslot .runner")

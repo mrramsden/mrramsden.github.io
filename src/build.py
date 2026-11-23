@@ -4,8 +4,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.join(HERE, "..", "ks3", "year-9")
 sys.path.insert(0, HERE)
 PART = sys.argv[1] if len(sys.argv) > 1 else "3"
-NAMES = {"1": "escape-the-dungeon-1", "2": "escape-the-dungeon-2", "3": "escape-the-dungeon-3"}
-MODS = {"1": ("checks1", "predict1"), "2": ("checks2", "predict2"), "3": ("checks", "predict")}
+NAMES = {"1": "escape-the-dungeon-1", "2": "escape-the-dungeon-2", "3": "escape-the-dungeon-3", "4": "heroes-dictionary"}
+MODS = {"1": ("checks1", "predict1"), "2": ("checks2", "predict2"), "3": ("checks", "predict"), "4": ("checks4", "predict4")}
 CHECKS = importlib.import_module(MODS[PART][0]).CHECKS
 PREDICT = importlib.import_module(MODS[PART][1]).PREDICT
 OUT = os.path.join(SITE, NAMES[PART] + ".html")

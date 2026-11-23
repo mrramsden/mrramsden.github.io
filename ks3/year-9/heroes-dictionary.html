@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Heroes Dictionary: Escape the Dungeon</title>
+<style>
+:root{
+  --navy:#0B1F3A; --deep:#13315C; --blue:#1F6FB2; --mid:#5B8DBE; --sky:#8CCBF5;
+  --pale:#EAF2FB; --bg:#F3F7FC; --line:#D3E2F2; --amber:#F2A541; --amber-pale:#FFF4E2;
+  --red:#C2413A; --red-pale:#FDECEA; --green:#2A9D6F;
+  --lvB:#2A9D8F; --lvI:#1F6FB2; --lvA:#13315C;
+  --code:"Cascadia Mono","Cascadia Code",Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--bg);color:var(--navy);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:17px;line-height:1.55}
+code{font-family:var(--code);background:var(--pale);color:var(--deep);padding:1px 5px;border-radius:4px;font-size:.92em}
+h1,h2,h3{line-height:1.2;margin:0}
+button{font:inherit;cursor:pointer}
+svg.i{width:1.1em;height:1.1em;vertical-align:-.18em;flex:none}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;display:flex;align-items:center;gap:18px;padding:10px 22px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.1rem;margin-right:auto}
+.brand svg{color:var(--amber);width:28px;height:28px}
+.brand small{font-weight:400;color:var(--sky);font-size:.9rem}
+.lvswitch{display:flex;background:var(--deep);border-radius:999px;padding:4px;gap:2px}
+.lvswitch span{font-size:.8rem;color:var(--sky);align-self:center;padding:0 8px 0 10px}
+.lvswitch button{border:0;background:transparent;color:#fff;padding:6px 14px;border-radius:999px;font-size:.92rem}
+.lvswitch button[aria-pressed="true"]{background:#fff;color:var(--navy);font-weight:700}
+.filebar{display:flex;gap:6px;align-items:center}
+.filebar button{border:0;border-radius:999px;padding:6px 14px;font-size:.92rem;font-weight:600;display:inline-flex;gap:6px;align-items:center;background:var(--deep);color:#fff;position:relative}
+.filebar button.savebtn{background:var(--amber);color:var(--navy)}
+.filebar button.savebtn.dirty::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid var(--navy)}
+.filebar button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.toast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 18px;border-radius:10px;box-shadow:0 4px 14px rgba(11,31,58,.3);z-index:30;font-size:.95rem;max-width:90vw}
+.toast.bad{background:var(--red)}
+.toast[hidden]{display:none}
+.dots{display:flex;justify-content:center;gap:8px;padding:12px 10px 4px;flex-wrap:wrap}
+.dot{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:#fff;color:var(--mid);font-weight:700;font-size:.85rem;display:grid;place-items:center;padding:0}
+.dot.current{border-color:var(--blue);color:var(--blue);box-shadow:0 0 0 3px rgba(31,111,178,.2)}
+.dot.done-B{background:var(--lvB);border-color:var(--lvB);color:#fff}
+.dot.done-I{background:var(--lvI);border-color:var(--lvI);color:#fff}
+.dot.done-A{background:var(--lvA);border-color:var(--lvA);color:#fff}
+
+main{max-width:1000px;margin:0 auto;padding:10px 20px 110px}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(19,49,92,.12);padding:22px 24px;margin:18px 0}
+
+/* stage header */
+.stage-head{background:var(--deep);color:#fff;border-radius:16px;padding:24px 28px;margin-top:14px;display:flex;gap:22px;align-items:center}
+.stage-head .badge{flex:none;width:76px;height:76px;border-radius:50%;background:var(--navy);display:grid;place-items:center;color:var(--amber);font-size:2rem;font-weight:800}
+.stage-head .kicker{color:var(--sky);font-size:.9rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.stage-head h1{font-size:2rem;margin:2px 0 6px}
+.stage-head p{margin:0;color:#DCE9F7}
+.stage-head code{background:rgba(255,255,255,.14);color:#fff}
+
+h2.sec{display:flex;align-items:center;gap:10px;font-size:1.3rem;margin-bottom:10px}
+h2.sec svg{color:var(--blue)}
+.learn p{margin:.4em 0}
+.learn ul{margin:.3em 0;padding-left:1.3em}
+
+details.help{padding:0}
+details.help summary{list-style:none;cursor:pointer;padding:16px 24px;font-weight:700;display:flex;align-items:center;gap:10px}
+details.help summary::-webkit-details-marker{display:none}
+details.help summary::after{content:"Show";margin-left:auto;font-weight:600;font-size:.85rem;color:var(--blue)}
+details.help[open] summary::after{content:"Hide"}
+.helpgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:0 24px 20px}
+.helpgrid h3{font-size:1rem;margin-bottom:6px;color:var(--deep)}
+.kw{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.95rem}
+.kw dt{font-family:var(--code);font-weight:700;color:var(--blue)}
+.kw dd{margin:0}
+.mist{margin:0;padding-left:1.2em;font-size:.95rem}
+.mist li{margin-bottom:4px}
+
+/* level panel */
+.lvhead{display:flex;align-items:center;gap:14px;margin:30px 0 4px}
+.lvpill{color:#fff;font-weight:700;border-radius:999px;padding:6px 16px;font-size:.95rem}
+.lv-B .lvpill{background:var(--lvB)} .lv-I .lvpill{background:var(--lvI)} .lv-A .lvpill{background:var(--lvA)}
+.lvhead p{margin:0;color:var(--deep)}
+.part{border-left:0}
+.part h3{font-size:1.2rem;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.tasknum{background:var(--pale);color:var(--blue);font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 10px;border-radius:999px}
+.part p{margin:.4em 0}
+.part ul{margin:.3em 0 .6em;padding-left:1.3em}
+pre.sample{background:var(--navy);color:#E6F0FB;font-family:var(--code);font-size:.92rem;padding:12px 16px;border-radius:10px;overflow-x:auto;margin:10px 0;line-height:1.45}
+.steps{list-style:none;padding:0;margin:10px 0}
+.steps li{margin:6px 0}
+.steps label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.steps input{width:20px;height:20px;margin-top:3px;accent-color:var(--green);flex:none}
+.steps input:checked + span{color:var(--mid);text-decoration:line-through}
+
+.part.kind-ext, .part.kind-stretch{background:linear-gradient(#fff,#fff) padding-box;border:2px dashed var(--sky)}
+.part.locked .pbody{display:none}
+.lockrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.lockrow p{margin:0;color:var(--deep)}
+.lockrow[hidden]{display:none}
+
+.hints{margin-top:12px}
+.hintbtn{background:var(--amber-pale);border:1px solid var(--amber);color:var(--navy);border-radius:8px;padding:7px 14px;display:inline-flex;gap:8px;align-items:center;font-weight:600}
+.hintbtn[disabled]{opacity:.55;cursor:default}
+.hint{background:var(--amber-pale);border-radius:8px;padding:9px 14px;margin-top:8px;font-size:.95rem}
+.hint b{color:#9A5B00}
+
+.btn{border:0;border-radius:9px;padding:9px 18px;font-weight:600;display:inline-flex;gap:8px;align-items:center}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.ghost{background:var(--pale);color:var(--deep)}
+.btn.amber{background:var(--amber);color:var(--navy)}
+.btn:focus-visible,.dot:focus-visible,.lvswitch button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+
+/* runner */
+.runner{margin-top:14px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.rbar{display:flex;align-items:center;gap:6px;background:var(--pale);padding:7px 10px;flex-wrap:wrap}
+.rbar .lbl{font-size:.8rem;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.06em;margin-right:auto;padding-left:4px}
+.rbar button{border:0;border-radius:7px;padding:6px 12px;font-size:.88rem;font-weight:600;display:inline-flex;gap:6px;align-items:center;background:#fff;color:var(--deep)}
+.rbar button.run{background:var(--green);color:#fff}
+.rbar button.stop{background:var(--red);color:#fff}
+.rbar button[disabled]{opacity:.45;cursor:default}
+.rbar button.check{background:var(--amber);color:var(--navy)}
+.gut div.todo{background:var(--amber-pale);color:#9A5B00;border-radius:4px;padding-right:4px;box-shadow:inset 3px 0 0 var(--amber)}
+.msg.pass{background:#E3F4EC;color:#1C5C42;border-left:5px solid var(--green)}
+.passed{background:var(--green);color:#fff;font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;display:inline-flex;gap:5px;align-items:center;margin-left:auto}
+.cov{background:#fff;border-top:1px solid var(--line);padding:10px 14px;font-size:.95rem}
+.cov[hidden]{display:none}
+.cov .covtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cov .bar{flex:1;min-width:120px;height:10px;background:var(--pale);border-radius:99px;overflow:hidden}
+.cov .bar i{display:block;height:100%;background:var(--green);border-radius:99px}
+.cov ul{margin:6px 0 0;padding-left:1.2em}
+.cov li code{font-size:.85em}
+.cov .covreset{border:0;background:none;color:var(--blue);font-weight:600;font-size:.85rem;padding:0;text-decoration:underline}
+.predict .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.predict .opt{border:2px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;text-align:left;font-family:var(--code);font-size:.95rem;color:var(--navy)}
+.predict .opt:not([disabled]):hover{border-color:var(--blue)}
+.predict .opt.right{border-color:var(--green);background:#E3F4EC}
+.predict .opt.wrong{border-color:var(--red);background:var(--red-pale)}
+.predict .opt[disabled]{cursor:default}
+.predict .q{font-weight:700;margin:10px 0 0}
+.checkcount{font-size:.9rem;color:var(--deep);margin-top:4px}
+@media (max-width:760px){.predict .opts{grid-template-columns:1fr}}
+.ed{display:grid;grid-template-columns:auto 1fr;font-family:var(--code);font-size:15px;line-height:22px;background:#fff}
+.gut{background:#F6F9FD;color:#9AB3CF;text-align:right;padding:10px 8px 10px 10px;user-select:none;border-right:1px solid var(--line);min-width:38px}
+.gut div{height:22px}
+.ig{display:inline-block;white-space:pre;box-shadow:inset 2px 0 0 rgba(31,111,178,.45)}
+.ig.l1{background:rgba(31,111,178,.10)}.ig.l2{background:rgba(46,139,106,.13)}.ig.l3{background:rgba(108,85,184,.12)}
+.ig.bad{background:rgba(242,165,65,.55);box-shadow:inset 2px 0 0 var(--amber)}
+.edwrap{position:relative;background:#fff;min-width:0}
+.edwrap .guides{position:absolute;inset:0;margin:0;padding:10px 12px;font:inherit;line-height:22px;white-space:pre;color:transparent;overflow:hidden;pointer-events:none;tab-size:4;background:none}
+.edwrap textarea{position:relative;background:transparent!important;width:100%;display:block}
+.gut div.lintmark{background:var(--amber-pale);color:#9A5B00;border-radius:4px;padding-right:4px;box-shadow:inset 3px 0 0 var(--amber);cursor:help}
+.lint{display:flex;gap:8px;align-items:flex-start;background:var(--amber-pale);border-top:1px solid #F5D9A8;padding:8px 14px;font-size:.92rem;color:#6B4200}
+.lint[hidden]{display:none}
+.homelink{color:#fff;background:rgba(255,255,255,.12);border-radius:999px;padding:6px 14px;font-weight:600;text-decoration:none;font-size:.9rem;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.homelink:hover{background:rgba(255,255,255,.24)}.homelink:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.gut div.err{background:var(--red);color:#fff;border-radius:4px;padding-right:4px}
+.gut div.gap{background:var(--amber);color:var(--navy);border-radius:4px;padding-right:4px}
+.ed textarea{border:0;outline:0;resize:none;font:inherit;line-height:22px;padding:10px 12px;white-space:pre;overflow-x:auto;overflow-y:hidden;color:var(--navy);background:#fff;tab-size:4;min-height:110px}
+.ed textarea:focus{background:#FCFDFF}
+.con{background:var(--navy);color:#E6F0FB;font-family:var(--code);font-size:14.5px;line-height:1.5;padding:10px 14px;min-height:56px;max-height:340px;overflow-y:auto}
+.con pre{margin:0;white-space:pre-wrap;word-break:break-word;font:inherit}
+.con .typed{color:var(--amber);font-weight:700}
+.con .muted{color:#8FAACA;font-style:italic}
+.inrow{display:flex;align-items:center;gap:8px;margin-top:4px}
+.inrow label{color:var(--amber);font-weight:700}
+.inrow input{flex:1;font-family:var(--code);font-size:14.5px;border:2px solid var(--amber);border-radius:6px;padding:5px 8px;background:#14294A;color:#fff;outline:0}
+.inrow small{color:#8FAACA;font-family:"Segoe UI",system-ui,sans-serif}
+.msg{font-family:"Segoe UI",system-ui,sans-serif;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:.95rem;line-height:1.45}
+.msg.error{background:var(--red-pale);color:#7A1F1A}
+.msg.warn{background:var(--amber-pale);color:#6B4100}
+.msg.ok{background:#E3F4EC;color:#1C5C42;padding:6px 12px}
+.msg strong{display:block}
+.msg code{background:rgba(255,255,255,.7)}
+
+/* welcome */
+.hero{background:var(--navy);color:#fff;border-radius:18px;padding:34px 34px;margin-top:14px;display:flex;gap:28px;align-items:center}
+.hero h1{font-size:2.5rem}
+.hero p{color:#DCE9F7;margin:.6em 0 0;max-width:560px}
+.hero svg.big{width:120px;height:120px;color:var(--amber);flex:none}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.how div{background:var(--pale);border-radius:12px;padding:16px}
+.how b{display:flex;gap:8px;align-items:center;color:var(--deep)}
+.how svg{color:var(--blue)}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.lvcard{border:3px solid transparent;background:#fff;border-radius:14px;padding:20px;text-align:left;box-shadow:0 1px 3px rgba(19,49,92,.12);display:flex;flex-direction:column;gap:8px;color:var(--navy)}
+.lvcard .lvpill{align-self:flex-start}
+.lvcard.lv-B .lvpill{background:var(--lvB)} .lvcard.lv-I .lvpill{background:var(--lvI)} .lvcard.lv-A .lvpill{background:var(--lvA)}
+.lvcard[aria-pressed="true"]{border-color:var(--amber)}
+.lvcard q{font-weight:700;font-size:1.05rem;quotes:none}
+.lvcard span.d{font-size:.95rem;color:var(--deep)}
+
+/* stage end */
+.endcard{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.endcard .grow{flex:1;min-width:240px}
+.endcard p{margin:0}
+.done-msg{color:var(--green);font-weight:700}
+
+/* finish */
+table.prog{border-collapse:collapse;width:100%}
+table.prog th,table.prog td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
+table.prog td.c,table.prog th.c{text-align:center}
+.tick{color:var(--green);font-weight:800}
+
+/* bottom nav */
+.navbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:10px 22px;z-index:20}
+.navbar .where{color:var(--mid);font-size:.9rem}
+
+.plan label{display:block;font-weight:600;margin:10px 0}
+.plan input,.plan select{display:block;width:100%;font:inherit;font-weight:400;border:1px solid var(--line);border-radius:7px;padding:7px 9px;margin-top:4px;background:#fff;color:var(--navy)}
+.plan table{width:100%;border-collapse:collapse;margin-top:12px}
+.plan th{text-align:left;font-size:.85rem;color:var(--deep);padding:4px}
+.plan td{padding:4px;vertical-align:top}.plan td input,.plan td select{margin:0}
+.plan td.rn{font-weight:800;color:var(--blue);width:24px;padding-top:11px}
+.plan th:nth-child(3){width:38%}
+.saved{font-size:.85rem;color:var(--mid);margin:8px 0 0}
+.gamecard{border:3px solid var(--amber)}
+.myplan summary{cursor:pointer;font-weight:600;color:var(--blue);margin:6px 0}
+.myplan ol{margin:6px 0;padding-left:1.4em}.muted2{color:var(--mid)}
+@media (max-width:760px){
+  .helpgrid,.how,.levels{grid-template-columns:1fr}
+  .hero{flex-direction:column;align-items:flex-start}
+  .stage-head{flex-direction:column;align-items:flex-start}
+}
+/* reference panel */
+.refbtn{border:0;border-radius:999px;padding:6px 14px;font-size:.92rem;font-weight:600;display:inline-flex;gap:6px;align-items:center;background:var(--sky);color:var(--navy)}
+.refbtn[aria-expanded="true"]{background:#fff}
+.refbtn:focus-visible,.reflink:focus-visible,.chips button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.ref{position:fixed;top:0;right:0;bottom:0;width:min(440px,100vw);background:#fff;z-index:40;box-shadow:-6px 0 24px rgba(11,31,58,.22);display:flex;flex-direction:column}
+.ref[hidden]{display:none}
+.refhead{background:var(--navy);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.refhead h2{font-size:1.15rem;margin-right:auto;display:flex;gap:8px;align-items:center}
+.refhead h2 svg{color:var(--amber)}
+.refhead button{border:0;background:var(--deep);color:#fff;border-radius:8px;padding:5px 12px;font-weight:600}
+.refsearch{padding:12px 16px 4px}
+.refsearch input{width:100%;font:inherit;border:2px solid var(--line);border-radius:9px;padding:8px 12px;color:var(--navy)}
+.refsearch input:focus{border-color:var(--blue);outline:0}
+.reftip{font-size:.85rem;color:var(--mid);margin:6px 0 0}
+#reflist{overflow-y:auto;padding:4px 16px 30px;flex:1}
+#reflist h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mid);margin:16px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--amber);background:var(--amber-pale);color:var(--navy);border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600}
+.refcard{border:1px solid var(--line);border-radius:10px;margin:6px 0;background:#fff}
+.refcard summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;flex-direction:column;gap:1px}
+.refcard summary::-webkit-details-marker{display:none}
+.refcard .rt{font-family:var(--code);font-weight:700;color:var(--blue)}
+.refcard .rs{font-size:.88rem;color:var(--deep)}
+.refcard[open]{border-color:var(--blue);box-shadow:0 0 0 2px rgba(31,111,178,.15)}
+.refcard[open] summary{background:var(--pale);border-radius:9px 9px 0 0}
+.rb{padding:4px 12px 12px;font-size:.95rem}
+.rb p{margin:.45em 0}.rb ul{margin:.3em 0;padding-left:1.2em}
+.rb pre.sample{font-size:.85rem;white-space:pre}
+.watch{background:var(--amber-pale);border-radius:8px;padding:7px 10px}
+.watch b{color:#9A5B00}
+.rb .runner .rbar .copy{display:none}
+.refnone{color:var(--deep)}
+.reflink{margin-top:8px;border:1px solid currentColor;background:#fff;color:inherit;border-radius:7px;padding:4px 10px;font-size:.88rem;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.toast{z-index:50}
+@media (min-width:1180px){ body.refopen main{margin-left:max(20px,calc((100vw - 440px - 1000px)/2));margin-right:440px} }
+@media print{.top,.navbar,.dots,.rbar,.con,.ref,.refbtn{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M11.7 12H22M18 12v4M21 12v3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    Escape the Dungeon <small>The Heroes Dictionary</small></div>
+  <a class="homelink" href="./" title="Back to the Year 9 resources">&larr; Year 9</a>
+  <button class="refbtn" id="refbtn" aria-expanded="false" aria-controls="ref" title="Look up print, input, if, loops and more. Tip: highlight a word in your code first."><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2zM4 20a2 2 0 0 0 2 2h13v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> Look it up</button>
+  <div class="lvswitch" role="group" aria-label="Choose your level"><span>My level</span>
+    <button data-lv="B">Beginner</button><button data-lv="I">Intermediate</button><button data-lv="A">Advanced</button></div>
+  <div class="filebar" role="group" aria-label="Save or load your progress">
+    <button class="savebtn" id="savefile" title="Download your progress as a file">Save progress</button>
+    <button id="loadfile" title="Open a progress file you saved earlier">Load progress</button>
+    <input type="file" id="loadinput" accept=".json,application/json" hidden></div>
+</header>
+<aside class="ref" id="ref" hidden aria-label="Python reference">
+  <div class="refhead"><h2><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2zM4 20a2 2 0 0 0 2 2h13v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> Look it up</h2><button id="refclose">Close</button></div>
+  <div class="refsearch"><input type="search" id="refq" placeholder="Search: print, loop, list, error..." aria-label="Search the reference" autocomplete="off" spellcheck="false">
+    <p class="reftip">Tip: highlight a word in your code, then press Look it up.</p></div>
+  <div id="reflist"></div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<nav class="dots" id="dots" aria-label="Stages"></nav>
+<main id="page"></main>
+<footer class="navbar">
+  <button class="btn ghost" id="prev">&larr; Back</button>
+  <span class="where" id="where"></span>
+  <button class="btn primary" id="next">Next &rarr;</button>
+</footer>
+
+<script>
+const STAGES = [{"id": "h1", "num": 1, "concept": "dictionaries: keys and values", "title": "Make your hero", "hook": "Health, gold, a name, a backpack. Your hero has lots of stats. Let's keep them all together in one place.", "learnHtml": "\u003cp>A \u003cstrong>dictionary\u003c/strong> stores lots of values in one variable, and gives each one a label. The label is called a \u003cstrong>key\u003c/strong>. The thing stored with it is its \u003cstrong>value\u003c/strong>.\u003c/p>\n\u003cp>Make a dictionary with curly brackets. A colon joins each key to its value, and commas separate the pairs:\u003c/p>\n\u003cpre class=\"sample\">hero = {\"name\": \"Ash\", \"health\": 100, \"gold\": 20}\u003c/pre>\n\u003cp>To get a value out, put its key in square brackets: \u003ccode>hero[\"health\"]\u003c/code> gives \u003ccode>100\u003c/code>. Think of it as a set of labelled boxes: ask for the label, get what's inside.\u003c/p>\n\u003cp>A list finds things by position (0, 1, 2). A dictionary finds them by name, which is much easier to read.\u003c/p>", "learnCode": "hero = {\"name\": \"Ash\", \"health\": 100, \"gold\": 20}\n\nprint(\"Name:\", hero[\"name\"])\nprint(\"Health:\", hero[\"health\"])\nprint(\"Gold:\", hero[\"gold\"])\nprint(hero)", "keywords": [["dictionary", "one variable that stores values with labels, in curly brackets { }"], ["key", "the label you use to find a value, like \"health\""], ["value", "the thing stored with a key, like 100"]], "mistakes": ["Using square brackets to make it. A dictionary is made with curly brackets: \u003ccode>{\"gold\": 20}\u003c/code>. Square brackets are for getting a value out.", "Forgetting the quote marks round the key: \u003ccode>hero[health]\u003c/code>. Python looks for a variable called health. Write \u003ccode>hero[\"health\"]\u003c/code>.", "Spelling a key differently: \u003ccode>\"Health\"\u003c/code> and \u003ccode>\"health\"\u003c/code> are different keys. Python stops with a \u003ccode>KeyError\u003c/code>.", "Missing a comma between two pairs, or the colon between a key and its value."], "game": {"B": "If your adventure doesn't have one yet, add \u003ccode>hero = {\"health\": 100, \"gold\": 0}\u003c/code> to your main program, and print the hero's health at the start. Keep your old variables for now.", "I": "Add a \u003ccode>hero\u003c/code> dictionary to your main program with health, gold and a \u003ccode>\"backpack\"\u003c/code> list. Print a welcome that uses at least two of its values. Keep your old variables for now: Stage 2 swaps them over.", "A": "Add a \u003ccode>hero\u003c/code> dictionary holding every stat your game uses, including the backpack. Print them all at the start with a \u003ccode>for\u003c/code> loop. Keep your old variables for now: Stage 2 swaps them over."}, "levels": {"B": {"intro": "Small steps, with help whenever you need it.", "parts": [{"id": "h1b1", "kind": "step", "title": "Run the example", "html": "\u003cp>Run the example in the Learn box. Then change \u003ccode>\"Ash\"\u003c/code> to your own hero's name, and the gold to \u003ccode>50\u003c/code>. Run it again.\u003c/p>", "steps": ["I saw the name, health and gold", "I saw the whole dictionary at the end, in curly brackets", "I changed the name and the gold, and saw them change"]}, {"id": "h1b2", "kind": "main", "title": "Fill the gaps: read the stats", "html": "\u003cp>Gap 1 is the key for the name. Keys need quote marks. Gap 2 is the name of the dictionary. Gap 3 is the key for the gold (the quote marks are already there). When it works it should print:\u003c/p>\n\u003cpre class=\"sample\">Hero: Brin\nHealth: 80\nGold: 15\u003c/pre>", "starter": "hero = {\"name\": \"Brin\", \"health\": 80, \"gold\": 15}\n\nprint(\"Hero:\", hero[___])\nprint(\"Health:\", ___[\"health\"])\nprint(\"Gold:\", hero[\"___\"])", "hints": ["Gap 1 needs the key in quote marks: \"name\"", "Gap 2 is the dictionary: hero. Gap 3 is just gold, because the quote marks are already there."]}, {"id": "h1b3", "kind": "main", "title": "Your turn: make a monster", "html": "\u003cp>Make a dictionary called \u003ccode>monster\u003c/code> with three keys: \u003ccode>\"name\"\u003c/code> is \u003ccode>\"goblin\"\u003c/code>, \u003ccode>\"health\"\u003c/code> is \u003ccode>30\u003c/code> and \u003ccode>\"damage\"\u003c/code> is \u003ccode>8\u003c/code>. The print lines are already written. When it works it should print:\u003c/p>\n\u003cpre class=\"sample\">A goblin attacks!\nIt has 30 health.\nIt does 8 damage.\u003c/pre>", "steps": ["Curly brackets at the start and the end", "Three keys, each in quote marks, each with a colon and a value", "Commas between the pairs", "I ran it and saw all three lines"], "starter": "# Make the monster dictionary here\nmonster = ___\n\nprint(\"A\", monster[\"name\"], \"attacks!\")\nprint(\"It has\", monster[\"health\"], \"health.\")\nprint(\"It does\", monster[\"damage\"], \"damage.\")", "hints": ["Copy the shape of hero in the Learn box: {\"name\": ..., \"health\": ..., \"damage\": ...}", "monster = {\"name\": \"goblin\", \"health\": 30, \"damage\": 8}"]}]}, "I": {"intro": "A short brief. Use the hints only if you need them.", "parts": [{"id": "h1i1", "kind": "main", "title": "The hero card", "html": "\u003cp>Ask the player for their hero's name. Make a dictionary called \u003ccode>hero\u003c/code> with three keys: \u003ccode>\"name\"\u003c/code> (what they typed), \u003ccode>\"health\"\u003c/code> (100) and \u003ccode>\"gold\"\u003c/code> (20). Then print a card like this one, reading every value from the dictionary:\u003c/p>\n\u003cpre class=\"sample\">== Ash ==\nHealth: 100\nGold: 20\u003c/pre>", "starter": "# ask for the name\n\n# make the hero dictionary\n\n# print the card\n", "hints": ["name = input(\"What is your hero called? \") then use name as a value: {\"name\": name, ...}", "print(\"==\", hero[\"name\"], \"==\") prints the top line."]}, {"id": "h1i2", "kind": "ext", "title": "Extension: more stats", "html": "\u003cp>Add two more keys to your hero: \u003ccode>\"weapon\"\u003c/code> and \u003ccode>\"backpack\"\u003c/code>. The backpack is a list, so it can start as \u003ccode>[\"torch\"]\u003c/code>. Yes, a list can live inside a dictionary! Add lines to the card that show the weapon and how many things are in the backpack.\u003c/p>", "starter": "", "hints": ["\"backpack\": [\"torch\"] goes inside the curly brackets, like any other pair.", "len(hero[\"backpack\"]) counts the things in the backpack."]}]}, "A": {"intro": "A specification only. Work it out, then try the stretch.", "parts": [{"id": "h1a1", "kind": "main", "title": "Choose your class", "html": "\u003cp>Ask for the hero's name, then their class: \u003ccode>warrior\u003c/code>, \u003ccode>mage\u003c/code> or \u003ccode>rogue\u003c/code>. If they type anything else, keep asking until they type one of the three. Make a dictionary called \u003ccode>hero\u003c/code> with the keys \u003ccode>\"name\"\u003c/code>, \u003ccode>\"class\"\u003c/code>, \u003ccode>\"health\"\u003c/code> and \u003ccode>\"attack\"\u003c/code>:\u003c/p>\n\u003cpre class=\"sample\">warrior   health 120   attack 8\nmage      health 70    attack 14\nrogue     health 90    attack 10\u003c/pre>\n\u003cp>Then print every key and its value with a \u003ccode>for\u003c/code> loop. \u003ccode>for key in hero:\u003c/code> goes through the keys one at a time.\u003c/p>\n\u003cpre class=\"sample\">name: Ash\nclass: mage\nhealth: 70\nattack: 14\u003c/pre>", "starter": "", "hints": ["Make the dictionary with the name and class, then add the other two in an if/elif: hero[\"health\"] = 120", "for key in hero:\n    print(key + \":\", hero[key])"]}, {"id": "h1a2", "kind": "stretch", "title": "Stretch: a missing key", "html": "\u003cp>Add \u003ccode>print(hero[\"mana\"])\u003c/code> at the end and run it. Read the error. Now change it so it only prints the mana if the hero has some: \u003ccode>if \"mana\" in hero:\u003c/code> works on dictionaries too, and checks the keys. Then find out what \u003ccode>hero.get(\"mana\", 0)\u003c/code> does, and add a comment saying when you'd use it.\u003c/p>", "starter": "", "hints": ["in checks the keys of a dictionary, not the values.", "get gives back the value if the key is there, or the second thing (here 0) if it isn't."]}]}}}, {"id": "h2", "num": 2, "concept": "changing and adding values", "title": "Battle scars and loot", "hook": "A hero who never gets hurt and never gets rich is a bit dull. Let's change the stats as the game goes on.", "learnHtml": "\u003cp>To change a value, put the key on the left of an \u003ccode>=\u003c/code>, just like a variable:\u003c/p>\n\u003cpre class=\"sample\">hero[\"health\"] = hero[\"health\"] - 15\u003c/pre>\n\u003cp>Read it from right to left: take the health, subtract 15, and store the answer back under \u003ccode>\"health\"\u003c/code>. The shortcut \u003ccode>hero[\"gold\"] += 10\u003c/code> adds 10 to the gold.\u003c/p>\n\u003cp>To \u003cstrong>add\u003c/strong> a new key, store a value under a key that isn't there yet: \u003ccode>hero[\"level\"] = 2\u003c/code>\u003c/p>\n\u003cp>A value can even be a list. \u003ccode>hero[\"backpack\"].append(\"rope\")\u003c/code> puts a rope in the backpack inside the hero.\u003c/p>", "learnCode": "hero = {\"name\": \"Ash\", \"health\": 100, \"gold\": 20, \"backpack\": []}\n\nprint(\"A rat bites you!\")\nhero[\"health\"] = hero[\"health\"] - 15\n\nprint(\"You find some coins.\")\nhero[\"gold\"] += 10\n\nhero[\"backpack\"].append(\"rope\")\nhero[\"level\"] = 2\n\nprint(hero)\nprint(\"Health:\", hero[\"health\"])", "keywords": [["update", "change a value: hero[\"gold\"] = hero[\"gold\"] + 5"], ["+= and -=", "shortcuts: hero[\"gold\"] += 5 adds 5 to the gold"], ["add a key", "store a value under a new key: hero[\"level\"] = 2"]], "mistakes": ["Doing the maths but not storing it: \u003ccode>hero[\"health\"] - 15\u003c/code> on its own changes nothing. It needs \u003ccode>hero[\"health\"] =\u003c/code> in front.", "Spelling the key wrong when you store: \u003ccode>hero[\"helth\"] = 50\u003c/code> doesn't change the health. It quietly adds a new key called helth. Print the hero to check.", "Using a separate variable: \u003ccode>health = health - 15\u003c/code> changes a variable called health, not the health inside the hero.", "Writing \u003ccode>hero[\"backpack\"] = \"rope\"\u003c/code>. That throws the whole backpack away and puts a word there instead. Use \u003ccode>.append(\"rope\")\u003c/code>."], "game": {"B": "Store the health in the hero. Where your main program says \u003ccode>health = trap_room(health)\u003c/code>, write \u003ccode>hero[\"health\"] = trap_room(hero[\"health\"])\u003c/code>. Then delete the old \u003ccode>health = 100\u003c/code> line and play-test.", "I": "Swap every old variable in your main program for the hero's values, like \u003ccode>hero[\"gold\"] = treasure_room(hero[\"gold\"])\u003c/code>. Then delete the old variables, and play-test to make sure nothing broke.", "A": "Swap every old variable for the hero's values and delete the old ones. Then add a new stat that your rooms change, like \u003ccode>\"xp\"\u003c/code> or \u003ccode>\"kills\"\u003c/code>."}, "levels": {"B": {"intro": "Small steps, with help whenever you need it.", "parts": [{"id": "h2b1", "kind": "step", "title": "Run the example", "html": "\u003cp>Run the example. Then change the rat bite so it takes \u003ccode>50\u003c/code> health, and add a line that puts a \u003ccode>\"torch\"\u003c/code> in the backpack too. Run it again.\u003c/p>", "steps": ["The health went from 100 to 85", "I saw 'level': 2 in the dictionary, even though it wasn't there at the start", "I changed the bite to 50 and saw 50 health left", "The torch went into the backpack"]}, {"id": "h2b2", "kind": "main", "title": "Fill the gaps: ouch, then loot", "html": "\u003cp>Gap 1: the rat bite takes 10 health. Gap 2: the key for the gold (the quote marks are already there). When it works, the last line should print:\u003c/p>\n\u003cpre class=\"sample\">{'name': 'Brin', 'health': 90, 'gold': 5}\u003c/pre>", "starter": "hero = {\"name\": \"Brin\", \"health\": 100, \"gold\": 0}\n\nprint(\"A rat bites you!\")\nhero[\"health\"] = hero[\"health\"] - ___\n\nprint(\"You find a coin purse.\")\nhero[\"___\"] = hero[\"gold\"] + 5\n\nprint(hero)", "hints": ["Gap 1 is just a number: 10", "Gap 2 is the key you're changing: gold"]}, {"id": "h2b3", "kind": "main", "title": "Your turn: pack the backpack", "html": "\u003cp>The hero starts with an empty backpack. Use \u003ccode>append\u003c/code> to add a \u003ccode>\"torch\"\u003c/code>, then a \u003ccode>\"map\"\u003c/code>. The print lines are already written. When it works it should print:\u003c/p>\n\u003cpre class=\"sample\">Backpack: ['torch', 'map']\nYou carry 2 things.\u003c/pre>", "steps": ["A line with hero[\"backpack\"].append(...) for the torch", "Another line for the map", "I ran it and saw 2 things"], "starter": "hero = {\"name\": \"Brin\", \"health\": 100, \"backpack\": []}\n\n# add the torch and the map here\n\n\nprint(\"Backpack:\", hero[\"backpack\"])\nprint(\"You carry\", len(hero[\"backpack\"]), \"things.\")", "hints": ["hero[\"backpack\"].append(\"torch\")", "Do the same again for the map, on its own line."]}]}, "I": {"intro": "A short brief. Use the hints only if you need them.", "parts": [{"id": "h2i1", "kind": "main", "title": "The potion shop", "html": "\u003cp>The hero has 30 gold. Ask \u003ccode>Buy a potion for 10 gold? \u003c/code>\u003c/p>\n\u003cul>\u003cli>If they type \u003ccode>yes\u003c/code> and have at least 10 gold: take 10 gold, put a \u003ccode>\"potion\"\u003c/code> in the backpack, and print \u003ccode>You buy a potion.\u003c/code>\u003c/li>\n\u003cli>If they type \u003ccode>yes\u003c/code> but have less than 10 gold: print \u003ccode>You can't afford it.\u003c/code>\u003c/li>\n\u003cli>Anything else: print \u003ccode>Maybe later.\u003c/code>\u003c/li>\u003c/ul>\n\u003cp>Print the hero at the end. Test all three paths: to test the second one, change the hero's starting gold.\u003c/p>", "starter": "hero = {\"name\": \"Ash\", \"gold\": 30, \"backpack\": []}\n\n# ask, then if / elif / else\n\nprint(hero)\n", "hints": ["if answer == \"yes\" and hero[\"gold\"] >= 10:", "Take the gold with hero[\"gold\"] = hero[\"gold\"] - 10, then append the potion."]}, {"id": "h2i2", "kind": "ext", "title": "Extension: level up", "html": "\u003cp>Give a hero \u003ccode>\"xp\": 0\u003c/code> and \u003ccode>\"level\": 1\u003c/code>. Write a \u003ccode>for\u003c/code> loop that runs 5 fights, each giving the hero 30 xp. Whenever the xp reaches 100 or more, the hero goes up a level and loses 100 xp. Print the level and xp after every fight. You should finish on level 2 with 50 xp.\u003c/p>", "starter": "", "hints": ["for fight in range(5):", "Inside the loop: if hero[\"xp\"] >= 100:"]}]}, "A": {"intro": "A specification only. Work it out, then try the stretch.", "parts": [{"id": "h2a1", "kind": "main", "title": "The merchant", "html": "\u003cp>A merchant buys loot. The prices are in a second dictionary, where each key is an item and each value is its price:\u003c/p>\n\u003cpre class=\"sample\">prices = {\"gem\": 50, \"rope\": 5, \"bone\": 1}\u003c/pre>\n\u003cp>Start with \u003ccode>hero = {\"gold\": 10, \"backpack\": [\"gem\", \"rope\", \"sock\", \"gem\"]}\u003c/code>. Sell everything the merchant will buy: add each item's price to the hero's gold, and take it out of the backpack. Items the merchant doesn't buy (like the sock) stay in the backpack. Print each sale, then the hero. You should finish with 115 gold and \u003ccode>['sock']\u003c/code>.\u003c/p>\n\u003cp>Make sure it still works if the prices or the backpack change.\u003c/p>", "starter": "prices = {\"gem\": 50, \"rope\": 5, \"bone\": 1}\nhero = {\"gold\": 10, \"backpack\": [\"gem\", \"rope\", \"sock\", \"gem\"]}\n", "hints": ["if item in prices: checks whether the merchant buys it. prices[item] gives its price.", "Removing from a list while you loop through it skips items. Build a new list of the things to keep instead, then: hero[\"backpack\"] = keep"]}, {"id": "h2a2", "kind": "stretch", "title": "Stretch: count the loot", "html": "\u003cp>A backpack like \u003ccode>[\"gem\", \"rope\", \"gem\"]\u003c/code> is easier to read as \u003ccode>{'gem': 2, 'rope': 1}\u003c/code>. Start with an empty dictionary, \u003ccode>counts = {}\u003c/code>, and loop through the backpack. If the item is already a key, add 1 to it. If not, add it with the value 1. Print the counts. Then find out how \u003ccode>counts.get(item, 0)\u003c/code> could make your code shorter.\u003c/p>", "starter": "", "hints": ["if item in counts: checks the keys.", "counts[item] = 1 adds a new key."]}]}}}, {"id": "h3", "num": 3, "concept": "passing a dictionary to subroutines", "title": "One hero, every room", "hook": "In Part 3, a room that changed two things needed two values in and two out. With a dictionary, every room takes just one thing: the whole hero.", "learnHtml": "\u003cp>Pass the whole hero into a room, change what you need, then send it back with \u003ccode>return\u003c/code>. It's the same rule you've used since Part 2: in, then back out.\u003c/p>\n\u003cpre class=\"sample\">hero = trap_room(hero)\u003c/pre>\n\u003cp>That line never gets longer, however many stats your hero has. Compare it with Part 3: \u003ccode>inventory, gold = chest(inventory, gold)\u003c/code>\u003c/p>\n\u003cp>A procedure that only shows the stats, like \u003ccode>show_status(hero)\u003c/code>, takes the hero in but doesn't need to send it back.\u003c/p>", "learnCode": "def show_status(hero):\n    print(\"~\" * 20)\n    print(\"Health:\", hero[\"health\"])\n    print(\"Gold:\", hero[\"gold\"])\n    print(\"Backpack:\", hero[\"backpack\"])\n    print(\"~\" * 20)\n\ndef trap_room(hero):\n    print(\"Spikes shoot from the floor!\")\n    hero[\"health\"] = hero[\"health\"] - 10\n    return hero\n\ndef treasure_room(hero):\n    print(\"A chest! You take the gold and a rusty key.\")\n    hero[\"gold\"] = hero[\"gold\"] + 25\n    hero[\"backpack\"].append(\"rusty key\")\n    return hero\n\nhero = {\"health\": 100, \"gold\": 0, \"backpack\": []}\nhero = trap_room(hero)\nhero = treasure_room(hero)\nshow_status(hero)\n\nif \"rusty key\" in hero[\"backpack\"]:\n    print(\"You unlock the door and escape!\")", "keywords": [["pass in", "give a subroutine a value to use: trap_room(hero)"], ["return", "sends a value back out of a function: return hero"], ["None", "what a function sends back if it has no return"]], "mistakes": ["Forgetting \u003ccode>return hero\u003c/code>. The room sends back \u003ccode>None\u003c/code>, so \u003ccode>hero = trap_room(hero)\u003c/code> wipes your hero out. The next line that reads a stat stops with \u003ccode>'NoneType' object is not subscriptable\u003c/code>.", "Making the dictionary inside a room. \u003ccode>hero = {\"health\": 100, ...}\u003c/code> in a room resets every stat each time the player walks in. Make the hero once, in the main program.", "Calling a room without catching the hero: \u003ccode>trap_room(hero)\u003c/code> on its own. It happens to work for dictionaries (the Advanced stretch finds out why), but keep the rule: \u003ccode>hero = trap_room(hero)\u003c/code>."], "game": {"B": "Pick one room in your adventure and change it to take the hero in and send it back: \u003ccode>def trap_room(hero):\u003c/code> and \u003ccode>hero = trap_room(hero)\u003c/code>.", "I": "Change every room to take the hero in and return it, and add a \u003ccode>show_status(hero)\u003c/code>. Every room call in your main program should now look like \u003ccode>hero = room(hero)\u003c/code>.", "A": "Change every room to \u003ccode>hero = room(hero)\u003c/code>, add a \u003ccode>show_status(hero)\u003c/code> with a health bar, and make your boss fight check the hero's backpack."}, "levels": {"B": {"intro": "Small steps, with help whenever you need it.", "parts": [{"id": "h3b1", "kind": "step", "title": "Run the example", "html": "\u003cp>Run the example. Then delete the line \u003ccode>return hero\u003c/code> from \u003ccode>trap_room\u003c/code> and run it again. Read the error. Put the line back.\u003c/p>", "steps": ["I saw the status box and escaped", "Without return hero, Python stopped with an error about NoneType", "I put return hero back and it worked again"]}, {"id": "h3b2", "kind": "main", "title": "Fill the gaps: the treasure room", "html": "\u003cp>Gap 1 sends the hero back out of the room. Gap 2 passes the hero in. When it works it should print \u003ccode>Gold: 25\u003c/code>.\u003c/p>", "starter": "def treasure_room(hero):\n    print(\"You open a dusty chest.\")\n    hero[\"gold\"] = hero[\"gold\"] + 25\n    return ___\n\nhero = {\"health\": 100, \"gold\": 0}\nhero = treasure_room(___)\nprint(\"Gold:\", hero[\"gold\"])", "hints": ["Both gaps are the same word.", "return hero and treasure_room(hero)"]}, {"id": "h3b3", "kind": "main", "title": "Your turn: the spike trap", "html": "\u003cp>Write \u003ccode>trap_room(hero)\u003c/code>. It prints a warning, takes 20 health away from the hero, and sends the hero back. The main program is already written. When it works it should print \u003ccode>Health: 80\u003c/code>.\u003c/p>", "steps": ["def trap_room(hero): with a colon", "A print line, indented", "hero[\"health\"] = hero[\"health\"] - 20", "return hero, indented, at the end"], "starter": "# Write trap_room(hero) here\n\n\n# main program\nhero = {\"health\": 100, \"gold\": 10}\nhero = trap_room(hero)\nprint(\"Health:\", hero[\"health\"])", "hints": ["Copy the shape of the treasure room above, or trap_room in the Learn box.", "def trap_room(hero):\n    print(\"Spikes!\")\n    hero[\"health\"] = hero[\"health\"] - 20\n    return hero"]}]}, "I": {"intro": "A short brief. Use the hints only if you need them.", "parts": [{"id": "h3i1", "kind": "main", "title": "The armoury and the wishing well", "html": "\u003cp>Write three subroutines. The two rooms take the hero in and return it.\u003c/p>\n\u003cul>\u003cli>\u003ccode>show_status(hero)\u003c/code> prints the health, the gold and the backpack.\u003c/li>\n\u003cli>\u003ccode>armoury(hero)\u003c/code> puts a \u003ccode>\"sword\"\u003c/code> in the backpack.\u003c/li>\n\u003cli>\u003ccode>well(hero)\u003c/code> asks \u003ccode>Throw a coin in the well? \u003c/code> If they type \u003ccode>yes\u003c/code> and have at least 1 gold, take 1 gold and add 5 health. If they type \u003ccode>yes\u003c/code> with no gold, print \u003ccode>You have no coins.\u003c/code> Anything else: nothing happens.\u003c/li>\u003c/ul>\n\u003cp>The main program makes the hero with 90 health, 3 gold and an empty backpack, visits the armoury and the well, then shows the status.\u003c/p>", "starter": "# show_status(hero)\n\n# armoury(hero)\n\n# well(hero)\n\n# main program\n", "hints": ["Every room ends with return hero, and every call looks like hero = armoury(hero).", "In the well: if answer == \"yes\" and hero[\"gold\"] >= 1:"]}, {"id": "h3i2", "kind": "ext", "title": "Extension: is the hero still alive?", "html": "\u003cp>Write a function \u003ccode>alive(hero)\u003c/code> that returns \u003ccode>True\u003c/code> if the hero's health is above 0, and \u003ccode>False\u003c/code> if not. Use it in your main program: \u003ccode>while alive(hero):\u003c/code> keep sending the hero into a trap room until they fall. Count how many traps it took.\u003c/p>", "starter": "", "hints": ["return hero[\"health\"] > 0 gives back True or False on its own.", "Keep a counter, traps = 0, and add 1 every time round the loop."]}]}, "A": {"intro": "A specification only. Work it out, then try the stretch.", "parts": [{"id": "h3a1", "kind": "main", "title": "The boss", "html": "\u003cp>Write \u003ccode>boss(hero)\u003c/code>. The boss starts with 40 health. Each round, ask \u003ccode>attack or potion? \u003c/code>\u003c/p>\n\u003cul>\u003cli>\u003ccode>attack\u003c/code>: the boss loses 15 health if \u003ccode>\"sword\"\u003c/code> is in the hero's backpack, or 5 if not.\u003c/li>\n\u003cli>\u003ccode>potion\u003c/code>: if there's a \u003ccode>\"potion\"\u003c/code> in the backpack, use it up and add 30 health, but never go above 100. If not, print \u003ccode>You have no potion.\u003c/code>\u003c/li>\u003c/ul>\n\u003cp>After the hero's move, if the boss is still standing, it hits the hero for 10. The fight ends when either health is 0 or less. If the boss loses, set \u003ccode>hero[\"boss_beaten\"] = True\u003c/code>. Return the hero.\u003c/p>\n\u003cp>Test it: with a sword and 100 health, three attacks win with 80 health left.\u003c/p>", "starter": "", "hints": ["Keep the boss's health in a normal variable inside the function: boss_health = 40", "while hero[\"health\"] > 0 and boss_health > 0:"]}, {"id": "h3a2", "kind": "stretch", "title": "Stretch: why does it work without return?", "html": "\u003cp>Delete \u003ccode>hero = \u003c/code> from one room call in your main program, so it just says \u003ccode>trap_room(hero)\u003c/code>, and run your game. The health still changes! Now try the same with Part 2's \u003ccode>trap_room(health)\u003c/code>, which takes a number. Add a comment explaining the difference. Which style would you use in a big game, and why?\u003c/p>", "starter": "", "hints": ["The hero inside the room and the hero outside are the same dictionary, not a copy.", "health = health - 10 makes a new number inside the function. The one outside is untouched."]}]}}}];
+const RUNTIME_PY = "import ast\nimport builtins\nimport copy\nimport difflib\nimport inspect\nimport io\nimport json\nimport random\nimport re\nimport sys\nimport tokenize\nimport traceback\n\nimport rt_js\n\nFILENAME = \"\u003cyour code>\"\nLOOP_LIMIT = 200000\n\n\nclass LoopLimit(Exception):\n    pass\n\n\nclass NeedInput(Exception):\n    pass\n\n\nclass CheckFail(Exception):\n    pass\n\n\n# queue: None = ask the real person; a list = scripted answers (used by Check)\n# hits: None = not tracking paths; a set = keys of the if/elif/else paths that ran\n_state = {\"count\": 0, \"queue\": None, \"used\": 0, \"hits\": None}\n\n\ndef _rt_guard():\n    _state[\"count\"] += 1\n    if _state[\"count\"] > LOOP_LIMIT:\n        raise LoopLimit()\n\n\ndef _rt_hit(key):\n    if _state[\"hits\"] is not None:\n        _state[\"hits\"].add(key)\n\n\nasync def _rt_input(prompt=\"\"):\n    sys.stdout.write(str(prompt))\n    q = _state[\"queue\"]\n    if q is not None:\n        if not q:\n            raise NeedInput()\n        value = q.pop(0)\n        _state[\"used\"] += 1\n        sys.stdout.write(value + \"\\n\")\n        return value\n    sys.stdout.flush()\n    value = await rt_js.get_input()\n    return str(value)\n\n\ndef _calls_any(node, names):\n    for sub in ast.walk(node):\n        if isinstance(sub, ast.Call) and isinstance(sub.func, ast.Name) and sub.func.id in names:\n            return True\n    return False\n\n\ndef _async_names(tree):\n    # input() becomes awaitable, so any function that (directly or indirectly) calls it must be async too\n    names = {\"input\"}\n    funcs = [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]\n    changed = True\n    while changed:\n        changed = False\n        for f in funcs:\n            if f.name not in names and _calls_any(f, names):\n                names.add(f.name)\n                changed = True\n    return names\n\n\n# ---------------- paths (branch coverage) ----------------\n\ndef _branches(tree, lines):\n    \"\"\"Find every if / elif / else path. Returns {(lineno, kind): info} plus a display list.\"\"\"\n    found = []\n\n    def text(n):\n        return lines[n - 1].strip() if 0 \u003c n \u003c= len(lines) else \"\"\n\n    for node in ast.walk(tree):\n        if not isinstance(node, ast.If):\n            continue\n        kind = \"elif\" if text(node.lineno).startswith(\"elif\") else \"if\"\n        found.append((node.lineno, kind, node))\n        orelse = node.orelse\n        is_elif = (len(orelse) == 1 and isinstance(orelse[0], ast.If)\n                   and text(orelse[0].lineno).startswith(\"elif\"))\n        if orelse and not is_elif:\n            ln = orelse[0].lineno - 1\n            while ln > node.lineno and not text(ln).startswith(\"else\"):\n                ln -= 1\n            found.append((ln, \"else\", node))\n    found.sort(key=lambda x: (x[0], x[1] == \"else\"))\n    seen, table, shown = {}, {}, []\n    for ln, kind, node in found:\n        label = text(ln)\n        if kind == \"else\":\n            label = \"else  (after: \" + text(node.lineno)[:40] + \")\"\n        base = text(ln) + (\"|else|\" + text(node.lineno) if kind == \"else\" else \"\")\n        seen[base] = seen.get(base, 0) + 1\n        key = base + \"#\" + str(seen[base])\n        table[(id(node), kind)] = key\n        shown.append({\"key\": key, \"line\": ln, \"label\": label[:70]})\n    return table, shown\n\n\nclass _Transform(ast.NodeTransformer):\n    def __init__(self, names, paths=None):\n        self.names = names\n        self.paths = paths\n\n    def visit_Call(self, node):\n        self.generic_visit(node)\n        if isinstance(node.func, ast.Name) and node.func.id in self.names:\n            if node.func.id == \"input\":\n                node.func = ast.copy_location(ast.Name(\"_rt_input\", ast.Load()), node.func)\n            return ast.copy_location(ast.Await(node), node)\n        return node\n\n    def visit_FunctionDef(self, node):\n        self.generic_visit(node)\n        if node.name in self.names:\n            new = ast.AsyncFunctionDef(**{f: getattr(node, f) for f in node._fields})\n            return ast.copy_location(new, node)\n        return node\n\n    def _hit(self, key, where):\n        call = ast.Expr(ast.Call(ast.Name(\"_rt_hit\", ast.Load()), [ast.Constant(key)], []))\n        return ast.copy_location(call, where)\n\n    def visit_If(self, node):\n        keys = {}\n        if self.paths is not None:\n            for kind in (\"if\", \"elif\", \"else\"):\n                if (id(node), kind) in self.paths:\n                    keys[kind] = self.paths[(id(node), kind)]\n        self.generic_visit(node)\n        own = keys.get(\"if\") or keys.get(\"elif\")\n        if own:\n            node.body.insert(0, self._hit(own, node.body[0]))\n        if keys.get(\"else\") and node.orelse:\n            node.orelse.insert(0, self._hit(keys[\"else\"], node.orelse[0]))\n        return node\n\n    def _guard_loop(self, node):\n        self.generic_visit(node)\n        guard = ast.Expr(ast.Call(ast.Name(\"_rt_guard\", ast.Load()), [], []))\n        ast.copy_location(guard, node.body[0])\n        node.body.insert(0, guard)\n        return node\n\n    visit_While = _guard_loop\n    visit_For = _guard_loop\n\n\n# ---------------- friendly error hints ----------------\n\nERL_LINES = [\n    (r\"\\bthen\\s*:?\\s*$\", \"Python doesn't use then. End the line with a colon instead, like: if health > 0:\"),\n    (r\"^\\s*(endif|endwhile|endfor|endfunction|endprocedure|endswitch)\\b\",\n     \"Python doesn't need {0}. The indentation shows where a block ends, so delete this line.\"),\n    (r\"^\\s*next\\s+\\w+\\s*$\", \"Python doesn't need next. The indentation shows where the loop ends, so delete this line.\"),\n    (r\"^\\s*(elseif|else\\s+if)\\b\", \"In Python it's elif, like: elif health > 50:\"),\n    (r\"^\\s*for\\s+\\w+\\s*=.*\\bto\\b\", \"That's how exam papers write a loop. In Python it's: for i in range(1, 11):  (range stops before the last number).\"),\n    (r\"^\\s*(procedure|function)\\s+\\w+\", \"In Python, procedures and functions both start with def, like: def show_bag(inventory):\"),\n    (r\"^\\s*(do|until)\\b\", \"Python doesn't have do ... until. Use a while loop instead.\"),\n    (r\"\\b(AND|OR|NOT)\\b\", \"In Python, and, or and not are written in lower case.\"),\n]\n\n\ndef _erl_hint(line_text):\n    if not line_text:\n        return \"\"\n    for pat, msg in ERL_LINES:\n        m = re.search(pat, line_text)\n        if m:\n            return msg.format(m.group(1) if m.groups() else \"\")\n    return \"\"\n\n\nCOMMON_BUILTINS = {\"print\", \"input\", \"int\", \"str\", \"float\", \"len\", \"range\", \"round\", \"abs\", \"min\", \"max\",\n                   \"sum\", \"sorted\", \"list\", \"bool\", \"type\", \"ord\", \"chr\", \"True\", \"False\", \"None\"}\n\n\ndef _did_you_mean(bad, names):\n    builtin_names = set(dir(builtins))\n    cands = sorted({n for n in names if not n.startswith(\"_\") and n != bad\n                    and (n not in builtin_names or n in COMMON_BUILTINS)})\n    for c in cands:\n        if c.lower() == bad.lower():\n            return c\n    close = difflib.get_close_matches(bad, cands, n=1, cutoff=0.8)\n    return close[0] if close else \"\"\n\n\ndef _hint(e):\n    kind = type(e).__name__\n    msg = str(e)\n    low = (getattr(e, \"msg\", \"\") or msg).lower()\n    if kind in (\"IndentationError\", \"TabError\"):\n        return (\"Check the spaces at the start of this line. Lines inside an if, while or for \"\n                \"need 4 spaces, and the lines after it need to line up again.\")\n    if kind == \"SyntaxError\":\n        if \"'await'\" in low:\n            return (\"This page's runner can't use input() in this exact spot. \"\n                    \"Try moving the input() onto its own line.\")\n        if \"invalid character\" in low:\n            if any(c in low for c in \"\\u201c\\u201d\\u2018\\u2019\"):\n                return (\"This line has curly quotes, which sneak in when code is copied from a document. \"\n                        \"Delete them and type the quote marks again, straight from the keyboard.\")\n            return (\"This line has a special character Python can't read, often from copying out of a \"\n                    \"document. Delete the odd symbol and type it again from the keyboard.\")\n        if \"expected ':'\" in low:\n            return \"You might be missing a colon : at the end of this line.\"\n        if \"maybe you meant '=='\" in low:\n            return \"To compare two things, use == (two equals signs). One = stores a value.\"\n        if \"unterminated string\" in low or \"eol while\" in low:\n            return \"A quote mark is missing. Text needs a quote at the start AND at the end.\"\n        if \"never closed\" in low or \"unmatched\" in low or \"does not match\" in low:\n            return \"Your brackets don't match up. Every ( needs a ). The mistake may be on the line above.\"\n        return (\"Python can't understand this line. Check your brackets, quote marks and colons. \"\n                \"Sometimes the real mistake is on the line above.\")\n    if kind == \"NameError\":\n        bad = msg.split(\"'\")[1] if msg.count(\"'\") >= 2 else \"this name\"\n        if bad == \"random\":\n            return \"Python doesn't know what random is yet. Put import random on the very first line of your program.\"\n        return (f\"Python doesn't know what {bad} is. Check the spelling and capital letters \"\n                \"(print, not Print). If it's a variable, give it a value first. \"\n                \"If it's meant to be text, put it in quotes.\")\n    if kind == \"TypeError\":\n        if \"positional argument\" in msg:\n            return (\"The number of values in the call doesn't match the def. Count the values in the \"\n                    \"brackets where you call it, and the parameters in the brackets of the def.\")\n        if \"NoneType\" in msg and \"subscriptable\" in msg:\n            return (\"This value is None, which usually means a function gave nothing back. \"\n                    \"Check the function ends with a return line, like: return hero\")\n        if \"'set' object is not subscriptable\" in msg:\n            return (\"Your curly brackets hold values but no keys. Give each value a key and a colon, \"\n                    \"like: {\\\"name\\\": \\\"goblin\\\", \\\"health\\\": 30}\")\n        if \"indices must be integers or slices, not str\" in msg:\n            return (\"You're asking a list for something by name. Lists only use positions (0, 1, 2). \"\n                    \"To look things up by name, make a dictionary with curly brackets { }.\")\n        if \"NoneType\" in msg:\n            return (\"One of these values is None, which means a subroutine gave nothing back. A subroutine \"\n                    \"that prints its answer doesn't return it: add return, like: return width * height\")\n        if \"not supported between instances of 'str' and 'int'\" in msg or \\\n           \"not supported between instances of 'int' and 'str'\" in msg:\n            return \"You're comparing text with a number. Did you forget int() around input()?\"\n        if \"concatenate str\" in msg or (\"unsupported operand\" in msg and \"str\" in msg) or \"can't multiply\" in msg:\n            return (\"You're mixing text and numbers. Use int() to turn typed text into a number. \"\n                    \"To show a number with text, use a comma in print instead of +.\")\n        return \"Something is the wrong type here, for example text where a number should be.\"\n    if kind == \"AttributeError\" and \"NoneType\" in msg:\n        return (\"Your list has turned into None. Check for list = list.append(...) (just write \"\n                \"list.append(...)), or a function that forgot to return the list.\")\n    if kind == \"AttributeError\" and \"random\" in msg:\n        return \"Check the spelling after random. It's random.randint or random.choice.\"\n    if kind == \"ValueError\" and \"x not in list\" in msg:\n        return \"You tried to remove something that isn't in the list. Check with in before you remove it.\"\n    if kind == \"ValueError\" and \"empty range\" in msg:\n        return \"random.randint needs the smaller number first, e.g. random.randint(1, 6).\"\n    if kind == \"ValueError\" and \"invalid literal for int()\" in msg:\n        return \"int() can only turn whole numbers into numbers. What was typed in wasn't a whole number.\"\n    if kind == \"KeyError\":\n        return (f\"Python couldn't find the key {msg} in your dictionary. Check its spelling and capital \"\n                \"letters match exactly, and that the key is in quote marks.\")\n    if kind == \"ZeroDivisionError\":\n        return \"You can't divide by zero. Check the number you're dividing by.\"\n    if kind == \"IndexError\":\n        return \"You asked for a position that doesn't exist. Remember positions start at 0.\"\n    return \"\"\n\n\n\ndef _error_line(e):\n    if isinstance(e, SyntaxError):\n        return e.lineno\n    frames = [f for f in traceback.extract_tb(e.__traceback__) if f.filename == FILENAME]\n    return frames[-1].lineno if frames else None\n\n\ndef _known_names(e, ns):\n    names = set(ns or {}) | set(dir(builtins))\n    tb = e.__traceback__\n    while tb is not None:\n        if tb.tb_frame.f_code.co_filename == FILENAME:\n            names |= set(tb.tb_frame.f_locals) | set(tb.tb_frame.f_globals)\n        tb = tb.tb_next\n    return names\n\n\ndef _indent_hint(e, line, lines, text):\n    \"\"\"Plain-English, line-specific help for indentation mistakes.\"\"\"\n    kind = type(e).__name__\n    low = (getattr(e, \"msg\", \"\") or str(e)).lower()\n    if kind in (\"IndentationError\", \"TabError\"):\n        m = re.search(r\"expected an indented block after (.+?) on line (\\d+)\", low)\n        if m:\n            what = m.group(1).replace(\"'\", \"\").replace(\" statement\", \"\").replace(\"function definition\", \"def\")\n            return (f\"Line {m.group(2)} ends with a colon, so the line after it must be indented one step. \"\n                    f\"Click at the start of line {line} and press Tab. Everything that belongs to the {what} \"\n                    \"goes in that indented block.\")\n        if \"unexpected indent\" in low:\n            return (f\"Line {line} is indented, but the line above doesn't end with a colon, so nothing has \"\n                    \"started a block. Press Shift+Tab to line it up with the line above. (Or is a colon \"\n                    \"missing from the line above?)\")\n        if \"unindent does not match\" in low or \"inconsistent\" in low:\n            return (f\"Line {line} doesn't line up with any line above it. Indents come in steps of 4 spaces: \"\n                    \"press Shift+Tab until it lines up exactly with the lines it belongs with.\")\n        if kind == \"TabError\":\n            return \"This line mixes tabs and spaces. Delete the gap at the start and press Tab again.\"\n    if kind == \"SyntaxError\":\n        stripped = text.strip()\n        if re.match(r\"(elif|else)\\b\", stripped) and text != stripped:\n            word = stripped.split()[0].rstrip(\":\")\n            return (f\"{word} must line up exactly with the if it belongs to. Press Shift+Tab until this \"\n                    \"line starts in the same place as its if.\")\n        if \"'return' outside function\" in low:\n            return (f\"return only works inside a def. Press Tab at the start of line {line} so it lines up \"\n                    \"with the other lines of the subroutine above.\")\n    return \"\"\n\n\ndef _full_hint(e, line, lines, ns=None):\n    kind = type(e).__name__\n    text = lines[line - 1] if line and 0 \u003c line \u003c= len(lines) else \"\"\n    ind = _indent_hint(e, line, lines, text)\n    if ind:\n        return ind\n    if kind in (\"SyntaxError\", \"NameError\", \"IndentationError\"):\n        erl = _erl_hint(text)\n        if erl:\n            return erl\n    hint = _hint(e)\n    if kind == \"NameError\":\n        msg = str(e)\n        bad = msg.split(\"'\")[1] if msg.count(\"'\") >= 2 else \"\"\n        guess = _did_you_mean(bad, _known_names(e, ns)) if bad and bad != \"random\" else \"\"\n        if guess:\n            hint = f\"Did you mean {guess}? \" + hint\n    return hint\n\n\ndef _report(e, line, lines=(), ns=None):\n    return {\n        \"type\": \"error\",\n        \"line\": line,\n        \"error\": f\"{type(e).__name__}: {getattr(e, 'msg', None) or e}\",\n        \"hint\": _full_hint(e, line, lines, ns),\n    }\n\n\ndef _compile(src, cover=False, defs_only=False):\n    \"\"\"Returns (code, paths_display) or raises SyntaxError.\"\"\"\n    tree = ast.parse(src, FILENAME)\n    if defs_only:\n        keep = []\n        known = set(dir(builtins))\n        for n in tree.body:\n            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):\n                keep.append(n)\n                known.add(n.name)\n            elif isinstance(n, (ast.Import, ast.ImportFrom)):\n                keep.append(n)\n                known.update((a.asname or a.name).split(\".\")[0] for a in n.names)\n            elif isinstance(n, (ast.Assign, ast.AnnAssign)) and not any(isinstance(s, ast.Call) for s in ast.walk(n)):\n                # skip constants built from names that only exist once the main program runs\n                if n.value is not None and any(isinstance(s, ast.Name) and s.id not in known for s in ast.walk(n.value)):\n                    continue\n                keep.append(n)\n                for t in (n.targets if isinstance(n, ast.Assign) else [n.target]):\n                    known.update(x.id for x in ast.walk(t) if isinstance(x, ast.Name))\n        tree.body = keep\n    shown = None\n    table = None\n    if cover:\n        table, shown = _branches(tree, src.split(\"\\n\"))\n    tree = _Transform(_async_names(tree), table).visit(tree)\n    ast.fix_missing_locations(tree)\n    code = compile(tree, FILENAME, \"exec\", flags=ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)\n    return code, shown\n\n\ndef _compile_tree(tree):\n    tree = _Transform(_async_names(tree), None).visit(tree)\n    ast.fix_missing_locations(tree)\n    return compile(tree, FILENAME, \"exec\", flags=ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)\n\n\ndef _fresh_ns():\n    return {\"__name__\": \"__main__\", \"_rt_input\": _rt_input, \"_rt_guard\": _rt_guard, \"_rt_hit\": _rt_hit}\n\n\nasync def run(src, cover=False):\n    \"\"\"Run the pupil's program for real (the Run button).\"\"\"\n    _state.update(count=0, queue=None, used=0, hits=set() if cover else None)\n    lines = src.split(\"\\n\")\n    result = {\"type\": \"ok\"}\n    shown = None\n    try:\n        code, shown = _compile(src, cover)\n    except SyntaxError as e:\n        result = _report(e, e.lineno, lines)\n    else:\n        ns = _fresh_ns()\n        try:\n            r = eval(code, ns)\n            if r is not None:\n                await r\n        except LoopLimit:\n            result = {\n                \"type\": \"loop\",\n                \"error\": f\"Stopped: a loop ran more than {LOOP_LIMIT:,} times.\",\n                \"hint\": (\"That usually means an infinite loop. Check that something inside the loop \"\n                         \"changes, so the condition can become False.\"),\n            }\n        except SystemExit:\n            pass\n        except BaseException as e:\n            if \"RT_STOPPED\" in str(e):\n                result = {\"type\": \"stopped\"}\n            else:\n                result = _report(e, _error_line(e), lines, ns)\n    sys.stdout.flush()\n    if cover and shown is not None:\n        result[\"paths\"] = shown\n        result[\"hits\"] = sorted(_state[\"hits\"] or [])\n    _state[\"hits\"] = None\n    return json.dumps(result)\n\n\n# ---------------- Check my code ----------------\n\ndef _show(v):\n    return repr(v)\n\n\ndef _say_inputs(inputs):\n    inputs = list(inputs)\n    if not inputs:\n        return \"\"\n    shown = [repr(x) if x.strip() != x or x == \"\" else x for x in inputs]\n    if len(shown) > 6:\n        return f\" and typed {', '.join(shown[:3])} and so on ({len(shown)} answers)\"\n    return \" and typed \" + \", \".join(shown)\n\n\nclass Result:\n    def __init__(self, out, ns, used, ret=None):\n        self.out = out\n        self.ns = ns\n        self.used = used\n        self.ret = ret\n\n    @property\n    def lines(self):\n        return [l.rstrip() for l in self.out.split(\"\\n\") if l.strip()]\n\n\nasync def _exec_captured(coro_or_none, inputs, seed):\n    \"\"\"Run something with scripted input and captured output. Returns (out, error, used).\"\"\"\n    old = sys.stdout\n    buf = io.StringIO()\n    sys.stdout = buf\n    _state.update(count=0, queue=list(inputs), used=0)\n    random.seed(seed)\n    err = None\n    value = None\n    try:\n        value = await coro_or_none()\n    except SystemExit:\n        pass\n    except BaseException as e:\n        err = e\n    finally:\n        sys.stdout = old\n        _state[\"queue\"] = None\n    return buf.getvalue(), err, _state[\"used\"], value\n\n\ndef _crash_text(err, lines, ns=None):\n    if isinstance(err, NeedInput):\n        return None\n    if isinstance(err, LoopLimit):\n        return \"it got stuck in a loop that never ends. Check that something inside the loop changes.\"\n    line = _error_line(err)\n    where = f\" on line {line}\" if line else \"\"\n    hint = _full_hint(err, line, lines, ns)\n    return f\"it stopped with an error{where}: `{type(err).__name__}: {err}`. \" + hint\n\n\nclass Checker:\n    def __init__(self, src, code, spec):\n        self.src = src\n        self.lines = src.split(\"\\n\")\n        self.code = code\n        self.full = code\n        self.spec = spec\n        self.ns = None\n        self.out = \"\"\n        self.used = 0\n        self.fail_line = None\n\n    # ----- running -----\n    async def rerun(self, inputs=(), seed=None, what=None, _code=None):\n        ns = _fresh_ns()\n        code = _code or self.full\n\n        async def go():\n            r = eval(code, ns)\n            if r is not None:\n                await r\n\n        out, err, used, _ = await _exec_captured(go, inputs, seed)\n        if err is not None:\n            ctx = what or (\"When I ran your program\" + _say_inputs(inputs))\n            if isinstance(err, NeedInput):\n                raise CheckFail(f\"{ctx}, it asked for more answers than I expected. \"\n                                \"Check how many times your program uses input().\")\n            if not isinstance(err, LoopLimit):\n                self.fail_line = _error_line(err)\n            tip = (\" \" + self.spec[\"loop_tip\"]) if isinstance(err, LoopLimit) and self.spec.get(\"loop_tip\") else \"\"\n            raise CheckFail(f\"{ctx}, \" + _crash_text(err, self.lines, ns) + tip)\n        return Result(out, ns, used)\n\n    async def rerun_vars(self, values, inputs=(), seed=None, what=None):\n        \"\"\"Run the whole program again, with the first top-level  name = ...  replaced for each name given.\"\"\"\n        tree = ast.parse(self.src, FILENAME)\n        done = set()\n        for node in tree.body:\n            if (isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)\n                    and node.targets[0].id in values and node.targets[0].id not in done):\n                v = values[node.targets[0].id]\n                expr = ast.Constant(v) if not isinstance(v, (dict, list, tuple)) else ast.parse(repr(v), mode=\"eval\").body\n                node.value = ast.copy_location(expr, node.value)\n                ast.fix_missing_locations(node)\n                done.add(node.targets[0].id)\n        return await self.rerun(inputs, seed, what, _code=_compile_tree(tree))\n\n    def assigned(self, name):\n        \"\"\"True if the program has a top-level  name = ...  line.\"\"\"\n        for node in self.tree().body:\n            if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):\n                return True\n        return False\n\n    def count(self, kind, inside=None):\n        \"\"\"How many nodes of an ast type, e.g. C.count(ast.For).\"\"\"\n        node = self.func_node(inside) if inside else self.tree()\n        return sum(isinstance(n, kind) for n in ast.walk(node)) if node is not None else 0\n\n    def funcs(self):\n        return [n for n in self.tree().body if isinstance(n, ast.FunctionDef)]\n\n    def top_calls(self):\n        \"\"\"Names of subroutines called by the main program (not inside a def), in order.\"\"\"\n        names = []\n        for stmt in self.tree().body:\n            if isinstance(stmt, ast.FunctionDef):\n                continue\n            for n in ast.walk(stmt):\n                if isinstance(n, ast.Call) and isinstance(n.func, ast.Name):\n                    names.append(n.func.id)\n        return names\n\n    async def call(self, name, *args, inputs=(), seed=None):\n        f = self.ns.get(name)\n        if not callable(f):\n            raise CheckFail(f\"I couldn't find a subroutine called `{name}`. Check the def line and its spelling.\")\n        shown_args = \", \".join(_show(a) for a in args)\n        args = copy.deepcopy(args)\n\n        async def go():\n            r = f(*args)\n            if inspect.iscoroutine(r):\n                r = await r\n            return r\n\n        out, err, used, value = await _exec_captured(go, inputs, seed)\n        if err is not None:\n            ctx = f\"I tested `{name}({shown_args})`\" + _say_inputs(inputs)\n            if isinstance(err, NeedInput):\n                raise CheckFail(f\"{ctx}, and it kept asking for more answers. \"\n                                \"Does the loop stop once it gets a good answer?\")\n            if not isinstance(err, LoopLimit):\n                self.fail_line = _error_line(err)\n            raise CheckFail(f\"{ctx}, and \" + _crash_text(err, self.lines, self.ns))\n        return Result(out, self.ns, used, value)\n\n    # ----- helpers for the checks -----\n    def need(self, name, nparams=None):\n        f = self.ns.get(name)\n        if f is None:\n            close = _did_you_mean(name, [k for k, v in self.ns.items() if callable(v)])\n            extra = f\" I can see `{close}`. Is that meant to be `{name}`?\" if close else \"\"\n            raise CheckFail(f\"I couldn't find a subroutine called `{name}`. Write it with `def {name}(...):`.{extra}\")\n        if not callable(f):\n            raise CheckFail(f\"`{name}` should be a subroutine made with def, but it's a variable.\")\n        if nparams is not None:\n            try:\n                params = list(inspect.signature(f).parameters)\n            except (TypeError, ValueError):\n                params = []\n            required = [p for p in inspect.signature(f).parameters.values() if p.default is inspect.Parameter.empty]\n            if len(required) != nparams and len(params) != nparams:\n                want = f\"{nparams} parameter\" + (\"\" if nparams == 1 else \"s\")\n                raise CheckFail(f\"`{name}` should have {want} in its brackets, but it has {len(params)}\"\n                                + (f\": `{', '.join(params)}`.\" if params else \".\"))\n        return f\n\n    def comments(self):\n        found = []\n        try:\n            for tok in tokenize.generate_tokens(io.StringIO(self.src).readline):\n                if tok.type == tokenize.COMMENT:\n                    found.append(tok.string)\n        except (tokenize.TokenError, IndentationError, SyntaxError):\n            pass\n        return found\n\n    def tree(self):\n        return ast.parse(self.src)\n\n    def func_node(self, name):\n        for n in ast.walk(self.tree()):\n            if isinstance(n, ast.FunctionDef) and n.name == name:\n                return n\n        return None\n\n    def calls(self, name, inside=None):\n        node = self.func_node(inside) if inside else self.tree()\n        if node is None:\n            return False\n        for n in ast.walk(node):\n            if isinstance(n, ast.Call):\n                f = n.func\n                if (isinstance(f, ast.Name) and f.id == name) or (isinstance(f, ast.Attribute) and f.attr == name):\n                    return True\n        return False\n\n    def strings_in(self, inside):\n        node = self.func_node(inside)\n        out = []\n        if node is None:\n            return out\n        for n in ast.walk(node):\n            if isinstance(n, ast.Constant) and isinstance(n.value, str):\n                out.append(n.value)\n        return out\n\n    def options_in(self, inside):\n        \"\"\"Move words a fight function accepts: from ask(..., [list]) or from == \"word\" comparisons.\"\"\"\n        node = self.func_node(inside)\n        found = []\n        if node is None:\n            return found\n        for n in ast.walk(node):\n            if isinstance(n, ast.Call) and len(n.args) >= 2 and isinstance(n.args[1], (ast.List, ast.Tuple)):\n                for e in n.args[1].elts:\n                    if isinstance(e, ast.Constant) and isinstance(e.value, str) and e.value not in found:\n                        found.append(e.value)\n        if not found:\n            for n in ast.walk(node):\n                if isinstance(n, ast.Compare) and any(isinstance(o, (ast.Eq, ast.In)) for o in n.ops):\n                    for e in [n.left] + n.comparators:\n                        if isinstance(e, ast.Constant) and isinstance(e.value, str) and e.value not in found:\n                            found.append(e.value)\n        return found\n\n    def items_checked_in(self, inside):\n        \"\"\"Strings tested with  \"x\" in inventory  inside a function.\"\"\"\n        node = self.func_node(inside)\n        found = []\n        if node is None:\n            return found\n        for n in ast.walk(node):\n            if isinstance(n, ast.Compare) and any(isinstance(o, (ast.In, ast.NotIn)) for o in n.ops):\n                if isinstance(n.left, ast.Constant) and isinstance(n.left.value, str):\n                    found.append(n.left.value)\n        return found\n\n\ndef norm(s):\n    return re.sub(r\"\\s+\", \" \", str(s)).strip().lower()\n\n\ndef has(text, piece):\n    return norm(piece) in norm(text)\n\n\ndef fail(msg):\n    raise CheckFail(msg)\n\n\nasync def check(src, spec_json):\n    spec = json.loads(spec_json)\n    lines = src.split(\"\\n\")\n    try:\n        code, _ = _compile(src, defs_only=spec.get(\"defs_only\", False))\n    except SyntaxError as e:\n        r = _report(e, e.lineno, lines)\n        return json.dumps({\"type\": \"fail\", \"line\": e.lineno,\n                           \"msg\": \"Your code has a mistake Python can't read yet, so I can't check it. \"\n                                  f\"Press Run to see it. ({r['hint'] or r['error']})\"})\n    C = Checker(src, code, spec)\n    try:\n        C.full, _ = _compile(src)\n        first = await C.rerun(spec.get(\"inputs\", []), spec.get(\"seed\", 1),\n                              what=spec.get(\"what\"), _code=code)\n        C.ns, C.out, C.used = first.ns, first.out, first.used\n        env = {\"C\": C, \"out\": C.out, \"ns\": C.ns, \"fail\": fail, \"has\": has, \"norm\": norm,\n               \"random\": random, \"re\": re, \"ast\": ast, \"CheckFail\": CheckFail}\n        test = compile(spec[\"py\"], \"\u003ccheck>\", \"exec\", flags=ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)\n        r = eval(test, env)\n        if r is not None:\n            await r\n    except CheckFail as e:\n        return json.dumps({\"type\": \"fail\", \"msg\": str(e), \"line\": C.fail_line})\n    except Exception as e:\n        return json.dumps({\"type\": \"fail\", \"line\": C.fail_line,\n                           \"msg\": \"Something unexpected happened while checking, so I couldn't finish. \"\n                                  \"Press Run and make sure your program works, then check again. \"\n                                  f\"(Details for your teacher: {type(e).__name__}: {e})\"})\n    finally:\n        _state[\"queue\"] = None\n    return json.dumps({\"type\": \"pass\"})\n";
+const CHECKS = {"h1b2": {"win": "Every line reads its value from the dictionary.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nfor want in (\"Hero: Brin\", \"Health: 80\", \"Gold: 15\"):\n    if not has(out, want):\n        fail(\"It should print `\" + want + \"`. It printed: \" + shown(out))\nr = await C.rerun_vars({\"hero\": {\"name\": \"Zed\", \"health\": 5, \"gold\": 99}})\nif not (has(r.out, \"Hero: Zed\") and has(r.out, \"Health: 5\") and has(r.out, \"Gold: 99\")):\n    fail(\"I changed the hero to Zed, with 5 health and 99 gold, but it printed: \" + shown(r.out) + \". Every line should read from the dictionary, like `hero[\\\"name\\\"]`, instead of typing the value in.\")\n"}, "h1b3": {"win": "Your monster dictionary has all three keys, with the right values.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nm = ns.get(\"monster\")\nif not isinstance(m, dict):\n    fail(\"`monster` should be a dictionary, made with curly brackets { }.\")\nfor k, v in ((\"name\", \"goblin\"), (\"health\", 30), (\"damage\", 8)):\n    got = m[k]\n    if got == v and type(got) == type(v):\n        continue\n    if isinstance(v, int) and str(got).strip() == str(v):\n        fail(\"The \" + k + \" should be the number \" + str(v) + \", without quote marks, so the game can do maths with it.\")\n    fail(\"The \" + k + \" should be \" + repr(v) + \", but your monster has \" + repr(got) + \".\")\nfor want in (\"A goblin attacks!\", \"It has 30 health.\", \"It does 8 damage.\"):\n    if not has(out, want):\n        fail(\"It should print `\" + want + \"`. It printed: \" + shown(out))\n"}, "h1i1": {"inputs": ["Ash"], "win": "Your hero card reads everything from the dictionary.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nh = get_hero(ns, \"I typed Ash\")\nfor k in (\"name\", \"health\", \"gold\"):\n    if k not in h:\n        fail(\"Your hero needs a key called \\\"\" + k + \"\\\". It has: \" + (\", \".join(repr(x) for x in h) or \"no keys\") + \".\")\nif h[\"name\"] != \"Ash\":\n    if isinstance(h[\"name\"], str) and h[\"name\"].strip().lower() in (\"name\", \"input\", \"hero\"):\n        fail(\"When I typed Ash, the hero's name came out as `\" + h[\"name\"] + \"`. Take the quote marks off that value, so Python uses the variable holding what was typed.\")\n    fail(\"When I typed Ash, the hero's name should be Ash, but it's \" + repr(h[\"name\"]) + \".\")\nif h[\"health\"] != 100 or h[\"gold\"] != 20:\n    fail(\"The hero should start with 100 health and 20 gold, as numbers without quote marks. Yours has \" + repr(h[\"health\"]) + \" and \" + repr(h[\"gold\"]) + \".\")\nfor want in (\"== Ash ==\", \"Health: 100\", \"Gold: 20\"):\n    if not has(out, want):\n        fail(\"When I typed Ash, the card should include `\" + want + \"`. It printed: \" + shown(out))\nused = keys_read_in_prints(\"hero\")\nmissing = [k for k in (\"name\", \"health\", \"gold\") if k not in used]\nif missing:\n    fail(\"The card should read every value from the dictionary. Use `hero[\\\"\" + missing[0] + \"\\\"]` in the print line, instead of another variable or typing the value in.\")\nr = await C.rerun([\"Zed\"])\nif not has(r.out, \"== Zed ==\"):\n    fail(\"When I typed Zed, the top of the card should say `== Zed ==`. It printed: \" + shown(r.out))\n"}, "h1a1": {"defs_only": true, "win": "All three classes work, it keeps asking until it gets one, and the for loop prints every stat.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nTABLE = {\"warrior\": (120, 8), \"mage\": (70, 14), \"rogue\": (90, 10)}\n\ndef line_for(text, k, v):\n    return re.search(r\"(?im)^\\s*\" + re.escape(str(k)) + r\"\\s*:?\\s+\" + re.escape(str(v)) + r\"\\s*$\", text)\n\nasync def try_class(typed, cls):\n    said = \"Ash, then \" + \", then \".join(typed)\n    try:\n        r = await C.rerun([\"Ash\"] + typed)\n    except CheckFail as e:\n        if \"more answers\" in str(e):\n            fail(\"I typed \" + said + \", but it asked for more answers than that. Ask for the name first, then the class, and stop asking once the class is warrior, mage or rogue.\")\n        raise\n    if len(typed) > 1 and r.used \u003c 1 + len(typed):\n        fail(\"I typed \" + said + \". \" + typed[0] + \" isn't a class, so it should keep asking until it gets warrior, mage or rogue, then make a \" + cls + \".\")\n    h = get_hero(r.ns, \"I typed \" + said)\n    for k in (\"name\", \"class\", \"health\", \"attack\"):\n        if k not in h:\n            fail(\"I typed \" + said + \". The hero should have a key called \\\"\" + k + \"\\\", but it only has: \" + (\", \".join(repr(x) for x in h) or \"no keys\") + \".\")\n    if h[\"name\"] != \"Ash\":\n        fail(\"I typed \" + said + \". The hero's name should be Ash, but it's \" + repr(h[\"name\"]) + \". Ask for the name first, then the class.\")\n    if h[\"class\"] != cls:\n        fail(\"I typed \" + said + \". The hero's class should be \" + cls + \", but it's \" + repr(h[\"class\"]) + \".\")\n    hp, at = TABLE[cls]\n    if h[\"health\"] != hp or h[\"attack\"] != at:\n        fail(\"I typed \" + said + \". A \" + cls + \" should have \" + str(hp) + \" health and \" + str(at) + \" attack, but your hero has \" + repr(h[\"health\"]) + \" health and \" + repr(h[\"attack\"]) + \" attack.\")\n    for k in h:\n        if not line_for(r.out, k, h[k]):\n            fail(\"I typed \" + said + \". Each stat should print on its own line, like `\" + str(k) + \": \" + str(h[k]) + \"`. It printed: \" + shown(r.out))\n\nfor cls in (\"warrior\", \"mage\", \"rogue\"):\n    await try_class([cls], cls)\nawait try_class([\"wizard\", \"rogue\"], \"rogue\")\nawait try_class([\"dragon\", \"elf\", \"warrior\"], \"warrior\")\nif C.count(ast.For) == 0:\n    fail(\"The stats print correctly, but use a `for` loop to print them: `for key in hero:` goes through every key.\")\n"}, "h2b2": {"win": "The health and the gold both changed inside the hero.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nh = get_hero(ns)\nwant = {\"name\": \"Brin\", \"health\": 90, \"gold\": 5}\nextra = [k for k in h if k not in want]\nif extra:\n    fail(\"Your hero has a new key called `\" + str(extra[0]) + \"`. Gap 2 should be exactly `gold`, in lower case, so it changes the gold that's already there.\")\nif h.get(\"health\") != 90:\n    fail(\"After the rat bite, the health should be 90, but it's \" + repr(h.get(\"health\")) + \". Gap 1 is how much health to take away: 10.\")\nif h != want:\n    fail(\"The hero should end up as \" + repr(want) + \", but it's \" + repr(h) + \".\")\n"}, "h2b3": {"win": "The torch and the map are in the backpack, in order.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nh = get_hero(ns)\nbp = h.get(\"backpack\")\nif not isinstance(bp, list):\n    fail(\"The backpack isn't a list any more: it's \" + repr(bp) + \". Add to it with `hero[\\\"backpack\\\"].append(\\\"torch\\\")`, not with `=`.\")\nif bp != [\"torch\", \"map\"]:\n    if sorted(bp) == [\"map\", \"torch\"]:\n        fail(\"Both things are in the backpack, but the wrong way round. Add the torch first, then the map.\")\n    fail(\"The backpack should end up as ['torch', 'map'], but it's \" + repr(bp) + \".\")\nn = sum(1 for x in ast.walk(C.tree()) if isinstance(x, ast.Call) and isinstance(x.func, ast.Attribute) and x.func.attr == \"append\")\nif n \u003c 2:\n    fail(\"The backpack has the right things, but use `append` twice to add them, and leave the backpack starting empty.\")\nif not has(out, \"You carry 2 things\"):\n    fail(\"The last line should say `You carry 2 things.` It printed: \" + shown(out))\n"}, "h2i1": {"inputs": ["yes"], "win": "All three paths work, including exactly 10 gold.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\ndef state(h):\n    return repr(h.get(\"gold\")) + \" gold and the backpack \" + repr(h.get(\"backpack\"))\n\nh = get_hero(ns, \"I typed yes\")\nif h.get(\"gold\") != 20 or h.get(\"backpack\") != [\"potion\"]:\n    fail(\"I typed yes with 30 gold. The hero should finish with 20 gold and ['potion'], but has \" + state(h) + \".\")\nif not has(out, \"You buy a potion\"):\n    fail(\"I typed yes with 30 gold. It should print `You buy a potion.` It printed: \" + shown(out))\nfor typed in (\"no\", \"maybe\"):\n    r = await C.rerun([typed])\n    h = get_hero(r.ns, \"I typed \" + typed)\n    if h.get(\"gold\") != 30 or h.get(\"backpack\") != []:\n        fail(\"I typed \" + typed + \". Nothing should change, but the hero finished with \" + state(h) + \".\")\n    if not has(r.out, \"Maybe later\"):\n        fail(\"I typed \" + typed + \". It should print `Maybe later.` It printed: \" + shown(r.out))\nr = await C.rerun_vars({\"hero\": {\"name\": \"Ash\", \"gold\": 10, \"backpack\": []}}, [\"yes\"])\nh = get_hero(r.ns, \"I typed yes with 10 gold\")\nif h.get(\"gold\") != 0 or h.get(\"backpack\") != [\"potion\"]:\n    fail(\"I set the gold to exactly 10 and typed yes. That's enough, so they should buy it, but the hero finished with \" + state(h) + \". That's an edge: check whether you need >= or >.\")\nr = await C.rerun_vars({\"hero\": {\"name\": \"Ash\", \"gold\": 9, \"backpack\": []}}, [\"yes\"])\nh = get_hero(r.ns, \"I typed yes with 9 gold\")\nif h.get(\"gold\") != 9 or h.get(\"backpack\") != []:\n    fail(\"I set the gold to 9 and typed yes. They can't afford it, so nothing should change, but the hero finished with \" + state(h) + \".\")\nif not has(r.out, \"can't afford\"):\n    fail(\"I set the gold to 9 and typed yes. It should print `You can't afford it.` It printed: \" + shown(r.out))\n"}, "h2a1": {"win": "It sells by the price list, keeps what the merchant won't buy, and never skips an item.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nDEFAULT = {\"gem\": 50, \"rope\": 5, \"bone\": 1}\n\nasync def sell(gold, bag, prices=None):\n    vals = {\"hero\": {\"gold\": gold, \"backpack\": list(bag)}}\n    if prices is not None:\n        vals[\"prices\"] = prices\n    p = prices if prices is not None else DEFAULT\n    r = await C.rerun_vars(vals)\n    h = get_hero(r.ns)\n    want_gold = gold + sum(p[i] for i in bag if i in p)\n    want_bag = [i for i in bag if i not in p]\n    if h.get(\"gold\") != want_gold or h.get(\"backpack\") != want_bag:\n        said = \"I started the hero with \" + str(gold) + \" gold and the backpack \" + repr(list(bag))\n        if prices is not None:\n            said += \", and changed the prices to \" + repr(prices)\n        msg = said + \". It should finish with \" + str(want_gold) + \" gold and \" + repr(want_bag) + \", but finished with \" + repr(h.get(\"gold\")) + \" gold and \" + repr(h.get(\"backpack\")) + \".\"\n        if isinstance(h.get(\"gold\"), int) and h.get(\"gold\") \u003c want_gold:\n            msg += \" Some items were skipped. Removing from a list while you loop through it skips the next item: build a new list of things to keep instead.\"\n        elif prices is not None and h.get(\"gold\") != want_gold:\n            msg += \" Use the prices dictionary, like `prices[item]`, instead of typing prices into your code.\"\n        fail(msg)\n\nif not (\"prices\" in ns and isinstance(ns[\"prices\"], dict)):\n    fail(\"Keep the price list as a dictionary called `prices`.\")\nawait sell(10, [\"gem\", \"rope\", \"sock\", \"gem\"])\nawait sell(0, [\"gem\", \"gem\", \"gem\", \"bone\"])\nawait sell(3, [\"apple\", \"gem\", \"rope\"], {\"gem\": 7, \"apple\": 2})\nawait sell(5, [])\n"}, "h3b2": {"win": "The hero goes into the room and comes back out richer.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nC.need(\"treasure_room\", 1)\nr = await C.call(\"treasure_room\", {\"health\": 50, \"gold\": 7})\nif r.ret is None:\n    fail(\"I tested `treasure_room` and nothing came back. Gap 1 should send the hero back: `return hero`.\")\nif not isinstance(r.ret, dict) or r.ret.get(\"gold\") != 32 or r.ret.get(\"health\") != 50:\n    fail(\"I sent in a hero with 50 health and 7 gold. It should come back with 50 health and 32 gold, but came back as \" + repr(r.ret) + \".\")\nif not has(out, \"Gold: 25\"):\n    fail(\"The main program should print `Gold: 25`. It printed: \" + shown(out))\n"}, "h3b3": {"win": "Your trap takes 20 health from whichever hero walks in, and sends the hero back.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nC.need(\"trap_room\", 1)\nr = await C.call(\"trap_room\", {\"health\": 50, \"gold\": 3})\nif r.ret is None:\n    fail(\"I tested `trap_room` and nothing came back, so the hero turns into None. Add `return hero` as the last line of trap_room, indented.\")\nh = r.ret\nif not isinstance(h, dict):\n    fail(\"trap_room should send back the hero dictionary, but it sent back \" + repr(h) + \". End it with `return hero`.\")\nif h.get(\"gold\") != 3:\n    fail(\"I sent in a hero with 3 gold, and it came back with \" + repr(h.get(\"gold\")) + \". It looks like trap_room makes a new hero. Change the hero that was passed in instead, or every stat resets.\")\nif h.get(\"health\") == 80:\n    fail(\"I sent in a hero with 50 health, and it came back with 80. trap_room should take 20 from whatever health the hero has: `hero[\\\"health\\\"] = hero[\\\"health\\\"] - 20`\")\nif h.get(\"health\") != 30:\n    fail(\"I sent in a hero with 50 health. It should come back with 30, but came back with \" + repr(h.get(\"health\")) + \".\")\nif not r.out.strip():\n    fail(\"The health works. Now add a print line so the player knows they walked into a trap.\")\nif not has(out, \"Health: 80\"):\n    fail(\"The main program should print `Health: 80`. It printed: \" + shown(out))\n"}, "h3i1": {"inputs": ["yes"], "win": "Both rooms take the hero in and send it back, and the well handles every case.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nfor name in (\"show_status\", \"armoury\", \"well\"):\n    C.need(name, 1)\n\ndef back(r, name):\n    if r.ret is None:\n        fail(\"I tested `\" + name + \"` and nothing came back. End it with `return hero`.\")\n    if not isinstance(r.ret, dict):\n        fail(\"`\" + name + \"` should send back the hero dictionary, but sent back \" + repr(r.ret) + \".\")\n    return r.ret\n\nh = back(await C.call(\"armoury\", {\"health\": 50, \"gold\": 0, \"backpack\": [\"torch\"]}), \"armoury\")\nif h.get(\"backpack\") != [\"torch\", \"sword\"]:\n    fail(\"I sent a hero with ['torch'] into the armoury. The backpack should come back as ['torch', 'sword'], but came back as \" + repr(h.get(\"backpack\")) + \".\")\n\nasync def well(gold, typed, want_gold, want_health, note=\"\"):\n    r = await C.call(\"well\", {\"health\": 90, \"gold\": gold, \"backpack\": []}, inputs=[typed])\n    h = back(r, \"well\")\n    if h.get(\"gold\") != want_gold or h.get(\"health\") != want_health:\n        fail(\"I sent a hero with 90 health and \" + str(gold) + \" gold to the well and typed \" + typed + \". It should come back with \" + str(want_health) + \" health and \" + str(want_gold) + \" gold, but came back with \" + repr(h.get(\"health\")) + \" health and \" + repr(h.get(\"gold\")) + \" gold.\" + note)\n    return r\n\nawait well(3, \"yes\", 2, 95)\nawait well(1, \"yes\", 0, 95, \" That's an edge: 1 gold is enough. Check whether you need >= or >.\")\nr = await well(0, \"yes\", 0, 90)\nif not has(r.out, \"no coins\"):\n    fail(\"I sent a hero with 0 gold to the well and typed yes. It should print `You have no coins.` It printed: \" + shown(r.out))\nawait well(3, \"no\", 3, 90)\n\nr = await C.call(\"show_status\", {\"health\": 42, \"gold\": 7, \"backpack\": [\"gem\"]})\nfor want in (\"42\", \"7\", \"gem\"):\n    if want not in r.out:\n        fail(\"I tested `show_status` with 42 health, 7 gold and ['gem'] in the backpack. It should show all three, but printed: \" + shown(r.out))\nif not (has(out, \"95\") and has(out, \"sword\")):\n    fail(\"When I typed yes, the main program's status should show 95 health and the sword. It printed: \" + shown(out) + \". Check the main program makes the hero with 90 health, 3 gold and an empty backpack, then visits both rooms.\")\n"}, "h3a1": {"defs_only": true, "win": "The boss fight works for swords, potions, the 100 cap, and losing.", "py": "\ndef shown(text):\n    return \" / \".join(l.strip() for l in text.split(\"\\n\") if l.strip()) or \"nothing\"\n\ndef get_hero(names, what=\"the program finished\"):\n    h = names.get(\"hero\")\n    if not isinstance(h, dict):\n        fail(\"I couldn't find a dictionary called `hero` when \" + what + \". Make it with curly brackets: `hero = {...}`\")\n    return h\n\ndef keys_read_in_prints(var):\n    used = set()\n    for n in ast.walk(C.tree()):\n        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == \"print\":\n            for s in ast.walk(n):\n                if (isinstance(s, ast.Subscript) and isinstance(s.value, ast.Name) and s.value.id == var\n                        and isinstance(s.slice, ast.Constant)):\n                    used.add(s.slice.value)\n    return used\n\nC.need(\"boss\", 1)\n\nasync def fight(hero, moves, label, early=\"\"):\n    said = \"I sent in \" + label + \" and typed \" + \", \".join(moves)\n    try:\n        r = await C.call(\"boss\", hero, inputs=moves)\n    except CheckFail as e:\n        if \"kept asking\" in str(e):\n            fail(said + \". By then the fight should be over, but it kept asking. Stop the loop as soon as either health is 0 or less.\")\n        raise\n    if r.ret is None:\n        fail(\"`boss` didn't send anything back. Add `return hero` at the end, outside the loop.\")\n    if not isinstance(r.ret, dict):\n        fail(\"`boss` should send back the hero dictionary, but sent back \" + repr(r.ret) + \".\")\n    if r.used \u003c len(moves):\n        fail(said + \", but the fight ended after \" + str(r.used) + \" move\" + (\"\" if r.used == 1 else \"s\") + \". It should only end when the boss or the hero is on 0 health or less.\" + early)\n    return r, r.ret, said\n\nr, h, said = await fight({\"health\": 100, \"backpack\": [\"sword\"]}, [\"attack\"] * 3, \"a hero with 100 health and a sword\")\nif h.get(\"health\") != 80:\n    tip = \" Once the boss is on 0 or less, it shouldn't hit back.\" if h.get(\"health\") == 70 else \"\"\n    fail(said + \". The boss should hit back twice, leaving 80 health, but the hero has \" + repr(h.get(\"health\")) + \".\" + tip)\nif h.get(\"boss_beaten\") is not True:\n    fail(\"The boss was beaten, so set `hero[\\\"boss_beaten\\\"] = True` before you return the hero.\")\n\nr, h, said = await fight({\"health\": 100, \"backpack\": []}, [\"attack\"] * 8, \"a hero with 100 health and no sword\", \" Without a sword each attack does 5, so the boss lasts 8 attacks.\")\nif h.get(\"health\") != 30 or h.get(\"boss_beaten\") is not True:\n    fail(said + \". Without a sword each attack does 5, so it takes 8 attacks, and the hero should finish on 30 health with the boss beaten. The hero finished as \" + repr(h) + \".\")\n\nr, h, said = await fight({\"health\": 50, \"backpack\": [\"sword\", \"potion\"]}, [\"potion\", \"attack\", \"attack\", \"attack\"], \"a hero with 50 health, a sword and a potion\")\nif h.get(\"backpack\") != [\"sword\"]:\n    fail(said + \". The potion should be used up, leaving ['sword'], but the backpack is \" + repr(h.get(\"backpack\")) + \".\")\nif h.get(\"health\") != 50:\n    fail(said + \". The potion takes them to 80, then the boss hits back three times, so they should finish on 50 health, but finished on \" + repr(h.get(\"health\")) + \".\")\n\nr, h, said = await fight({\"health\": 90, \"backpack\": [\"sword\", \"potion\"]}, [\"potion\", \"attack\", \"attack\", \"attack\"], \"a hero with 90 health, a sword and a potion\")\nif h.get(\"health\") != 70:\n    tip = \" The potion took the health above 100. Cap it: if it goes over 100, set it back to 100.\" if h.get(\"health\") == 90 else \"\"\n    fail(said + \". The potion should stop at 100, then three hits leave 70, but they finished on \" + repr(h.get(\"health\")) + \".\" + tip)\n\nr, h, said = await fight({\"health\": 100, \"backpack\": [\"sword\"]}, [\"potion\", \"attack\", \"attack\", \"attack\"], \"a hero with a sword but no potion\")\nif not has(r.out, \"no potion\"):\n    fail(said + \". It should print `You have no potion.` It printed: \" + shown(r.out))\nif h.get(\"health\") != 70:\n    fail(said + \". The boss still hits back after the wasted turn, so they should finish on 70 health, but finished on \" + repr(h.get(\"health\")) + \".\")\n\nr, h, said = await fight({\"health\": 15, \"backpack\": []}, [\"attack\", \"attack\"], \"a hero with 15 health and no sword\")\nif h.get(\"health\", 1) > 0:\n    fail(said + \". Two hits from the boss should take them to -5, but they finished on \" + repr(h.get(\"health\")) + \".\")\nif h.get(\"boss_beaten\") is True:\n    fail(said + \". The hero lost, so `boss_beaten` shouldn't be True.\")\n"}};
+const PREDICT = {"h1": {"code": "hero = {\"name\": \"Ash\", \"gold\": 20, \"health\": 100}\nprint(hero[\"gold\"])", "q": "What will this print?", "o": ["Ash", "20", "gold", "100"], "a": 1, "e": "The key \"gold\" finds the value stored with it, which is 20. It doesn't matter where gold sits in the dictionary."}, "h2": {"code": "hero = {\"health\": 100}\nhero[\"helth\"] = 60\nprint(hero[\"health\"])", "q": "What will this print?", "o": ["60", "100", "An error", "helth"], "a": 1, "e": "The key is spelt helth, so Python adds a new key instead of changing the health. The health is still 100. Print the whole hero to see both keys."}, "h3": {"code": "def heal(hero):\n    hero[\"health\"] = hero[\"health\"] + 20\n\nhero = {\"health\": 50}\nhero = heal(hero)\nprint(hero)", "q": "What will this print?", "o": ["{'health': 70}", "{'health': 50}", "None", "An error"], "a": 2, "e": "heal has no return, so it sends back None. hero = heal(hero) then stores None in hero. That's why every room ends with return hero."}};
+const PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js";
+const LEVELS = {B: "Beginner", I: "Intermediate", A: "Advanced"};
+
+/* ---------------- icons ---------------- */
+const IC = {
+  play: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>',
+  stop: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>',
+  reset: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  copy: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>',
+  bulb: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  book: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2zM4 20a2 2 0 0 0 2 2h13v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  lock: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>',
+  key: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M11.7 12H22M18 12v4M21 12v3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  code: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  stairs: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h5v-5h5v-5h5V5h3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  save: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  map: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  tick: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  check: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 12.3l2.8 2.8L16.5 9.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  door: '<svg class="big" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 58V26a18 18 0 0 1 36 0v32z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M24 58V30M32 58V27M40 58V30M8 58h48" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="44" cy="44" r="2.5" fill="currentColor"/></svg>'
+};
+
+/* ---------------- state ---------------- */
+const KEY = "escapeTheDungeonHeroes.v1";
+const fresh = () => ({level: null, page: 0, code: {}, ticks: {}, hints: {}, unlocked: {}, done: {}, checked: {}, pred: {}, cover: {}, plan: {title: "", goal: "", rooms: []}});
+let S = fresh();
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+let dirty = false;
+try { dirty = localStorage.getItem(KEY + ".dirty") === "1"; } catch (e) {}
+function setDirty(v){
+  dirty = v;
+  try { localStorage.setItem(KEY + ".dirty", v ? "1" : "0"); } catch (e) {}
+  const b = document.getElementById("savefile");
+  if (b) { b.classList.toggle("dirty", v); b.title = v ? "You have changes that aren't saved to a file yet" : "Download your progress as a file"; }
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} setDirty(true); }
+
+/* ---------------- save / load progress file ---------------- */
+const FILE_APP = "escapeTheDungeonHeroes";
+let toastTimer = null;
+function toast(msg, bad){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.toggle("bad", !!bad); t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, bad ? 6000 : 3500);
+}
+function saveToFile(){
+  const d = new Date(), pad = n => String(n).padStart(2, "0");
+  const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+  const data = {app: FILE_APP, version: 1, saved: d.toISOString(), state: S};
+  const blob = new Blob([JSON.stringify(data, null, 1)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `Heroes Dictionary progress ${stamp}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setDirty(false);
+  toast("Progress saved to your Downloads folder. Next lesson, press Load progress and pick this file.");
+}
+function loadFromFile(file){
+  const r = new FileReader();
+  r.onload = () => {
+    let data;
+    try { data = JSON.parse(r.result); } catch (e) { toast("That file couldn't be read. Pick the .json file you saved from this page.", true); return; }
+    if (data && data.app === "escapeTheDungeonPython") { toast('That\'s your Part 1 file. Pick a file that starts "Heroes Dictionary progress", or your newest Part 3 file to bring your adventure across.', true); return; }
+    if (data && data.app === "escapeTheDungeonPart3") { importAdventure(data.state, "Part 3"); return; }
+    if (data && data.app === "escapeTheDungeonPart2") { importAdventure(data.state, "Part 2"); return; }
+    const st = data && data.app === FILE_APP && data.state;
+    if (!st || typeof st !== "object") { toast("That isn't an Escape the Dungeon progress file. Check you picked the right one.", true); return; }
+    const next = fresh();
+    for (const k of ["code", "ticks", "hints", "unlocked", "done", "checked", "pred", "cover"]) if (st[k] && typeof st[k] === "object") next[k] = st[k];
+    if (["B", "I", "A"].includes(st.level)) next.level = st.level;
+    if (st.plan && typeof st.plan === "object") next.plan = cleanPlan(st.plan);
+    if (Number.isInteger(st.page)) next.page = Math.max(0, Math.min(PAGES.length - 1, st.page));
+    S = next;
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+    setDirty(false);
+    document.querySelectorAll(".lvswitch button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lv === S.level)));
+    draw(); window.scrollTo(0, 0);
+    toast("Progress loaded. Welcome back!");
+  };
+  r.onerror = () => toast("That file couldn't be read. Try again.", true);
+  r.readAsText(file);
+}
+function cleanPlan(p){
+  const str = v => typeof v === "string" ? v : "";
+  return {title: str(p.title), goal: str(p.goal),
+    rooms: Array.isArray(p.rooms) ? p.rooms.map(rm => rm && typeof rm === "object" ? {name: str(rm.name), what: str(rm.what), type: str(rm.type), to: str(rm.to)} : null) : []};
+}
+/* bring a Part 3 (or Part 2) adventure (code and plan) across, without overwriting work done here */
+function importAdventure(st, from){
+  if (!st || typeof st !== "object") { toast("That " + from + " file couldn't be read. Check you picked the right one.", true); return; }
+  const p2 = st.code && typeof st.code.mygame === "string" && st.code.mygame.trim() ? st.code.mygame : null;
+  const cur = S.code.mygame;
+  const hasOwn = typeof cur === "string" && cur.trim() !== "" && cur.trim() !== GAME_STARTER.trim();
+  if (p2 && hasOwn && cur !== p2) { toast("You already have an adventure in this page on this computer, so it wasn't replaced. To start again from your " + from + " game, use Reset my progress on the Finish page first.", true); return; }
+  if (st.plan && typeof st.plan === "object") S.plan = cleanPlan(st.plan);
+  if (!S.level && ["B", "I", "A"].includes(st.level)) S.level = st.level;
+  if (p2) S.code.mygame = p2;
+  save();
+  document.querySelectorAll(".lvswitch button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lv === S.level)));
+  draw();
+  toast(p2 ? "Your " + from + " adventure has come across. It's in the My adventure box on every stage. Press Save progress at the end of the lesson to keep a Heroes Dictionary file."
+           : "Your " + from + " plan has come across, but there was no adventure code in that file. Start your game in the My adventure box.");
+}
+const level = () => S.level || "B";
+const PAGES = ["welcome", ...STAGES.map(s => s.id), "finish"];
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function cap(t){ return /^f-/.test(t) ? t : t.charAt(0).toUpperCase() + t.slice(1); }
+/* ---------------- indentation shading ---------------- */
+// Each 4-space step gets a tinted band; leftover spaces (not a multiple of 4) show amber.
+function shadeLine(line){
+  const lead = line.match(/^ */)[0].length;
+  const steps = Math.floor(lead / 4), extra = lead % 4;
+  let html = "";
+  for (let i = 0; i < steps; i++) html += `<span class="ig l${(i % 3) + 1}">    </span>`;
+  if (extra) html += `<span class="ig bad">${" ".repeat(extra)}</span>`;
+  return html + esc(line.slice(lead));
+}
+function shadeCode(code){ return code.split("\n").map(shadeLine).join("\n"); }
+function codeBlock(code, cls){ return `<pre class="shaded ${cls || ""}">${shadeCode(code)}</pre>`; }
+
+/* ---------------- live indentation checker ---------------- */
+// Returns {line: message} for lines whose indentation looks wrong. Mirrors what Python will complain about.
+function lintIndent(code){
+  const lines = code.split("\n"), out = {};
+  const stack = [0];
+  let prevColon = false, depth = 0;
+  lines.forEach((raw, i) => {
+    const n = i + 1, line = raw.replace(/\t/g, "    ");
+    const body = line.trim();
+    if (!body || body.startsWith("#")) return;
+    if (depth > 0) { depth += bracketDelta(body); return; }   // continuation of an open bracket
+    const ind = line.length - line.trimStart().length;
+    const top = stack[stack.length - 1];
+    if (ind % 4) out[n] = `Line ${n} has ${ind} space${ind === 1 ? "" : "s"} at the start. Indents come in steps of 4: use Tab and Shift+Tab.`;
+    else if (prevColon && ind <= top) out[n] = `Line ${n} comes straight after a line ending in a colon, so it should be indented one more step. Press Tab at the start of it.`;
+    else if (!prevColon && ind > top) out[n] = `Line ${n} is indented, but the line above doesn't end with a colon. Line it up with the line above, or add the missing colon.`;
+    else if (prevColon && ind > top + 4) out[n] = `Line ${n} is indented two steps. One step (4 spaces) is enough.`;
+    else if (!prevColon && ind < top && !stack.includes(ind)) out[n] = `Line ${n} doesn't line up with any line above it. Press Shift+Tab or Tab until it lines up exactly.`;
+    else if (/^(elif|else)\b/.test(body) && !stack.slice(0, -1).includes(ind) && !prevColon) out[n] = `Line ${n}: ${body.split(/[\s:]/)[0]} must line up exactly with its if.`;
+    if (prevColon && ind > top) stack.push(ind);
+    else while (stack.length > 1 && stack[stack.length - 1] > ind) stack.pop();
+    const code_ = body.replace(/#.*$/, "").replace(/("[^"]*"|'[^']*')/g, "\"\"").trimEnd();
+    prevColon = code_.endsWith(":");
+    depth = Math.max(0, bracketDelta(code_));
+  });
+  return out;
+}
+function bracketDelta(s){
+  s = s.replace(/("[^"]*"|'[^']*')/g, "");
+  return (s.match(/[([{]/g) || []).length - (s.match(/[)\]}]/g) || []).length;
+}
+
+
+function fmt(msg){ return esc(msg).replace(/`([^`]+)`/g, "<code>$1</code>"); }
+function el(html){ const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+
+/* ---------------- Python (Pyodide) ---------------- */
+let pyPromise = null;
+let active = null;          // the runner currently running
+const decoder = new TextDecoder();
+
+function loadPython(){
+  if (pyPromise) return pyPromise;
+  pyPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = PYODIDE_URL;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("Could not download Python"));
+    document.head.appendChild(s);
+  }).then(() => loadPyodide()).then(async py => {
+    py.registerJsModule("rt_js", { get_input: () => active ? active.askInput() : Promise.reject(new Error("RT_STOPPED")) });
+    const write = buf => { if (active) active.write(decoder.decode(buf, {stream: true})); return buf.length; };
+    py.setStdout({ write });
+    py.setStderr({ write });
+    py.FS.writeFile("/home/pyodide/runtime.py", RUNTIME_PY);
+    await py.runPythonAsync("import runtime");
+    return py;
+  });
+  pyPromise.catch(() => { pyPromise = null; });
+  return pyPromise;
+}
+
+/* ---------------- runner ---------------- */
+function makeRunner(id, starter, label, download, opts){
+  opts = opts || {};
+  const saved = S.code[id];
+  const wrap = el(`<div class="runner">
+    <div class="rbar"><span class="lbl">${esc(label || "Python")}</span>
+      <button class="run" title="Run (Ctrl+Enter)">${IC.play} Run</button>
+      <button class="stop" disabled>${IC.stop} Stop</button>
+      <button class="reset" title="Put the starting code back">${IC.reset} Reset</button>
+      ${opts.check ? `<button class="check" title="Test your code to see if the task is done">${IC.check} Check my code</button>` : ""}
+      <button class="copy" title="Copy the code">${IC.copy} Copy</button>${download ? `<button class="dl" title="Save as a .py file">${IC.save} Download .py</button>` : ""}</div>
+    <div class="ed"><div class="gut" aria-hidden="true"></div><div class="edwrap"><pre class="guides" aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="Python code"></textarea></div></div>
+    <div class="lint" hidden aria-live="polite"></div>
+    <div class="con" aria-live="polite"><pre><span class="muted">Output appears here when you press Run.</span></pre></div>
+    ${opts.cover ? `<div class="cov" hidden aria-live="polite"></div>` : ""}
+  </div>`);
+  const ta = wrap.querySelector("textarea"), gut = wrap.querySelector(".gut"), con = wrap.querySelector(".con"), out = con.querySelector("pre");
+  const guides = wrap.querySelector(".guides"), lintBox = wrap.querySelector(".lint");
+  const bRun = wrap.querySelector(".run"), bStop = wrap.querySelector(".stop"), bReset = wrap.querySelector(".reset"), bCopy = wrap.querySelector(".copy");
+  ta.value = saved !== undefined ? saved : starter;
+  let marks = {};
+
+  function layout(){
+    const n = ta.value.split("\n").length;
+    const lint = lintIndent(ta.value);
+    gut.innerHTML = Array.from({length: n}, (_, i) => `<div class="${marks[i+1] || (lint[i+1] ? "lintmark" : "")}" ${lint[i+1] ? `title="${esc(lint[i+1])}"` : ""}>${i+1}</div>`).join("");
+    ta.style.height = (Math.max(n, 4) * 22 + 20 + (ta.scrollWidth > ta.clientWidth ? 16 : 0)) + "px";
+    guides.innerHTML = shadeCode(ta.value) + "\n";
+    guides.scrollLeft = ta.scrollLeft;
+    const first = Object.keys(lint)[0];
+    lintBox.hidden = !first;
+    if (first) lintBox.innerHTML = `${IC.bulb} <span><b>Indentation check:</b> ${esc(lint[first])}${Object.keys(lint).length > 1 ? ` (and ${Object.keys(lint).length - 1} more amber line${Object.keys(lint).length > 2 ? "s" : ""})` : ""}</span>`;
+  }
+  ta.addEventListener("scroll", () => { guides.scrollLeft = ta.scrollLeft; });
+  ta.addEventListener("paste", e => {
+    const text = (e.clipboardData || window.clipboardData).getData("text");
+    if (/\t|[\u201c\u201d\u2018\u2019]/.test(text)) {
+      e.preventDefault();
+      insert(text.replace(/\t/g, "    ").replace(/[\u201c\u201d]/g, '"').replace(/[\u2018\u2019]/g, "'"));
+    }
+  });
+  function setMarks(m){ marks = m; layout(); }
+  function persist(){ S.code[id] = ta.value; save(); }
+  ta.addEventListener("input", () => { setMarks({}); persist(); });
+  layout();
+
+  // ---- editor keys: tab indent, smart enter, smart backspace, ctrl+enter runs
+  function insert(text){
+    ta.focus();
+    if (!document.execCommand("insertText", false, text)) ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, "end");
+  }
+  ta.addEventListener("keydown", e => {
+    const v = ta.value, a = ta.selectionStart, b = ta.selectionEnd;
+    const lineStart = v.lastIndexOf("\n", a - 1) + 1;
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); return; }
+    if (e.key === "Tab") {
+      e.preventDefault();
+      if (a === b && !e.shiftKey) { insert("    "); return; }
+      const endLine = v.indexOf("\n", b - (b > a && v[b-1] === "\n" ? 1 : 0)); const stop = endLine === -1 ? v.length : endLine;
+      const block = v.slice(lineStart, stop);
+      const changed = e.shiftKey ? block.split("\n").map(l => l.replace(/^ {1,4}/, "")).join("\n") : block.split("\n").map(l => "    " + l).join("\n");
+      ta.setSelectionRange(lineStart, stop); insert(changed);
+      ta.setSelectionRange(lineStart, lineStart + changed.length); return;
+    }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      const before = v.slice(lineStart, a);
+      let indent = before.match(/^ */)[0];
+      if (/:\s*$/.test(before)) indent += "    ";
+      insert("\n" + indent); return;
+    }
+    if (e.key === "Backspace" && a === b && a > lineStart) {
+      const before = v.slice(lineStart, a);
+      if (/^ +$/.test(before) && before.length % 4 === 0) {
+        e.preventDefault(); ta.setSelectionRange(a - 4, a); document.execCommand("delete") || ta.setRangeText("", a - 4, a, "end"); return;
+      }
+    }
+  });
+
+  // ---- console
+  let segs = [], pending = null, inputRow = null, renderQueued = false;
+  function render(){
+    renderQueued = false;
+    let html = segs.map(s => s.t === "in" ? `<span class="typed">${esc(s.s)}</span>` : s.t === "note" ? `<span class="muted">${esc(s.s)}</span>` : esc(s.s)).join("");
+    out.innerHTML = html;
+    con.scrollTop = con.scrollHeight;
+  }
+  function queue(){ if (!renderQueued) { renderQueued = true; requestAnimationFrame(render); } }
+  let outLen = 0;
+  const api = {
+    write(text){
+      if (outLen > 60000) return;
+      outLen += text.length;
+      const last = segs[segs.length - 1];
+      if (last && last.t === "out") last.s += text; else segs.push({t: "out", s: text});
+      if (outLen > 60000) segs.push({t: "note", s: "\n(Lots of output. The rest is hidden.)\n"});
+      queue();
+    },
+    askInput(){
+      render();
+      return new Promise((resolve, reject) => {
+        pending = {resolve, reject};
+        inputRow = el(`<div class="inrow"><label>&gt;</label><input type="text" aria-label="Type your answer and press Enter" autocomplete="off" spellcheck="false"><small>press Enter</small></div>`);
+        con.appendChild(inputRow);
+        const box = inputRow.querySelector("input");
+        box.addEventListener("keydown", ev => {
+          if (ev.key !== "Enter") return;
+          ev.preventDefault();
+          const val = box.value;
+          inputRow.remove(); inputRow = null;
+          segs.push({t: "in", s: val}); segs.push({t: "out", s: "\n"}); render();
+          const p = pending; pending = null; p.resolve(val);
+        });
+        box.focus({preventScroll: true});
+        con.scrollTop = con.scrollHeight;
+      });
+    },
+    stop(){
+      if (pending) { if (inputRow) { inputRow.remove(); inputRow = null; } const p = pending; pending = null; p.reject(new Error("RT_STOPPED")); }
+    }
+  };
+  function clearMsgs(){ wrap.querySelectorAll(".msg").forEach(m => m.remove()); }
+  function showMsg(cls, html){ const m = el(`<div class="msg ${cls}">${html}</div>`); con.appendChild(m); con.scrollTop = con.scrollHeight; }
+
+  function ready(code){
+    if (code.includes("___")) {
+      const m = {}; code.split("\n").forEach((l, i) => { if (l.includes("___")) m[i+1] = "gap"; });
+      setMarks(m);
+      showMsg("warn", "<strong>Fill in the gaps first.</strong>Replace every <code>___</code> with your answer. The gaps are on the highlighted lines.");
+      return false;
+    }
+    setMarks({});
+    if (!code.trim()) { showMsg("warn", "<strong>There's no code yet.</strong>Type your program in the box above, then press Run."); return false; }
+    return true;
+  }
+  const bCheck = wrap.querySelector(".check"), cov = wrap.querySelector(".cov");
+
+  // ---- paths tried (if / elif / else) for the adventure box
+  function showPaths(res){
+    if (!cov || !res.paths) return;
+    const keys = new Set(res.paths.map(p => p.key));
+    const tried = new Set((S.cover[id] || []).filter(k => keys.has(k)).concat(res.hits || []));
+    S.cover[id] = [...tried]; save();
+    const n = res.paths.length;
+    if (!n) { cov.hidden = true; return; }
+    const todo = res.paths.filter(p => !tried.has(p.key)), done = n - todo.length;
+    const m = {}; todo.forEach(p => { if (!marks[p.line]) m[p.line] = "todo"; });
+    setMarks(Object.assign({}, marks, m));
+    cov.hidden = false;
+    cov.innerHTML = `<div class="covtop"><strong>Paths tested: ${done} of ${n}</strong><span class="bar"><i style="width:${Math.round(done / n * 100)}%"></i></span><button class="covreset">Start counting again</button></div>` +
+      (todo.length ? `<p style="margin:6px 0 0">Every <code>if</code>, <code>elif</code> and <code>else</code> is a path through your game. Play again and try to reach ${todo.length === 1 ? "this one" : "these"} (highlighted in the line numbers):</p><ul>${todo.slice(0, 6).map(p => `<li>Line ${p.line}: <code>${esc(p.label)}</code></li>`).join("")}${todo.length > 6 ? `<li>and ${todo.length - 6} more</li>` : ""}</ul>`
+                   : `<p style="margin:6px 0 0">${IC.tick} You've tried every path in your game. That's proper testing!</p>`);
+    cov.querySelector(".covreset").addEventListener("click", () => { S.cover[id] = []; save(); cov.hidden = true; setMarks({}); });
+  }
+
+  // ---- Check my code
+  async function check(){
+    if (active && active !== api) { active.stop(); await active.finished; }
+    if (active === api) return;
+    clearMsgs(); segs = []; outLen = 0; render();
+    const code = ta.value;
+    if (!ready(code)) return;
+    active = api; let finish; api.finished = new Promise(r => finish = r);
+    bRun.disabled = true; bCheck.disabled = true;
+    try {
+      segs = [{t: "note", s: (window.loadPyodide && pyPromise ? "" : "Loading Python... ") + "Checking your code. I'll run it with my own test answers...\n"}]; render();
+      let py;
+      try { py = await loadPython(); }
+      catch (e) { segs = []; render(); showMsg("error", "<strong>Python couldn't load.</strong>You might be offline, or the site that provides Python is blocked. Ask your teacher to check your work instead."); return; }
+      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+      py.globals.set("_rt_src", code);
+      py.globals.set("_rt_spec", JSON.stringify(opts.check));
+      const res = JSON.parse(await py.runPythonAsync("await runtime.check(_rt_src, _rt_spec)"));
+      segs = [{t: "note", s: "Check finished. Press Run to play your program yourself.\n"}]; render();
+      if (res.type === "pass") {
+        S.checked[id] = true; save();
+        showMsg("pass", `<strong>${IC.tick} Check passed!</strong>${esc(opts.check.win || "This task is done.")}`);
+        if (opts.onPass) opts.onPass();
+      } else {
+        if (res.line) setMarks({[res.line]: "err"});
+        showMsg("warn", `<strong>Not quite yet.</strong>${fmt(res.msg)}`);
+      }
+    } catch (e) {
+      showMsg("error", "<strong>Something went wrong checking your code.</strong>" + esc(e && e.message ? e.message.split("\n").slice(-2).join(" ") : e));
+    } finally {
+      if (active === api) active = null;
+      bRun.disabled = false; bCheck.disabled = false; finish();
+    }
+  }
+  if (bCheck) bCheck.addEventListener("click", check);
+
+  async function run(){
+    if (active && active !== api) { active.stop(); await active.finished; }
+    if (active === api) return;
+    clearMsgs(); segs = []; outLen = 0; render();
+    const code = ta.value;
+    if (!ready(code)) return;
+    active = api; let finish; api.finished = new Promise(r => finish = r);
+    bRun.disabled = true; bStop.disabled = false; if (bCheck) bCheck.disabled = true;
+    try {
+      let py;
+      if (!window.loadPyodide || !pyPromise) { segs = [{t: "note", s: "Loading Python... the first run takes a few seconds.\n"}]; render(); }
+      try { py = await loadPython(); }
+      catch (e) {
+        segs = []; render();
+        showMsg("error", "<strong>Python couldn't load.</strong>You might be offline, or the site that provides Python is blocked. Press <b>Copy</b> and paste your code into IDLE or Thonny instead.");
+        return;
+      }
+      if (segs.length === 1 && segs[0].t === "note") { segs = []; render(); }
+      py.globals.set("_rt_src", code);
+      py.globals.set("_rt_cover", !!opts.cover);
+      const res = JSON.parse(await py.runPythonAsync("await runtime.run(_rt_src, _rt_cover)"));
+      render();
+      if (res.type === "ok") showMsg("ok", segs.length ? "Program finished." : "Program finished. (It didn't print anything.)");
+      else if (res.type === "stopped") showMsg("warn", "<strong>Program stopped.</strong>");
+      else if (res.type === "loop") showMsg("warn", `<strong>${esc(res.error)}</strong>${esc(res.hint)}${refLink(res)}`);
+      else {
+        if (res.line) setMarks({[res.line]: "err"});
+        showMsg("error", `<strong>${res.line ? "Problem on line " + res.line : "Problem"}</strong><code>${esc(res.error)}</code>${res.hint ? "<br>" + esc(res.hint) : ""}${refLink(res)}`);
+      }
+      showPaths(res);
+    } catch (e) {
+      showMsg("error", "<strong>Something went wrong running your code.</strong>" + esc(e && e.message ? e.message.split("\n").slice(-2).join(" ") : e));
+    } finally {
+      if (active === api) active = null;
+      bRun.disabled = false; bStop.disabled = true; if (bCheck) bCheck.disabled = false; finish();
+    }
+  }
+  bRun.addEventListener("click", run);
+  bStop.addEventListener("click", () => api.stop());
+  bReset.addEventListener("click", () => {
+    if (bReset.dataset.confirm) {
+      delete bReset.dataset.confirm; bReset.innerHTML = IC.reset + " Reset";
+      ta.value = starter; delete S.code[id]; save(); setMarks({}); clearMsgs(); segs = []; render();
+    } else {
+      bReset.dataset.confirm = "1"; bReset.innerHTML = IC.reset + " Sure? Click again";
+      setTimeout(() => { if (bReset.dataset.confirm) { delete bReset.dataset.confirm; bReset.innerHTML = IC.reset + " Reset"; } }, 4000);
+    }
+  });
+  bCopy.addEventListener("click", async () => {
+    let ok = false;
+    try { await navigator.clipboard.writeText(ta.value); ok = true; } catch (e) {
+      ta.select(); try { ok = document.execCommand("copy"); } catch (e2) {}
+    }
+    bCopy.innerHTML = IC.copy + (ok ? " Copied" : " Press Ctrl+C");
+    setTimeout(() => bCopy.innerHTML = IC.copy + " Copy", 1800);
+  });
+  const bDl = wrap.querySelector(".dl");
+  if (bDl) bDl.addEventListener("click", () => {
+    const name = ((S.plan && S.plan.title) || "my_adventure").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "my_adventure";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([ta.value], {type: "text/x-python"}));
+    a.download = name + ".py"; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  });
+  api.finished = Promise.resolve();
+  wrap._stop = () => api.stop();
+  return wrap;
+}
+
+/* ---------------- adventure plan ---------------- */
+const GAME_STARTER = "# My adventure\n# Tip: press Load progress and pick your Part 3 file to bring your game across.\nimport random\n\n# 1. Define your rooms here (def ...)\n\n\n# 2. Main program\nhero = {\"health\": 100, \"gold\": 0, \"backpack\": []}\n";
+const TYPES = ["story", "choice", "riddle", "trap", "treasure", "shop", "fork"];
+function planHtml(n){
+  const P = S.plan, row = i => { const r = P.rooms[i] || {}; return `<tr><td class="rn">${i + 1}</td>
+    <td><input data-plan="name:${i}" value="${esc(r.name || "")}" placeholder="e.g. library" aria-label="Room ${i + 1} name"></td>
+    <td><input data-plan="what:${i}" value="${esc(r.what || "")}" placeholder="What happens here?" aria-label="Room ${i + 1} what happens"></td>
+    <td><select data-plan="type:${i}" aria-label="Room ${i + 1} type">${TYPES.map(t => `<option ${r.type === t ? "selected" : ""}>${t}</option>`).join("")}</select></td>
+    <td><input data-plan="to:${i}" value="${esc(r.to || "")}" placeholder="Leads to..." aria-label="Room ${i + 1} leads to"></td></tr>`; };
+  return `<div class="plan"><label>Name of your adventure<input data-plan="title" value="${esc(P.title || "")}" placeholder="e.g. The Goblin King's Tower"></label>
+    <label>How does the player win?<input data-plan="goal" value="${esc(P.goal || "")}" placeholder="e.g. find the golden key and escape"></label>
+    <table><thead><tr><th></th><th>Room name</th><th>What happens</th><th>Type</th><th>Leads to</th></tr></thead><tbody>${Array.from({length: n}, (_, i) => row(i)).join("")}</tbody></table>
+    <p class="saved">Your plan saves automatically on this computer. Press Save progress at the top to keep a copy you can take anywhere.</p></div>`;
+}
+function planSummary(){
+  const P = S.plan, rooms = (P.rooms || []).filter(r => r && (r.name || r.what));
+  if (!P.title && !rooms.length) return `<p class="muted2">No plan here yet. Press Load progress and pick your newest Part 3 file to bring your plan and your adventure across.</p>`;
+  return `<p><strong>${esc(P.title || "My adventure")}</strong>${P.goal ? ": " + esc(P.goal) : ""}</p><ol>${rooms.map(r => `<li><code>${esc(r.name || "?")}</code> (${esc(r.type || "story")}) ${esc(r.what || "")}${r.to ? " &rarr; " + esc(r.to) : ""}</li>`).join("")}</ol>`;
+}
+
+/* ---------------- pages ---------------- */
+const page = document.getElementById("page");
+
+function renderWelcome(){
+  const lv = S.level;
+  page.innerHTML = `
+  <section class="hero">${IC.door}<div>
+    <h1>The Heroes Dictionary</h1>
+    <p>Your hero has health, gold and a backpack, and the list keeps growing. This short add-on to Part 3 keeps every stat in one place: a dictionary. Three stages, one lesson.</p></div></section>
+  <div class="card gamecard"><h2 class="sec">${IC.map} Bring your Part 3 adventure</h2>
+    <p>Press <strong>Load progress</strong> at the top and pick your newest file that starts <strong>Escape the Dungeon Part 3 progress</strong>. Your adventure code and your plan come across, and by the end of the lesson your whole game runs on one hero dictionary.</p>
+    <p>No Part 3 file? No problem. Start a new adventure in the box at the bottom of each stage.</p></div>
+  <div class="card"><h2 class="sec">${IC.book} How this works</h2>
+    <div class="how">
+      <div><b>${IC.book} 1. Learn</b>Each stage starts with a short explanation and an example you can run.</div>
+      <div><b>${IC.code} 2. Code here</b>Type Python straight into this page and press <strong>Run</strong>. When a program asks a question, type in the box and press Enter. On most tasks, <strong>Check my code</strong> tests your work and tells you what to fix.</div>
+      <div><b>${IC.stairs} 3. Your adventure</b>Every stage ends with your own game, which grows as you go. It counts the paths you've tested, so you can find the ones you haven't tried.</div>
+    </div></div>
+  <div class="card"><h2 class="sec">${IC.book} Saving your work</h2>
+    <p>At the end of each lesson, press <strong>Save progress</strong> at the top. A file goes into your Downloads folder. It keeps your plan, your adventure code and everything else.</p>
+    <p>Next lesson, press <strong>Load progress</strong> and pick your newest file to carry on where you left off. A red dot on the Save button means you have changes that aren't saved to a file yet.</p></div>
+  <div class="card"><h2 class="sec">${IC.key} Choose your route</h2>
+    <div class="levels">
+      <button class="lvcard lv-B" data-lv="B" aria-pressed="${lv === "B"}"><span class="lvpill">Beginner</span><q>I'm new to Python, or I find it tricky.</q><span class="d">Make a hero, change its stats, and write a room that takes the hero in. Worked examples, fill-the-gap code, tick lists and plenty of hints.</span></button>
+      <button class="lvcard lv-I" data-lv="I" aria-pressed="${lv === "I"}"><span class="lvpill">Intermediate</span><q>I can write simple programs.</q><span class="d">A hero card, a potion shop, and rooms that share one hero. Short briefs, hints if you need them, plus extensions.</span></button>
+      <button class="lvcard lv-A" data-lv="A" aria-pressed="${lv === "A"}"><span class="lvpill">Advanced</span><q>I'm confident. Give me a challenge.</q><span class="d">Hero classes, a merchant with a price list, and a boss fight that uses the backpack. Specifications only, and stretch tasks beyond the lesson.</span></button>
+    </div></div>
+  <div class="card"><h2 class="sec">${IC.play} Test the runner</h2><p>Press <strong>Run</strong>. The first time, Python takes a few seconds to load.</p><div id="warm"></div></div>`;
+  page.querySelector("#warm").appendChild(makeRunner("warmup", 'print("Hello, dungeon!")', "Try it"));
+  page.querySelectorAll(".lvcard").forEach(b => b.addEventListener("click", () => { setLevel(b.dataset.lv); go(1); }));
+}
+
+function partHtml(p, n){
+  const isExtra = p.kind === "ext" || p.kind === "stretch";
+  const label = p.kind === "ext" ? "Extension" : p.kind === "stretch" ? "Stretch" : p.kind === "step" ? "Step " + n : p.kind === "plan" ? "Plan" : "Task " + n;
+  const steps = p.steps ? `<ul class="steps">${p.steps.map((s, i) => `<li><label><input type="checkbox" data-tick="${p.id}:${i}" ${S.ticks[p.id + ":" + i] ? "checked" : ""}><span>${s}</span></label></li>`).join("")}</ul>` : "";
+  const hints = p.hints && p.hints.length ? `<div class="hints" data-hints="${p.id}"></div>` : "";
+  const locked = isExtra && !S.unlocked[p.id];
+  return `<article class="card part kind-${p.kind}${locked ? " locked" : ""}" data-part="${p.id}">
+    <h3><span class="tasknum">${label}</span>${esc(cap(p.title.replace(/^(Extension|Stretch): /, "")))}${S.checked[p.id] ? `<span class="passed">${IC.tick} Checked</span>` : ""}</h3>
+    ${isExtra ? `<div class="lockrow"${locked ? "" : " hidden"}><p>Finished the task above? Unlock this ${label.toLowerCase()}.</p><button class="btn amber" data-unlock="${p.id}">${IC.key} Unlock</button></div>` : ""}
+    <div class="pbody">${p.html}${steps}${p.kind === "plan" ? planHtml(p.rooms) : ""}<div class="rslot"></div>${hints}</div>
+  </article>`;
+}
+
+function predictHtml(st){
+  const P = PREDICT[st.id];
+  if (!P) return "";
+  return `<div class="card predict" id="predict"><h2 class="sec">${IC.bulb} Predict first</h2>
+    <p>Before you run anything, read this code and decide what it does.</p>
+    <pre class="sample">${esc(P.code)}</pre><p class="q">${esc(P.q)}</p>
+    <div class="opts">${P.o.map((o, i) => `<button class="opt" data-opt="${i}">${esc(o)}</button>`).join("")}</div>
+    <div class="pfb"></div><div class="pslot"></div></div>`;
+}
+function wirePredict(st){
+  const P = PREDICT[st.id], box = page.querySelector("#predict");
+  if (!P || !box) return;
+  const btns = [...box.querySelectorAll(".opt")];
+  function reveal(pick, fresh){
+    btns.forEach((b, i) => { b.disabled = true; if (i === P.a) b.classList.add("right"); else if (i === pick) b.classList.add("wrong"); });
+    box.querySelector(".pfb").innerHTML = `<div class="msg ${pick === P.a ? "pass" : "warn"}"><strong>${pick === P.a ? IC.tick + " You predicted it." : "Not this time, and that's fine. Now you know."}</strong>${esc(P.e)} Run it to see for yourself.</div>`;
+    if (!box.querySelector(".runner")) box.querySelector(".pslot").appendChild(makeRunner(st.id + "-predict", P.code, "Run it to check"));
+  }
+  btns.forEach((b, i) => b.addEventListener("click", () => { S.pred[st.id] = i; save(); reveal(i, true); }));
+  if (S.pred[st.id] !== undefined) reveal(S.pred[st.id], false);
+}
+
+function renderHints(box, p){
+  const shown = S.hints[p.id] || 0;
+  box.innerHTML = p.hints.slice(0, shown).map((h, i) => `<div class="hint"><b>Hint ${i + 1}:</b> ${esc(h)}</div>`).join("") +
+    (shown < p.hints.length ? `<button class="hintbtn" style="margin-top:8px">${IC.bulb} ${shown ? "Another hint" : "Show a hint"} (${shown + 1} of ${p.hints.length})</button>` : "");
+  const b = box.querySelector(".hintbtn");
+  if (b) b.addEventListener("click", () => { S.hints[p.id] = shown + 1; save(); renderHints(box, p); });
+}
+
+function renderStage(st){
+  const lv = level(), L = st.levels[lv];
+  let n = 0;
+  const parts = L.parts.map(p => { if (p.kind === "main" || p.kind === "step") n++; return partHtml(p, n); }).join("");
+  const gameCard = st.game ? `<div class="card gamecard"><h2 class="sec">${IC.code} Your adventure</h2><p>${st.game[lv]}</p>
+    <details class="myplan"><summary>${IC.map} Show my plan</summary>${planSummary()}</details><div id="gameslot"></div></div>` : "";
+  const doneKey = st.id + ":" + lv, isDone = !!S.done[doneKey];
+  const checkable = L.parts.filter(p => CHECKS[p.id] && p.kind === "main"), nChecked = checkable.filter(p => S.checked[p.id]).length;
+  const checkLine = checkable.length ? `<p class="checkcount">${IC.check} Tasks checked on this route: ${nChecked} of ${checkable.length}</p>` : "";
+  const up = lv === "B" ? "I" : lv === "I" ? "A" : null;
+  page.innerHTML = `
+  <section class="stage-head"><div class="badge">${st.num}</div><div>
+    <div class="kicker">Stage ${st.num} of ${STAGES.length} &middot; ${esc(st.concept)}</div>
+    <h1>${esc(st.title)}</h1><p>${esc(st.hook)}</p></div></section>
+  ${predictHtml(st)}
+  <div class="card learn"><h2 class="sec">${IC.book} Learn</h2>${st.learnHtml}<div id="learnslot"></div></div>
+  <details class="card help" ${lv === "B" ? "open" : ""}><summary>${IC.bulb} Help box: key words and common mistakes</summary>
+    <div class="helpgrid"><div><h3>Key words</h3><dl class="kw">${st.keywords.map(k => `<dt>${esc(k[0])}</dt><dd>${esc(k[1])}</dd>`).join("")}</dl></div>
+    <div><h3>Common mistakes</h3><ul class="mist">${st.mistakes.map(m => `<li>${m}</li>`).join("")}</ul></div></div></details>
+  <div class="lv-${lv}"><div class="lvhead"><span class="lvpill">${LEVELS[lv]} route</span><p>${esc(L.intro)}</p></div>${parts}</div>${gameCard}
+  <div class="card endcard"><div class="grow">
+    ${isDone ? `<p class="done-msg">Stage complete on the ${LEVELS[lv]} route. Well done!</p>${up ? `<p>Feeling confident? Try this stage on the ${LEVELS[up]} route.</p>` : `<p>Head to the next stage when you're ready.</p>`}`
+             : `<p><strong>Finished everything you can on this stage?</strong></p><p>Mark it complete, then move on.</p>`}${checkLine}</div>
+    ${isDone ? (up ? `<button class="btn ghost" id="levelup">${IC.stairs} Level up to ${LEVELS[up]}</button>` : "") : `<button class="btn primary" id="markdone">I've finished this stage</button>`}
+    ${isDone ? `<button class="btn primary" id="nextstage">Next stage &rarr;</button>` : ""}
+  </div>`;
+  page.querySelector("#learnslot").appendChild(makeRunner(st.id + "-learn", st.learnCode, "Example"));
+  wirePredict(st);
+  if (st.game) page.querySelector("#gameslot").appendChild(makeRunner("mygame", GAME_STARTER, "My adventure", true, {cover: true}));
+  page.querySelectorAll("[data-plan]").forEach(inp => inp.addEventListener("input", () => {
+    const [k, i] = inp.dataset.plan.split(":");
+    if (i === undefined) S.plan[k] = inp.value; else { S.plan.rooms[+i] = S.plan.rooms[+i] || {}; S.plan.rooms[+i][k] = inp.value; }
+    save();
+  }));
+  L.parts.forEach(p => {
+    const art = page.querySelector(`[data-part="${p.id}"]`);
+    if (p.starter !== undefined && p.kind !== "step") art.querySelector(".rslot").appendChild(makeRunner(p.id, p.starter, "Your code", false, {
+      check: CHECKS[p.id],
+      onPass: () => {
+        const h = art.querySelector("h3");
+        if (!h.querySelector(".passed")) h.insertAdjacentHTML("beforeend", `<span class="passed">${IC.tick} Checked</span>`);
+        const cc = page.querySelector(".checkcount");
+        if (cc) { const n = checkable.filter(q => S.checked[q.id]).length; cc.innerHTML = `${IC.check} Tasks checked on this route: ${n} of ${checkable.length}`; }
+      }}));
+    const hb = art.querySelector(".hints"); if (hb) renderHints(hb, p);
+    const ub = art.querySelector("[data-unlock]");
+    if (ub) ub.addEventListener("click", () => { S.unlocked[p.id] = true; save(); art.classList.remove("locked"); ub.parentElement.hidden = true; });
+  });
+  page.querySelectorAll("[data-tick]").forEach(c => c.addEventListener("change", () => { S.ticks[c.dataset.tick] = c.checked; save(); }));
+  const md = page.querySelector("#markdone"); if (md) md.addEventListener("click", () => { S.done[doneKey] = true; save(); renderDots(); renderStage(st); page.querySelector(".endcard").scrollIntoView({block: "center"}); });
+  const lu = page.querySelector("#levelup"); if (lu) lu.addEventListener("click", () => { setLevel(up); window.scrollTo(0, 0); });
+  const ns = page.querySelector("#nextstage"); if (ns) ns.addEventListener("click", () => go(S.page + 1));
+}
+
+function renderFinish(){
+  const rows = STAGES.map(st => `<tr><td>Stage ${st.num}: ${esc(st.title)}</td>${["B", "I", "A"].map(l => `<td class="c">${S.done[st.id + ":" + l] ? '<span class="tick">&#10003;</span>' : ""}</td>`).join("")}</tr>`).join("");
+  page.innerHTML = `
+  <section class="hero">${IC.door}<div><h1>Hero complete?</h1>
+    <p>Your hero now keeps every stat in one dictionary, and every room takes the hero in and sends it back. Download your adventure from the box below so you have a copy, and hand it in if you've been asked to.</p></div></section>
+  <div class="card"><h2 class="sec">${IC.key} Your progress</h2>
+    <table class="prog"><thead><tr><th>Stage</th><th class="c">Beginner</th><th class="c">Intermediate</th><th class="c">Advanced</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="card"><h2 class="sec">${IC.bulb} Check yourself</h2>
+    <ul class="steps">${[
+      "I can make a dictionary with keys and values, and read a value using its key",
+      "I can explain the difference between a key and a value",
+      "I can change a value, add a new key, and add to a list inside a dictionary",
+      "I can pass a dictionary into a subroutine and send it back with return",
+      "I can explain why hero = room(hero) is better than passing lots of separate values"].map((s, i) => `<li><label><input type="checkbox" data-tick="final:${i}" ${S.ticks["final:" + i] ? "checked" : ""}><span>${s}</span></label></li>`).join("")}</ul></div>
+  <div class="card"><h2 class="sec">${IC.code} My adventure</h2><div id="gameslot"></div></div>
+  <div class="card"><h2 class="sec">${IC.reset} Start again</h2><p>This clears your code, plan, ticks and progress on this computer. Any progress file you saved stays in your Downloads folder.</p><button class="btn ghost" id="wipe">Reset my progress</button></div>`;
+  page.querySelectorAll("[data-tick]").forEach(c => c.addEventListener("change", () => { S.ticks[c.dataset.tick] = c.checked; save(); }));
+  page.querySelector("#gameslot").appendChild(makeRunner("mygame", GAME_STARTER, "My adventure", true, {cover: true}));
+  const w = page.querySelector("#wipe");
+  w.addEventListener("click", () => {
+    if (!w.dataset.confirm) { w.dataset.confirm = "1"; w.textContent = "Are you sure? Click again to reset"; return; }
+    S = fresh(); save(); setDirty(false); go(0);
+  });
+}
+
+/* ---------------- navigation ---------------- */
+function renderDots(){
+  const d = document.getElementById("dots");
+  d.innerHTML = PAGES.map((p, i) => {
+    let cls = "dot", label, txt;
+    if (p === "welcome") { label = "Welcome"; txt = "&#9733;"; }
+    else if (p === "finish") { label = "Finish"; txt = "&#10003;"; }
+    else { const st = STAGES[i - 1]; label = `Stage ${st.num}: ${st.title}`; txt = st.num;
+      const best = ["A", "I", "B"].find(l => S.done[st.id + ":" + l]); if (best) cls += " done-" + best; }
+    if (i === S.page) cls += " current";
+    return `<button class="${cls}" data-go="${i}" title="${esc(label)}" aria-label="${esc(label)}">${txt}</button>`;
+  }).join("");
+  d.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(+b.dataset.go)));
+}
+function setLevel(lv){
+  S.level = lv; save();
+  document.querySelectorAll(".lvswitch button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lv === lv)));
+  draw();
+}
+function draw(){
+  if (active) active.stop();
+  const p = PAGES[S.page];
+  if (p === "welcome") renderWelcome(); else if (p === "finish") renderFinish(); else renderStage(STAGES.find(s => s.id === p));
+  renderDots();
+  refStage();
+  document.getElementById("prev").disabled = S.page === 0;
+  document.getElementById("next").disabled = S.page === PAGES.length - 1;
+  document.getElementById("where").textContent = p === "welcome" ? "Welcome" : p === "finish" ? "Finish" : `Stage ${S.page} of ${STAGES.length}  |  ${LEVELS[level()]} route`;
+}
+function go(i){ S.page = Math.max(0, Math.min(PAGES.length - 1, i)); save(); draw(); window.scrollTo(0, 0); }
+document.getElementById("prev").addEventListener("click", () => go(S.page - 1));
+document.getElementById("next").addEventListener("click", () => go(S.page + 1));
+document.querySelectorAll(".lvswitch button").forEach(b => {
+  b.setAttribute("aria-pressed", String(b.dataset.lv === S.level));
+  b.addEventListener("click", () => setLevel(b.dataset.lv));
+});
+document.getElementById("savefile").addEventListener("click", saveToFile);
+const loadInput = document.getElementById("loadinput");
+document.getElementById("loadfile").addEventListener("click", () => { loadInput.value = ""; loadInput.click(); });
+loadInput.addEventListener("change", () => { if (loadInput.files[0]) loadFromFile(loadInput.files[0]); });
+if (S.page >= PAGES.length) S.page = 0;
+/* ---------------- reference panel ---------------- */
+const REF_ALL = [{"id": "print", "part": 1, "cat": "Output and text", "title": "print()", "short": "show something on the screen", "keys": ["print", "output", "show", "display"], "syntax": "print(\"Hello\")\nprint(\"Gold:\", gold)\nprint()", "html": "\u003cp>Shows text or values on the screen. Each \u003ccode>print\u003c/code> starts a new line. Separate several things with commas and Python puts a space between them. \u003ccode>print()\u003c/code> on its own prints a blank line.\u003c/p>", "example": "print(\"You wake up in a dungeon.\")\ngold = 5\nprint(\"You have\", gold, \"gold coins.\")\nprint()\nprint(\"The end.\")", "watch": "\u003ccode>Print\u003c/code> with a capital P doesn't work. Python is fussy about capital letters."}, {"id": "strings", "part": 1, "cat": "Output and text", "title": "Strings (text)", "short": "text in quote marks, joining and repeating", "keys": ["string", "str", "text", "quote", "quotes", "\"", "+", "*", "join", "repeat"], "syntax": "\"Hello\"\n\"Sir \" + name\n\"=\" * 30", "html": "\u003cp>Text in quote marks is called a \u003cstrong>string\u003c/strong>. Every string needs a quote at the start \u003cstrong>and\u003c/strong> the end.\u003c/p>\u003cul>\u003cli>\u003ccode>+\u003c/code> joins strings together.\u003c/li>\u003cli>\u003ccode>*\u003c/code> repeats a string: \u003ccode>\"=\" * 30\u003c/code> makes 30 equals signs.\u003c/li>\u003c/ul>", "example": "name = \"Asha\"\nprint(\"Sir \" + name)\nprint(\"=\" * 20)\nprint(\"Ha\" * 3)", "watch": "\u003ccode>+\u003c/code> only joins text to text. To show a number with text, use a comma in print instead."}, {"id": "joining", "part": 1, "cat": "Output and text", "title": "Text and numbers together", "short": "commas, str() and f-strings", "keys": ["str()", "f-string", "fstring", "f\"", "comma", "concatenate"], "syntax": "print(\"Gold:\", gold)\nprint(\"Gold: \" + str(gold))\nprint(f\"Gold: {gold}\")", "html": "\u003cp>Three ways to show a number with some text. They all print the same thing.\u003c/p>\u003cul>\u003cli>A comma in print (easiest).\u003c/li>\u003cli>\u003ccode>str()\u003c/code> turns a number into text so you can use \u003ccode>+\u003c/code>.\u003c/li>\u003cli>An \u003cstrong>f-string\u003c/strong>: put \u003ccode>f\u003c/code> before the quote and the variable in curly brackets.\u003c/li>\u003c/ul>", "example": "gold = 12\nprint(\"Gold:\", gold)\nprint(\"Gold: \" + str(gold))\nprint(f\"Gold: {gold}\")", "watch": "Writing \u003ccode>\"Gold: \" + gold\u003c/code> causes a TypeError, because gold is a number."}, {"id": "tidy", "part": 1, "cat": "Output and text", "title": ".lower()  .strip()  .title()", "short": "tidy up what the player typed", "keys": ["lower", ".lower()", "strip", ".strip()", "title", ".title()", "upper", "capital", "capitals", "case", "spaces"], "syntax": "answer = input(\"Yes or no? \").strip().lower()", "html": "\u003cp>Players type \u003ccode>YES\u003c/code>, \u003ccode>Yes\u003c/code> or \u003ccode> yes \u003c/code> with spaces. Tidy the answer before you check it.\u003c/p>\u003cul>\u003cli>\u003ccode>.lower()\u003c/code> makes it all lower case.\u003c/li>\u003cli>\u003ccode>.strip()\u003c/code> removes spaces at the start and end.\u003c/li>\u003cli>\u003ccode>.title()\u003c/code> gives every word a capital letter.\u003c/li>\u003c/ul>", "example": "answer = input(\"Do you open the door? \").strip().lower()\nif answer == \"yes\":\n    print(\"It creaks open.\")\nelse:\n    print(\"You leave it shut.\")", "watch": "After \u003ccode>.lower()\u003c/code>, compare with lower case: \u003ccode>\"yes\"\u003c/code>, not \u003ccode>\"Yes\"\u003c/code>."}, {"id": "comments", "part": 1, "cat": "Output and text", "title": "# Comments", "short": "notes that Python ignores", "keys": ["#", "comment", "comments", "note"], "syntax": "# This is a comment", "html": "\u003cp>Anything after a \u003ccode>#\u003c/code> is a note for people. Python ignores it. Use comments to plan your code and to explain the tricky bits.\u003c/p>", "example": "# Print the title\nprint(\"ESCAPE THE DUNGEON\")  # this part is ignored too", "watch": ""}, {"id": "variables", "part": 1, "cat": "Variables and input", "title": "Variables", "short": "a named box that stores a value", "keys": ["variable", "variables", "=", "store", "assign", "assignment"], "syntax": "name = \"Asha\"\nhealth = 100\nhealth = health - 20", "html": "\u003cp>A variable stores a value under a name. \u003ccode>=\u003c/code> puts the value on the right into the variable on the left. You can change it later, even using its old value.\u003c/p>\u003cp>Names can't have spaces or start with a number. \u003ccode>Health\u003c/code> and \u003ccode>health\u003c/code> are different variables.\u003c/p>", "example": "health = 100\nprint(health)\nhealth = health - 20\nprint(health)", "watch": "One \u003ccode>=\u003c/code> stores a value. Two, \u003ccode>==\u003c/code>, compares. A NameError often means the variable was spelt differently, or used before it was given a value."}, {"id": "input", "part": 1, "cat": "Variables and input", "title": "input()", "short": "ask the player a question", "keys": ["input", "ask", "question", "type", "typed"], "syntax": "name = input(\"What is your name? \")", "html": "\u003cp>Shows a question, waits for the player to type an answer and press Enter, then gives back what they typed. Store it in a variable so you can use it.\u003c/p>\u003cp>Leave a space before the closing quote so the answer doesn't touch the question.\u003c/p>", "example": "name = input(\"What is your name? \")\nprint(\"Welcome,\", name)", "watch": "input() \u003cstrong>always\u003c/strong> gives back text, even if they type a number. Use \u003ccode>int()\u003c/code> to do maths with it."}, {"id": "int", "part": 1, "cat": "Numbers", "title": "int()", "short": "turn typed text into a whole number", "keys": ["int", "int()", "integer", "number", "whole number"], "syntax": "coins = int(input(\"How many coins? \"))", "html": "\u003cp>Turns text like \u003ccode>\"5\"\u003c/code> into the number \u003ccode>5\u003c/code> so you can do maths with it. Most often wrapped round \u003ccode>input()\u003c/code>.\u003c/p>", "example": "coins = int(input(\"How many coins? \"))\nprint(\"Double that is\", coins * 2)", "watch": "\u003ccode>int(\"ten\")\u003c/code> or \u003ccode>int(\"2.5\")\u003c/code> causes a ValueError. Only whole numbers work."}, {"id": "maths", "part": 1, "cat": "Numbers", "title": "Maths", "short": "+  -  *  /  //  %", "keys": ["maths", "math", "+", "-", "*", "/", "//", "%", "add", "subtract", "multiply", "divide", "remainder", "modulus", "div", "mod"], "syntax": "+ add   - subtract   * multiply   / divide\n// whole-number divide   % remainder", "html": "\u003cp>Python does maths in the usual order: brackets first, then \u003ccode>* / // %\u003c/code>, then \u003ccode>+ -\u003c/code>.\u003c/p>\u003cul>\u003cli>\u003ccode>17 / 5\u003c/code> gives \u003ccode>3.4\u003c/code>\u003c/li>\u003cli>\u003ccode>17 // 5\u003c/code> gives \u003ccode>3\u003c/code> (how many whole times)\u003c/li>\u003cli>\u003ccode>17 % 5\u003c/code> gives \u003ccode>2\u003c/code> (what's left over)\u003c/li>\u003c/ul>", "example": "print(17 / 5)\nprint(17 // 5)\nprint(17 % 5)\nprint(2 + 3 * 4)\nprint((2 + 3) * 4)", "watch": "You can't divide by zero. That's a ZeroDivisionError."}, {"id": "if", "part": 1, "cat": "Decisions", "title": "if  elif  else", "short": "choose which code runs", "keys": ["if", "elif", "else", "selection", "decision", "choice", "branch", "branching"], "syntax": "if health > 50:\n    print(\"Strong\")\nelif health > 0:\n    print(\"Wounded\")\nelse:\n    print(\"Game over\")", "html": "\u003cp>Python checks each condition from the top. The first one that is True runs, and the rest are skipped. \u003ccode>else\u003c/code> runs if nothing above was True. You can have as many \u003ccode>elif\u003c/code> lines as you like, and you don't have to have an \u003ccode>else\u003c/code>.\u003c/p>", "example": "health = 40\nif health > 50:\n    print(\"You feel strong.\")\nelif health > 0:\n    print(\"You are wounded.\")\nelse:\n    print(\"Game over.\")", "watch": "Every \u003ccode>if\u003c/code>, \u003ccode>elif\u003c/code> and \u003ccode>else\u003c/code> line ends with a colon, and the code underneath is indented."}, {"id": "compare", "part": 1, "cat": "Decisions", "title": "Comparisons", "short": "==  !=  \u003c  >  \u003c=  >=", "keys": ["==", "!=", "\u003c", ">", "\u003c=", ">=", "compare", "comparison", "equal", "equals", "not equal", "greater", "less"], "syntax": "==  equal to          !=  not equal to\n\u003c   less than         >   greater than\n\u003c=  less or equal     >=  greater or equal", "html": "\u003cp>A comparison is either True or False. Use them in \u003ccode>if\u003c/code> and \u003ccode>while\u003c/code>.\u003c/p>", "example": "gold = 10\nprint(gold == 10)\nprint(gold != 10)\nprint(gold > 5)\nprint(gold \u003c= 9)", "watch": "Text must match exactly: \u003ccode>\"Yes\" == \"yes\"\u003c/code> is False. Use \u003ccode>.lower()\u003c/code> first."}, {"id": "andor", "part": 1, "cat": "Decisions", "title": "and  or  not", "short": "join conditions together", "keys": ["and", "or", "not", "both", "either"], "syntax": "if gold >= 10 and health \u003c 50:\nif answer == \"yes\" or answer == \"y\":", "html": "\u003cul>\u003cli>\u003ccode>and\u003c/code>: True only if \u003cstrong>both\u003c/strong> sides are True.\u003c/li>\u003cli>\u003ccode>or\u003c/code>: True if \u003cstrong>either\u003c/strong> side is True.\u003c/li>\u003cli>\u003ccode>not\u003c/code>: flips True and False.\u003c/li>\u003c/ul>", "example": "answer = \"y\"\nif answer == \"yes\" or answer == \"y\":\n    print(\"You light the torch.\")\ngold = 15\nhealth = 30\nif gold >= 10 and health \u003c 50:\n    print(\"Buy a potion!\")", "watch": "Each side needs a full comparison: \u003ccode>answer == \"yes\" or \"y\"\u003c/code> is always True. Write \u003ccode>answer == \"yes\" or answer == \"y\"\u003c/code>."}, {"id": "indent", "part": 1, "cat": "Decisions", "title": "Colons and indentation", "short": "the : and the 4 spaces", "keys": [":", "colon", "indent", "indentation", "spaces", "tab", "block"], "syntax": "if gold > 5:\n    print(\"inside the if\")\nprint(\"after the if\")", "html": "\u003cp>Lines that start a block end with a colon: \u003ccode>if\u003c/code>, \u003ccode>elif\u003c/code>, \u003ccode>else\u003c/code>, \u003ccode>while\u003c/code>, \u003ccode>for\u003c/code> and \u003ccode>def\u003c/code>. The lines that belong to it are indented by 4 spaces (press Tab). The first line that isn't indented is outside the block.\u003c/p>", "example": "gold = 8\nif gold > 5:\n    print(\"You can buy a torch.\")\n    print(\"This line is inside the if too.\")\nprint(\"This line always runs.\")", "watch": "An IndentationError means the spaces don't line up. A missing colon causes a SyntaxError."}, {"id": "while", "part": 1, "cat": "Loops", "title": "while loop", "short": "repeat while something is True", "keys": ["while", "loop", "repeat", "iteration", "until", "infinite"], "syntax": "while password != \"open\":\n    password = input(\"Password: \")", "html": "\u003cp>Repeats the indented code for as long as the condition is True. Use it when you don't know how many times you'll need to repeat, like until the player gets an answer right.\u003c/p>", "example": "password = input(\"Password: \")\nwhile password != \"open\":\n    print(\"Wrong!\")\n    password = input(\"Password: \")\nprint(\"The door opens.\")", "watch": "Something inside the loop must change, or the condition stays True forever. That's an infinite loop. This page will stop it for you."}, {"id": "for", "part": 1, "cat": "Loops", "title": "for loop and range()", "short": "repeat a set number of times", "keys": ["for", "range", "range()", "loop", "repeat", "count", "times"], "syntax": "for i in range(5):        # 0, 1, 2, 3, 4\nfor i in range(1, 6):     # 1, 2, 3, 4, 5\nfor i in range(10, 0, -1):  # 10 down to 1", "html": "\u003cp>Repeats a set number of times. \u003ccode>range\u003c/code> gives the numbers to count through. It \u003cstrong>stops before\u003c/strong> the second number. A for loop can also go through each letter of a string.\u003c/p>", "example": "for torch in range(1, 4):\n    print(\"Torch\", torch, \"is lit.\")\nfor letter in \"DOOR\":\n    print(letter)", "watch": "\u003ccode>range(1, 5)\u003c/code> gives 1 to 4, not 1 to 5."}, {"id": "random", "part": 1, "cat": "Numbers", "title": "random", "short": "dice rolls and random picks", "keys": ["random", "import", "randint", "random.randint", "choice", "random.choice", "dice", "luck", "seed"], "syntax": "import random\nroll = random.randint(1, 6)\nbeast = random.choice([\"rat\", \"bat\"])", "html": "\u003cp>Put \u003ccode>import random\u003c/code> once, on the very first line.\u003c/p>\u003cul>\u003cli>\u003ccode>random.randint(1, 6)\u003c/code> gives a whole number from 1 to 6. Unlike range, it \u003cstrong>includes\u003c/strong> both numbers.\u003c/li>\u003cli>\u003ccode>random.choice(list)\u003c/code> picks one item from a list.\u003c/li>\u003c/ul>\u003cp>Run random code several times when you test it.\u003c/p>", "example": "import random\nroll = random.randint(1, 6)\nprint(\"You rolled\", roll)\nbeast = random.choice([\"rat\", \"bat\", \"spider\"])\nprint(\"A\", beast, \"appears!\")", "watch": "Forgetting \u003ccode>import random\u003c/code> causes a NameError. Pick a new random number inside a loop, not once before it."}, {"id": "def", "part": 2, "cat": "Subroutines", "title": "def and calling", "short": "make a subroutine, then run it", "keys": ["def", "subroutine", "procedure", "call", "calling", "()", "define"], "syntax": "def entrance():\n    print(\"You stand at the entrance.\")\n\nentrance()", "html": "\u003cp>\u003ccode>def\u003c/code> creates a subroutine: a named block of code that does one job. Defining it does \u003cstrong>not\u003c/strong> run it. It runs when you \u003cstrong>call\u003c/strong> it: its name with brackets.\u003c/p>\u003cp>A subroutine that just does a job is called a \u003cstrong>procedure\u003c/strong>.\u003c/p>", "example": "def entrance():\n    print(\"You stand at the dungeon entrance.\")\n    print(\"Cold air drifts out.\")\n\nentrance()\nentrance()", "watch": "A call without brackets, \u003ccode>entrance\u003c/code>, does nothing. Names can't have spaces."}, {"id": "main", "part": 2, "cat": "Subroutines", "title": "The main program", "short": "defs at the top, calls at the bottom", "keys": ["main", "main program", "order", "sequence", "structure"], "syntax": "def hall():\n    ...\n\ndef cellar():\n    ...\n\n# main program\nhall()\ncellar()", "html": "\u003cp>Put all your \u003ccode>def\u003c/code> blocks at the top. Underneath, the \u003cstrong>main program\u003c/strong> calls them in order. When a subroutine is called, Python jumps into it, runs it, then comes back to the next line.\u003c/p>", "example": "def hall():\n    print(\"A long hall.\")\n\ndef cellar():\n    print(\"A damp cellar.\")\n\n# main program\nprint(\"Start\")\nhall()\ncellar()\nprint(\"End\")", "watch": "Don't indent the main program, or it ends up inside the last def and never runs. Call a subroutine below its def, not above it."}, {"id": "params", "part": 2, "cat": "Subroutines", "title": "Parameters", "short": "pass values into a subroutine", "keys": ["parameter", "parameters", "argument", "arguments", "pass", "passing", "brackets"], "syntax": "def show_status(health, gold):\n    print(health, gold)\n\nshow_status(100, 25)", "html": "\u003cp>A \u003cstrong>parameter\u003c/strong> is a name in the brackets of a def. It receives a value when the subroutine is called. The value you pass in is called an \u003cstrong>argument\u003c/strong>.\u003c/p>\u003cp>Several parameters are separated by commas. The values go in \u003cstrong>in order\u003c/strong>: first to first, second to second.\u003c/p>", "example": "def show_status(health, gold):\n    print(\"Health:\", health)\n    print(\"Gold:\", gold)\n\nshow_status(100, 25)\nshow_status(60, 40)", "watch": "The call needs the same number of values as the def has parameters, in the same order."}, {"id": "return", "part": 2, "cat": "Subroutines", "title": "return and functions", "short": "send a value back out", "keys": ["return", "function", "functions", "send back", "catch", "one in one out"], "syntax": "def trap_room(health):\n    health = health - 20\n    return health\n\nhealth = trap_room(health)", "html": "\u003cp>\u003ccode>return\u003c/code> sends a value back out of a subroutine. A subroutine that returns a value is called a \u003cstrong>function\u003c/strong>.\u003c/p>\u003cp>You must \u003cstrong>catch\u003c/strong> the value in a variable: \u003ccode>health = trap_room(health)\u003c/code>. Our rule: \u003cstrong>one in, one out\u003c/strong>.\u003c/p>", "example": "def trap_room(health):\n    print(\"Spikes!\")\n    health = health - 20\n    return health\n\nhealth = 100\nhealth = trap_room(health)\nprint(\"Health:\", health)", "watch": "Without \u003ccode>health =\u003c/code> the value comes back and is thrown away. Code after \u003ccode>return\u003c/code> never runs."}, {"id": "two", "part": 2, "cat": "Subroutines", "title": "Returning two values", "short": "gold, health = shop(gold, health)", "keys": ["two values", "multiple", "tuple", "return two", "two out"], "syntax": "def shop(gold, health):\n    ...\n    return gold, health\n\ngold, health = shop(gold, health)", "html": "\u003cp>A function can send back more than one value, separated by commas. Catch them in the \u003cstrong>same order\u003c/strong> you returned them.\u003c/p>", "example": "def shop(gold, health):\n    gold = gold - 10\n    health = health + 25\n    return gold, health\n\ngold = 30\nhealth = 50\ngold, health = shop(gold, health)\nprint(\"Gold:\", gold, \"Health:\", health)", "watch": "Catch them in the wrong order and Python won't complain. It just quietly swaps them."}, {"id": "local", "part": 2, "cat": "Subroutines", "title": "Local variables", "short": "variables inside a subroutine stay inside", "keys": ["local", "scope", "global", "inside", "outside"], "syntax": "def room():\n    key = \"silver\"   # only exists in here", "html": "\u003cp>A variable made \u003cstrong>inside\u003c/strong> a subroutine is \u003cstrong>local\u003c/strong>: it only exists while that subroutine runs. Another room can't see it, and it's gone when the subroutine finishes.\u003c/p>\u003cp>To get a value out, \u003ccode>return\u003c/code> it. To get a value in, pass it as a parameter.\u003c/p>", "example": "def cell():\n    key = \"silver key\"\n    print(\"Inside cell():\", key)\n\ncell()\nprint(\"Back outside, there is no key variable here.\")", "watch": "Using a local variable outside its subroutine causes a NameError."}, {"id": "lists", "part": 3, "cat": "Lists", "title": "Lists", "short": "lots of values in one variable", "keys": ["list", "lists", "[]", "[", "]", "append", "len", "len()", "index", "inventory", "bag"], "syntax": "bag = [\"torch\", \"rope\"]\nbag.append(\"key\")\nlen(bag)\nbag[0]", "html": "\u003cp>A list stores lots of values in square brackets. An empty list is \u003ccode>[]\u003c/code>.\u003c/p>\u003cul>\u003cli>\u003ccode>bag.append(\"key\")\u003c/code> adds to the end.\u003c/li>\u003cli>\u003ccode>len(bag)\u003c/code> counts the items.\u003c/li>\u003cli>\u003ccode>bag[0]\u003c/code> is the first item. Positions start at 0.\u003c/li>\u003c/ul>", "example": "bag = [\"torch\", \"rope\"]\nbag.append(\"key\")\nprint(bag)\nprint(len(bag), \"items\")\nprint(\"First item:\", bag[0])", "watch": "Write \u003ccode>bag.append(\"key\")\u003c/code>, not \u003ccode>bag = bag.append(\"key\")\u003c/code>, which loses the whole list."}, {"id": "forlist", "part": 3, "cat": "Lists", "title": "Looping through a list", "short": "for item in bag:", "keys": ["for item", "loop list", "each", "every item", "show bag"], "syntax": "for item in bag:\n    print(item)", "html": "\u003cp>A for loop can go through a list. Each time round, the loop variable holds the next item.\u003c/p>", "example": "bag = [\"torch\", \"rope\", \"key\"]\nprint(\"Your bag holds:\")\nfor item in bag:\n    print(\"-\", item)", "watch": ""}, {"id": "in", "part": 3, "cat": "Lists", "title": "in  and  not in", "short": "is it in the list?", "keys": ["in", "not in", "contains", "has", "check", "find"], "syntax": "if \"key\" in bag:\nif \"key\" not in bag:", "html": "\u003cp>\u003ccode>in\u003c/code> checks whether something is in a list. It gives True or False, so it works in an \u003ccode>if\u003c/code> or a \u003ccode>while\u003c/code>. \u003ccode>not in\u003c/code> checks the opposite.\u003c/p>", "example": "bag = [\"torch\", \"key\"]\nif \"key\" in bag:\n    print(\"You unlock the door.\")\nif \"rope\" not in bag:\n    print(\"You need a rope for the bridge.\")", "watch": "It must match exactly: \u003ccode>\"Key\"\u003c/code> and \u003ccode>\"key\"\u003c/code> are different."}, {"id": "remove", "part": 3, "cat": "Lists", "title": ".remove()", "short": "take an item out of a list", "keys": ["remove", ".remove()", "use up", "delete", "take out"], "syntax": "bag.remove(\"potion\")", "html": "\u003cp>Takes the first matching item out of a list. Check it's there first with \u003ccode>in\u003c/code>.\u003c/p>", "example": "bag = [\"potion\", \"torch\"]\nif \"potion\" in bag:\n    bag.remove(\"potion\")\n    print(\"You drink the potion.\")\nprint(bag)", "watch": "Removing something that isn't in the list causes a ValueError."}, {"id": "validate", "part": 3, "cat": "Lists", "title": "Checking input (validation)", "short": "keep asking until the answer makes sense", "keys": ["validation", "validate", "ask", "ask()", "check input", "isdigit", "options", "nonsense"], "syntax": "def ask(question, options):\n    answer = input(question).strip().lower()\n    while answer not in options:\n        answer = input(question).strip().lower()\n    return answer", "html": "\u003cp>Write one function that keeps asking until the answer is one of the options, then returns it. Every room can use it.\u003c/p>\u003cp>For numbers, \u003ccode>text.isdigit()\u003c/code> is True if the text is all digits, so \u003ccode>int()\u003c/code> is safe to use.\u003c/p>", "example": "def ask(question, options):\n    answer = input(question).strip().lower()\n    while answer not in options:\n        print(\"Please type one of:\", options)\n        answer = input(question).strip().lower()\n    return answer\n\nway = ask(\"Left or right? \", [\"left\", \"right\"])\nprint(\"You go\", way)", "watch": "Catch the answer: \u003ccode>way = ask(...)\u003c/code>. Keep the options in lower case."}, {"id": "dict", "part": 4, "cat": "Dictionaries", "title": "dictionaries { }", "short": "values with labels", "keys": ["dictionary", "dict", "key", "value", "{", "curly", "hero"], "syntax": "hero = {\"name\": \"Ash\", \"health\": 100}\nhero[\"health\"]", "html": "\u003cp>A dictionary stores values with labels, called \u003cstrong>keys\u003c/strong>. Make it with curly brackets, with a colon between each key and its value and commas between the pairs. Get a value out with its key in square brackets.\u003c/p>", "example": "hero = {\"name\": \"Ash\", \"health\": 100, \"gold\": 20}\nprint(hero[\"name\"], \"has\", hero[\"gold\"], \"gold\")", "watch": "Keys need quote marks, and must match exactly: \u003ccode>\"Gold\"\u003c/code> and \u003ccode>\"gold\"\u003c/code> are different keys."}, {"id": "dictchange", "part": 4, "cat": "Dictionaries", "title": "change or add a value", "short": "update the hero", "keys": ["change", "update", "add", "+=", "-=", "new key"], "syntax": "hero[\"gold\"] = hero[\"gold\"] + 5\nhero[\"gold\"] += 5\nhero[\"level\"] = 2", "html": "\u003cp>Put the key on the left of \u003ccode>=\u003c/code> to store a new value. If the key isn't there yet, it's added. A list inside a dictionary works like any list: \u003ccode>hero[\"backpack\"].append(\"rope\")\u003c/code>\u003c/p>", "example": "hero = {\"health\": 100, \"backpack\": []}\nhero[\"health\"] = hero[\"health\"] - 15\nhero[\"backpack\"].append(\"rope\")\nhero[\"level\"] = 2\nprint(hero)", "watch": "A misspelt key doesn't give an error when you store: \u003ccode>hero[\"helth\"] = 50\u003c/code> quietly adds a new key."}, {"id": "dictloop", "part": 4, "cat": "Dictionaries", "title": "for key in hero", "short": "loop through a dictionary", "keys": ["for key", "loop", "every key", "get", "in"], "syntax": "for key in hero:\n    print(key, hero[key])\nif \"mana\" in hero:", "html": "\u003cp>A \u003ccode>for\u003c/code> loop over a dictionary gives you each key in turn. Use \u003ccode>hero[key]\u003c/code> to get its value. \u003ccode>in\u003c/code> checks whether a key is there.\u003c/p>", "example": "hero = {\"name\": \"Ash\", \"health\": 100, \"gold\": 20}\nfor key in hero:\n    print(key + \":\", hero[key])\nif \"mana\" not in hero:\n    print(\"No mana yet.\")"}, {"id": "dictpass", "part": 4, "cat": "Dictionaries", "title": "hero = room(hero)", "short": "pass the hero into a room", "keys": ["pass", "room", "return hero", "subroutine", "none", "subscriptable"], "syntax": "def trap_room(hero):\n    hero[\"health\"] = hero[\"health\"] - 10\n    return hero\n\nhero = trap_room(hero)", "html": "\u003cp>Pass the whole hero in, change what you need, then send it back with \u003ccode>return hero\u003c/code>. However many stats the hero has, the call stays the same length.\u003c/p>", "example": "def trap_room(hero):\n    print(\"Spikes!\")\n    hero[\"health\"] = hero[\"health\"] - 10\n    return hero\n\nhero = {\"health\": 100}\nhero = trap_room(hero)\nprint(hero[\"health\"])", "watch": "Forget \u003ccode>return hero\u003c/code> and the room sends back None, so the next line stops with \u003ccode>'NoneType' object is not subscriptable\u003c/code>."}, {"id": "errors", "part": 1, "cat": "Fixing errors", "title": "Error messages", "short": "what they mean and what to check", "keys": ["error", "errors", "bug", "debug", "syntaxerror", "nameerror", "typeerror", "valueerror", "indentationerror", "fix"], "syntax": "Problem on line 3\nNameError: name 'helth' is not defined", "html": "\u003cp>The red line number shows where Python got stuck. Sometimes the real mistake is on the line above.\u003c/p>\u003cul>\u003cli>\u003cstrong>SyntaxError\u003c/strong>: breaks the rules. Check colons, brackets and quote marks.\u003c/li>\u003cli>\u003cstrong>IndentationError\u003c/strong>: the spaces don't line up.\u003c/li>\u003cli>\u003cstrong>NameError\u003c/strong>: a spelling mistake, a capital letter, or a variable used before it has a value.\u003c/li>\u003cli>\u003cstrong>TypeError\u003c/strong>: text and numbers mixed up. Did you forget \u003ccode>int()\u003c/code>?\u003c/li>\u003cli>\u003cstrong>ValueError\u003c/strong>: \u003ccode>int()\u003c/code> was given something that isn't a whole number.\u003c/li>\u003c/ul>\u003cp>A \u003cstrong>logic error\u003c/strong> has no message: the program runs but does the wrong thing. Test every choice to find those.\u003c/p>", "example": "health = 100\nprint(helth)", "watch": "Fix one error at a time, then run it again."}], REF_CATS = ["Output and text", "Variables and input", "Numbers", "Decisions", "Loops", "Subroutines", "Lists", "Dictionaries", "Fixing errors"], REF_STAGES = {"h1": ["dict", "dictloop", "strings"], "h2": ["dictchange", "dict", "lists"], "h3": ["dictpass", "return", "in"]}, REF_ERR = [["IndentationError|TabError", "indent"], ["expected ':'", "indent"], ["unterminated string|EOL while", "strings"], ["Maybe you meant '=='|cannot assign to", "compare"], ["name 'random' is not defined|module 'random'|empty range", "random"], ["positional argument", "params"], ["'NoneType' object has no attribute 'append'", "lists"], ["KeyError", "dict"], ["indices must be integers or slices, not str", "dict"], ["not subscriptable", "dictpass"], ["NoneType", "return"], ["x not in list", "remove"], ["IndexError", "lists"], ["invalid literal for int|'str' and 'int'|'int' and 'str'|concatenate str|unsupported operand", "int"], ["ZeroDivisionError", "maths"], ["Stopped: a loop", "while"], [".", "errors"]], REF_PART = 4;
+const REFS = REF_ALL.filter(r => r.part <= REF_PART);
+const REF_BY = Object.fromEntries(REFS.map(r => [r.id, r]));
+function refFor(err){
+  for (const [pat, id] of REF_ERR) if (REF_BY[id] && new RegExp(pat).test(err)) return REF_BY[id];
+  return null;
+}
+function refLink(res){
+  const r = refFor(String(res.error || ""));
+  return r ? `<br><button class="reflink" data-ref="${r.id}">${IC.book} Look it up: ${esc(r.title)}</button>` : "";
+}
+(function(){
+  const box = document.getElementById("ref"), list = document.getElementById("reflist"), q = document.getElementById("refq"), btn = document.getElementById("refbtn");
+  let picked = "";
+  const card = r => `<details class="refcard" data-rid="${r.id}"><summary><span class="rt">${esc(r.title)}</span><span class="rs">${esc(r.short)}</span></summary>
+    <div class="rb"><pre class="sample">${esc(r.syntax)}</pre>${r.html}${r.watch ? `<p class="watch"><b>Watch out:</b> ${r.watch}</p>` : ""}<div class="rslot2"></div></div></details>`;
+  function score(r, t){
+    if (r.keys.includes(t) || r.title.toLowerCase() === t) return 4;
+    if (r.title.toLowerCase().includes(t)) return 3;
+    if (t.length > 1 && r.keys.some(k => k.includes(t) || (k.length > 2 && t.includes(k)))) return 2;
+    if (t.length > 2 && (r.short + " " + r.html).toLowerCase().includes(t)) return 1;
+    return 0;
+  }
+  function wire(){
+    list.querySelectorAll(".refcard").forEach(d => d.addEventListener("toggle", () => {
+      if (d.open && !d.dataset.ran) { d.dataset.ran = "1"; const r = REF_BY[d.dataset.rid]; d.querySelector(".rslot2").appendChild(makeRunner("ref-" + r.id, r.example, "Try it")); }
+    }));
+    list.querySelectorAll("[data-chip]").forEach(b => b.addEventListener("click", () => show(b.dataset.chip)));
+  }
+  function render(){
+    const t = q.value.trim().toLowerCase();
+    if (t) {
+      const hits = REFS.map(r => [score(r, t), r]).filter(x => x[0] > 0).sort((a, b) => b[0] - a[0]).map(x => x[1]);
+      list.innerHTML = hits.length ? `<h3>Results</h3>` + hits.map(card).join("")
+        : `<p class="refnone">Nothing found for <code>${esc(t)}</code>. Try a shorter word, like <code>loop</code>, <code>print</code> or <code>error</code>.</p>` +
+          (/^[a-z_][a-z0-9_]*$/.test(t) ? `<p class="refnone">If <code>${esc(t)}</code> is a name from your own program, like a variable or a room, Python only knows it because your code creates it. Check it's spelt the same everywhere.</p>` : "");
+      wire();
+      const first = list.querySelector(".refcard");
+      if (first && (hits.length === 1 || score(hits[0], t) === 4)) first.open = true;
+    } else {
+      const ids = (REF_STAGES[PAGES[S.page]] || []).filter(id => REF_BY[id]);
+      list.innerHTML = (ids.length ? `<h3>On this stage</h3><div class="chips">${ids.map(id => `<button data-chip="${id}">${esc(REF_BY[id].title)}</button>`).join("")}</div>` : "") +
+        REF_CATS.map(c => { const rs = REFS.filter(r => r.cat === c); return rs.length ? `<h3>${esc(c)}</h3>` + rs.map(card).join("") : ""; }).join("");
+      wire();
+    }
+  }
+  function show(id){
+    const d = list.querySelector(`.refcard[data-rid="${id}"]`);
+    if (!d) return;
+    d.open = true;
+    d.scrollIntoView({block: "start"});
+  }
+  function open(term, id){
+    box.hidden = false; document.body.classList.add("refopen"); btn.setAttribute("aria-expanded", "true");
+    q.value = term || ""; render();
+    if (id) { q.value = ""; render(); show(id); } else if (!term) list.scrollTop = 0;
+    if (!id) q.focus({preventScroll: true});
+  }
+  function close(){ box.hidden = true; document.body.classList.remove("refopen"); btn.setAttribute("aria-expanded", "false"); }
+  // remember a word highlighted in any code box on the page
+  const grab = e => {
+    const t = e.target;
+    if (t.tagName !== "TEXTAREA" || box.contains(t)) return;
+    const s = t.value.slice(t.selectionStart, t.selectionEnd).trim();
+    picked = s && s.length <= 40 && !s.includes("\n") ? s : "";
+  };
+  document.addEventListener("mouseup", grab); document.addEventListener("keyup", grab);
+  btn.addEventListener("mousedown", e => e.preventDefault());
+  btn.addEventListener("click", () => {
+    const m = picked.match(/[A-Za-z_][A-Za-z0-9_]*|==|!=|<=|>=|\/\/|[%#+*\/<>=:\[]/);
+    picked = "";
+    if (m) { open(m[0].toLowerCase()); return; }
+    if (box.hidden) open(""); else close();
+  });
+  document.getElementById("refclose").addEventListener("click", close);
+  q.addEventListener("input", render);
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !box.hidden) close(); });
+  document.addEventListener("click", e => { const b = e.target.closest("[data-ref]"); if (b) open("", b.dataset.ref); });
+  window.refStage = () => { if (!box.hidden && !q.value.trim()) render(); };
+})();
+draw();
+setDirty(dirty);
+</script>
+</body>
+</html>

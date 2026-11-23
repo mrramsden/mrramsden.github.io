@@ -244,6 +244,15 @@ def _hint(e):
         if "positional argument" in msg:
             return ("The number of values in the call doesn't match the def. Count the values in the "
                     "brackets where you call it, and the parameters in the brackets of the def.")
+        if "NoneType" in msg and "subscriptable" in msg:
+            return ("This value is None, which usually means a function gave nothing back. "
+                    "Check the function ends with a return line, like: return hero")
+        if "'set' object is not subscriptable" in msg:
+            return ("Your curly brackets hold values but no keys. Give each value a key and a colon, "
+                    "like: {\"name\": \"goblin\", \"health\": 30}")
+        if "indices must be integers or slices, not str" in msg:
+            return ("You're asking a list for something by name. Lists only use positions (0, 1, 2). "
+                    "To look things up by name, make a dictionary with curly brackets { }.")
         if "NoneType" in msg:
             return ("One of these values is None, which means a subroutine gave nothing back. A subroutine "
                     "that prints its answer doesn't return it: add return, like: return width * height")
@@ -265,6 +274,9 @@ def _hint(e):
         return "random.randint needs the smaller number first, e.g. random.randint(1, 6)."
     if kind == "ValueError" and "invalid literal for int()" in msg:
         return "int() can only turn whole numbers into numbers. What was typed in wasn't a whole number."
+    if kind == "KeyError":
+        return (f"Python couldn't find the key {msg} in your dictionary. Check its spelling and capital "
+                "letters match exactly, and that the key is in quote marks.")
     if kind == "ZeroDivisionError":
         return "You can't divide by zero. Check the number you're dividing by."
     if kind == "IndexError":
@@ -356,11 +368,21 @@ def _compile(src, cover=False, defs_only=False):
     tree = ast.parse(src, FILENAME)
     if defs_only:
         keep = []
+        known = set(dir(builtins))
         for n in tree.body:
-            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Import, ast.ImportFrom)):
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 keep.append(n)
+                known.add(n.name)
+            elif isinstance(n, (ast.Import, ast.ImportFrom)):
+                keep.append(n)
+                known.update((a.asname or a.name).split(".")[0] for a in n.names)
             elif isinstance(n, (ast.Assign, ast.AnnAssign)) and not any(isinstance(s, ast.Call) for s in ast.walk(n)):
+                # skip constants built from names that only exist once the main program runs
+                if n.value is not None and any(isinstance(s, ast.Name) and s.id not in known for s in ast.walk(n.value)):
+                    continue
                 keep.append(n)
+                for t in (n.targets if isinstance(n, ast.Assign) else [n.target]):
+                    known.update(x.id for x in ast.walk(t) if isinstance(x, ast.Name))
         tree.body = keep
     shown = None
     table = None
@@ -521,7 +543,10 @@ class Checker:
         for node in tree.body:
             if (isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
                     and node.targets[0].id in values and node.targets[0].id not in done):
-                node.value = ast.copy_location(ast.Constant(values[node.targets[0].id]), node.value)
+                v = values[node.targets[0].id]
+                expr = ast.Constant(v) if not isinstance(v, (dict, list, tuple)) else ast.parse(repr(v), mode="eval").body
+                node.value = ast.copy_location(expr, node.value)
+                ast.fix_missing_locations(node)
                 done.add(node.targets[0].id)
         return await self.rerun(inputs, seed, what, _code=_compile_tree(tree))
 

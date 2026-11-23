@@ -5,8 +5,8 @@ sys.path.insert(0, os.path.join(HERE, 'fake')); sys.path.insert(0, HERE)
 import runtime_v2 as rt
 import importlib
 PART = sys.argv[1] if len(sys.argv) > 1 else '3'
-CHECKS = importlib.import_module({'1':'checks1','2':'checks2','3':'checks'}[PART]).CHECKS
-_s = importlib.import_module({'1':'solutions1','2':'solutions2','3':'solutions'}[PART])
+CHECKS = importlib.import_module({'1':'checks1','2':'checks2','3':'checks','4':'checks4'}[PART]).CHECKS
+_s = importlib.import_module({'1':'solutions1','2':'solutions2','3':'solutions','4':'solutions4'}[PART])
 GOOD, BAD = _s.GOOD, _s.BAD
 
 async def chk(cid, code):
