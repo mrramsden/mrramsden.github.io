@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot Brain Challenges: Year 8 BitBot</title>
+<meta name="description" content="Year 8 BitBot Lesson 1: four micro:bit challenges in MakeCode, from indicator lights to a radio remote control.">
+<style>
+:root{--navy:#17324D;--teal:#167D8D;--amber:#F2B84B;--coral:#E66F51;--pale:#EAF4F5;--ink:#17212B;--grey:#536372;--line:#C8DCE0;--green:#16A34A;
+--basic:#1E90FF;--input:#D400D4;--music:#E63022;--radio:#E3008C;--loops:#00AA00;--logic:#00A4A6;--vars:#DC143C;
+--bronze:#CD7F32;--silver:#7D8B96;--gold:#C9961A;--plat:#17324D}
+*{box-sizing:border-box}
+body{margin:0;font-family:Lexend,system-ui,'Segoe UI',Arial,sans-serif;color:var(--ink);background:#F4F8F9;line-height:1.55;font-size:17px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 18px}
+header.hero{background:linear-gradient(135deg,var(--navy),#0F4B5C);color:#fff;padding:28px 0 24px;border-top:6px solid var(--amber)}
+.hero .kick{color:var(--amber);font-weight:700;letter-spacing:.08em;font-size:.8rem;text-transform:uppercase}
+.hero h1{margin:4px 0 6px;font-size:2.1rem;line-height:1.15}
+.hero p{margin:0;color:#D5E8EC;max-width:700px}
+.shelf{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 10px rgba(23,50,77,.06)}
+.shelf .wrap{display:flex;align-items:center;gap:10px;padding:8px 18px;flex-wrap:wrap}
+.shelf .lbl{font-weight:700;color:var(--navy);font-size:.9rem}
+.troph{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:21px;background:#EEF2F4;filter:grayscale(1);opacity:.45;transition:.3s}
+.troph.got{filter:none;opacity:1;background:#FFF4CC;box-shadow:0 0 0 2px var(--amber)}
+.count{margin-left:auto;font-weight:700;color:var(--teal)}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:22px 0;box-shadow:0 2px 0 var(--line)}
+.start{border-left:8px solid var(--teal)}
+.start ol{margin:8px 0 0;padding-left:22px}
+.start code,.tipline code{background:var(--pale);padding:1px 6px;border-radius:5px;font-family:inherit;font-weight:600;color:var(--navy)}
+.ch{border-left:8px solid var(--c)}
+.ch.done{border-left-color:var(--green)}
+.chead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lvl{background:var(--c);color:#fff;font-weight:700;border-radius:10px;padding:4px 10px;font-size:.85rem;letter-spacing:.04em}
+.ch.done .lvl{background:var(--green)}
+.chead h2{margin:0;color:var(--navy);font-size:1.45rem}
+.skill{color:var(--grey);font-size:.9rem}
+.donemark{margin-left:auto;font-weight:700;color:var(--green);display:none}
+.ch.done .donemark{display:inline}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:14px}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+h3{color:var(--teal);margin:0 0 8px;font-size:1rem}
+.spec label{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border-radius:10px;cursor:pointer;margin:4px 0;background:var(--pale)}
+.spec label:hover{background:#DDEEF0}
+.spec input{width:20px;height:20px;margin-top:3px;accent-color:var(--green);flex:none}
+.spec label.ticked{background:#E3F6EA}
+.small{font-size:.88rem;color:var(--grey);margin:8px 0 0}
+.stack{margin:0 0 10px}
+.blk{color:#fff;font-weight:600;font-size:.9rem;padding:6px 12px;border-radius:6px;margin:2px 0;display:block;white-space:nowrap;width:max-content;max-width:100%}
+.blk.ev{border-radius:14px 14px 4px 4px;padding-bottom:4px}
+.blk .in{margin:5px 0 4px 12px}
+.blk .end{height:8px}
+.basic{background:var(--basic)}.input{background:var(--input)}.music{background:var(--music)}.radio{background:var(--radio)}
+.loops{background:var(--loops)}.logic{background:var(--logic)}.vars{background:var(--vars)}
+.tipline{font-size:.9rem;color:var(--grey);margin:6px 0 0}
+.link{margin-top:16px;background:var(--c);color:#fff;border-radius:10px;padding:10px 14px;font-weight:600}
+.ch.done .link{background:var(--green)}
+details{margin-top:12px;background:#FFF7E3;border:1px solid #F2DDA8;border-radius:10px;padding:8px 14px}
+summary{cursor:pointer;font-weight:700;color:#8A5A00}
+details p{margin:8px 0 4px}
+.finish{text-align:center;display:none;border-left:8px solid var(--green)}
+.finish.show{display:block}
+.finish h2{color:var(--green);margin:0 0 6px}
+.reset{font:inherit;font-size:.85rem;background:none;border:1px solid var(--line);border-radius:8px;padding:5px 10px;color:var(--grey);cursor:pointer}
+.reset:hover{border-color:var(--coral);color:var(--coral)}
+footer{color:var(--grey);font-size:.85rem;text-align:center;padding:24px 0 40px}
+</style>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<nav class="mr-back" style="font:600 14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:8px 16px;max-width:1200px;margin:0 auto"><a href="./" style="color:#1F6FB2;text-decoration:none">&larr; Year 8</a></nav>
+<header class="hero">
+  <div class="wrap">
+    <div class="kick">Year 8 • BitBot • Lesson 1</div>
+    <h1>Robot Brain Challenges</h1>
+    <p>Next lesson, a micro:bit becomes the brain of a robot. Get your MakeCode skills back by building four of the jobs that brain will need to do.</p>
+  </div>
+</header>
+
+<div class="shelf"><div class="wrap">
+  <span class="lbl">Trophies</span>
+  <span class="troph" id="t0" title="Bronze: Indicator lights">🥉</span>
+  <span class="troph" id="t1" title="Silver: Steering wheel">🥈</span>
+  <span class="troph" id="t2" title="Gold: Race start countdown">🥇</span>
+  <span class="troph" id="t3" title="Platinum: Remote control">💎</span>
+  <span class="count" id="count">0 of 4 done</span>
+  <button class="reset" id="reset" type="button">Start again</button>
+</div></div>
+
+<main class="wrap">
+  <section class="card start">
+    <h2 style="margin:0;color:var(--navy);font-size:1.3rem">Before you start</h2>
+    <ol>
+      <li>Go to <code>makecode.microbit.org</code> and click <b>New Project</b>. Put your name in the project title.</li>
+      <li>Test everything in the simulator on the left of the screen. You only need a real micro:bit if your teacher hands one out.</li>
+      <li>Work through the challenges in order. When your program does something on the list, tick it off. Tick everything and you win the trophy.</li>
+    </ol>
+  </section>
+
+  <div id="challenges"></div>
+
+  <section class="card finish" id="finish">
+    <h2>All four trophies!</h2>
+    <p>Your micro:bit can signal, steer, start a race and take orders by radio. That's a robot brain. Next challenge: add a third message to your remote control that shows a cross when you press A and B together.</p>
+  </section>
+</main>
+<footer>Your ticks are saved in this browser on this computer. Nothing is sent anywhere.</footer>
+
+<script>
+function B(cat, t){ return '<div class="blk ' + cat + '">' + t + '</div>'; }
+function E(cat, t, inner){ return '<div class="blk ev ' + cat + '">' + t + '<div class="in">' + inner.join("") + '</div><div class="end"></div></div>'; }
+function S(x){ return '<div class="stack">' + x + '</div>'; }
+
+var CH = [
+  { lvl:"BRONZE", c:"var(--bronze)", title:"Indicator lights", skill:"Events",
+    spec:["Press A: an arrow pointing left", "Press B: an arrow pointing right", "Press A and B together: a cross to mean stop"],
+    blocks: S(E("input","on button A pressed",[B("basic","show arrow West")])),
+    tip:"<code>show arrow</code> is in Basic under <b>…more</b>. West points left. The cross is <code>show icon</code>, then pick the cross.",
+    hint:"You need three event blocks: one for A, one for B and one for A+B (use the drop-down on the button block). Each one gets its own show block.",
+    link:"Robot link: a robot flashes its lights to show which way it is turning." },
+  { lvl:"SILVER", c:"var(--silver)", title:"Steering wheel", skill:"Selection",
+    spec:["Tilt left: a left arrow", "Tilt right: a right arrow", "Held level: a small square"],
+    blocks: S(E("basic","forever",[
+      E("logic","if acceleration (mg) x &lt; -300 then",[B("basic","show arrow West")]),
+      E("logic","else if acceleration (mg) x &gt; 300 then",[B("basic","…")]),
+      E("logic","else",[B("basic","…")]) ])),
+    tip:"In the simulator, move your mouse over the micro:bit to tilt it. Click <b>+</b> at the bottom of the <code>if</code> block to add <code>else if</code> and <code>else</code>. <code>acceleration</code> is in Input under <b>…more</b>.",
+    hint:"Everything goes inside forever so the micro:bit keeps checking. Tilting left makes acceleration x a negative number; tilting right makes it positive. Level is close to 0.",
+    link:"Robot link: selection is how a robot decides which way to go." },
+  { lvl:"GOLD", c:"var(--gold)", title:"Race start countdown", skill:"Variables and loops",
+    spec:["Pressing A starts it", "It counts down 3, 2, 1 on the screen", "It plays a sound", "It shows an arrow pointing up to mean GO"],
+    blocks: S(E("input","on button A pressed",[B("vars","set count to 3"),
+      E("loops","repeat 3 times",[B("basic","show number count"), B("vars","change count by -1")]),
+      B("music","play sound …"), B("basic","show arrow …")])),
+    tip:"Make the variable first: Variables, then <b>Make a Variable</b>. Trace it: what does count hold each time round the loop?",
+    hint:"Set count to 3 before the repeat, not inside it, or it will show 3 every time. Inside the repeat: show it, then take 1 off. The arrow pointing up is North.",
+    link:"Robot link: our robot races will start with a countdown like this." },
+  { lvl:"PLATINUM", c:"var(--plat)", title:"Remote control", skill:"Radio",
+    spec:["Press A on one micro:bit: the other shows a left arrow", "Press B: the other shows a right arrow"],
+    blocks: S(E("basic","on start",[B("radio","radio set group 1")])) +
+            S(E("input","on button A pressed",[B("radio","radio send number 1")])) +
+            S(E("radio","on radio received receivedNumber",[E("logic","if receivedNumber = 1 then",[B("basic","show arrow West")])])),
+    tip:"The simulator adds a second micro:bit as soon as you use a radio block. On real micro:bits, pick a group number nobody near you is using.",
+    hint:"Both micro:bits run the same program. Button B needs its own event that sends a different number, say 2. Then add an else if to the receiving block to check for 2.",
+    link:"Robot link: swap the arrows for motor blocks and this drives a robot." }
+];
+
+var KEY = "mr-bitbot-l1-challenges";
+var S0;
+try { S0 = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { S0 = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S0)); } catch (e) {} }
+
+var host = document.getElementById("challenges");
+CH.forEach(function(ch, i){
+  var specs = ch.spec.map(function(s, j){
+    var id = "c" + i + "s" + j;
+    return '<label for="' + id + '"><input type="checkbox" id="' + id + '" data-c="' + i + '" data-s="' + j + '"><span>' + s + '</span></label>';
+  }).join("");
+  var sec = document.createElement("section");
+  sec.className = "card ch"; sec.id = "ch" + i; sec.style.setProperty("--c", ch.c);
+  sec.innerHTML =
+    '<div class="chead"><span class="lvl">' + ch.lvl + '</span><h2>' + ch.title + '</h2><span class="skill">' + ch.skill + '</span><span class="donemark">✓ Trophy won</span></div>' +
+    '<div class="cols"><div class="spec"><h3>Your program should…</h3>' + specs +
+    '<p class="small">Only tick a line when you have seen it work.</p></div>' +
+    '<div><h3>Blocks to get you started</h3>' + ch.blocks + '<p class="tipline">' + ch.tip + '</p></div></div>' +
+    '<details><summary>Stuck? Show a hint</summary><p>' + ch.hint + '</p></details>' +
+    '<div class="link">' + ch.link + '</div>';
+  host.appendChild(sec);
+});
+
+function refresh(){
+  var done = 0;
+  CH.forEach(function(ch, i){
+    var all = true;
+    ch.spec.forEach(function(_, j){
+      var box = document.getElementById("c" + i + "s" + j);
+      box.checked = !!S0[i + "-" + j];
+      box.parentNode.classList.toggle("ticked", box.checked);
+      if (!box.checked) all = false;
+    });
+    document.getElementById("ch" + i).classList.toggle("done", all);
+    document.getElementById("t" + i).classList.toggle("got", all);
+    if (all) done++;
+  });
+  document.getElementById("count").textContent = done + " of 4 done";
+  document.getElementById("finish").classList.toggle("show", done === 4);
+}
+host.addEventListener("change", function(e){
+  var t = e.target;
+  if (t.type !== "checkbox") return;
+  S0[t.dataset.c + "-" + t.dataset.s] = t.checked;
+  save(); refresh();
+});
+document.getElementById("reset").addEventListener("click", function(){
+  S0 = {}; save(); refresh();
+});
+refresh();
+</script>
+</body>
+</html>
