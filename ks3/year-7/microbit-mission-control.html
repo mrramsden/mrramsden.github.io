@@ -96,6 +96,16 @@ ol.steps li{margin:8px 0}
 .extlist{list-style:none;padding-left:4px}
 .extlist li{margin:6px 0}
 .extlist input{width:18px;height:18px;margin-right:8px;vertical-align:-3px}
+.page{display:none}.page.on{display:block;animation:fadein .25s}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stepper{display:flex;gap:6px;flex-wrap:wrap;padding:0 18px 10px;max-width:1000px;margin:0 auto}
+.step{font:inherit;font-size:.85rem;font-weight:600;border:2px solid var(--line);background:#fff;color:var(--deep);border-radius:999px;padding:4px 12px;cursor:pointer}
+.step:hover{border-color:var(--sky)}
+.step.done{background:#ECFDF3;border-color:var(--green);color:#166534}
+.step.cur{background:var(--blue);border-color:var(--blue);color:#fff}
+.pnav{display:flex;justify-content:space-between;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.pnav .next{margin-left:auto}
+.page.done .pnav .next{background:var(--green)}
 .stretch{border:2px dashed var(--gold);border-radius:14px;padding:14px 18px;margin-top:18px;background:#FFFCF0}
 .stretch h3{margin-top:0;color:#7A5A00}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.25);transition:.4s;z-index:50;text-align:center;visibility:hidden}
@@ -134,7 +144,7 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
     <div style="margin-top:8px"><button class="btn alt" id="copyLink">Copy this page's link</button> <span id="copyLinkMsg"></span></div>
   </div>
 
-  <section class="card">
+  <section class="card" id="start">
     <h2>Before you start</h2>
     <p>You've already learnt about <b>input, process and output</b>, smart devices, <b>flowcharts</b>, <b>variables</b> and <b>binary</b>. Today you'll use all of that to build two micro:bit programs in MakeCode.</p>
     <div class="plan">
@@ -670,7 +680,7 @@ $("extDone").onclick = function(){
     if (all) opt = lists[i].dataset.opt;
   }
   if (!opt) { fb.className = "fb no"; fb.textContent = "✘ Tick every box for your option first. If a box isn't done yet, go back and add it to your slides."; return; }
-  S.ext = opt; save(); $("m6").classList.add("done");
+  S.ext = opt; save(); $("m6").classList.add("done"); if (typeof drawSteps === "function") drawSteps();
   fb.className = "fb ok"; fb.textContent = "✔ Great work. Upload your PowerPoint to the Teams assignment along with your certificate.";
   award("ext");
 };
@@ -680,6 +690,42 @@ if (S.ext) $("m6").classList.add("done");
 ["m1", "m2", "m3", "m4", "m5"].forEach(function(m){ if (S["done_" + m]) $(m).classList.add("done"); });
 q1Done(); q5Done(); drawShelf(); drawCert();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawCert);
+/* ---------- one page at a time ---------- */
+var PAGES = [["start", "Start"], ["m1", "Mission 1"], ["m2", "Mission 2"], ["m3", "Mission 3"], ["m4", "Mission 4"], ["m5", "Mission 5"], ["m6", "Extension"], ["finish", "Hand it in"]];
+var stepper = document.createElement("nav"); stepper.className = "stepper"; stepper.setAttribute("aria-label", "Pages");
+document.querySelector(".shelf").appendChild(stepper);
+PAGES.forEach(function(pg, i){
+  var el = $(pg[0]); el.classList.add("page");
+  var b = document.createElement("button"); b.className = "step"; b.id = "step-" + pg[0]; b.textContent = pg[1];
+  b.onclick = function(){ go(i); };
+  stepper.appendChild(b);
+  var nav = document.createElement("div"); nav.className = "pnav";
+  if (i > 0) { var bk = document.createElement("button"); bk.className = "btn alt"; bk.textContent = "\u2190 Back"; bk.onclick = function(){ go(i - 1); }; nav.appendChild(bk); }
+  if (i < PAGES.length - 1) {
+    var nx = document.createElement("button"); nx.className = "btn next"; nx.id = "next-" + pg[0];
+    nx.textContent = "Next: " + (PAGES[i + 1][0] === "m6" ? "Extension (if you have time)" : PAGES[i + 1][1]) + " \u2192";
+    nx.onclick = function(){ go(i + 1); }; nav.appendChild(nx);
+  }
+  el.appendChild(nav);
+});
+function drawSteps(){
+  PAGES.forEach(function(pg, i){
+    var b = $("step-" + pg[0]);
+    b.classList.toggle("cur", i === S.page);
+    b.classList.toggle("done", $(pg[0]).classList.contains("done") && i !== S.page);
+  });
+}
+function go(i){
+  S.page = i; save();
+  PAGES.forEach(function(pg, j){ $(pg[0]).classList.toggle("on", j === i); });
+  if (PAGES[i][0] === "finish") drawCert();
+  drawSteps();
+  window.scrollTo(0, 0);
+}
+var _done = done;
+done = function(id){ _done(id); drawSteps(); };
+go(typeof S.page === "number" && S.page >= 0 && S.page < PAGES.length ? S.page : 0);
+
 })();
 </script>
 </body>
