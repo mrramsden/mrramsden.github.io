@@ -93,6 +93,9 @@ input.num{font:inherit;width:110px;padding:8px 10px;border:2px solid var(--line)
 ol.steps{padding-left:22px}
 ol.steps li{margin:8px 0}
 .check-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.extlist{list-style:none;padding-left:4px}
+.extlist li{margin:6px 0}
+.extlist input{width:18px;height:18px;margin-right:8px;vertical-align:-3px}
 .stretch{border:2px dashed var(--gold);border-radius:14px;padding:14px 18px;margin-top:18px;background:#FFFCF0}
 .stretch h3{margin-top:0;color:#7A5A00}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.25);transition:.4s;z-index:50;text-align:center;visibility:hidden}
@@ -251,6 +254,36 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
     <div class="score" id="quiz5score"></div>
   </section>
 
+  <!-- EXTENSION -->
+  <section class="card mission" id="m6" style="border-left-color:var(--gold)">
+    <div class="mhead"><span class="mnum" style="background:var(--gold);color:var(--navy)">Extension</span><h2>Show what you know</h2><span class="mins">If you finish early</span></div>
+    <p>Finished Missions 1 to 5? Pick <b>one</b> of these. Make it in <b>PowerPoint</b> (on your computer or in Office 365), save it with your name in the file name, and upload it to the Teams assignment with your certificate.</p>
+
+    <h3>Option A: Teach binary to a Year 5</h3>
+    <p>Make a PowerPoint of <b>4 to 6 slides</b> that would teach a Year 5 pupil how binary works. Your slides should:</p>
+    <ul class="extlist" data-opt="A">
+      <li><label><input type="checkbox"> explain what binary is and why computers use it (on and off)</label></li>
+      <li><label><input type="checkbox"> show the place values 16, 8, 4, 2, 1</label></li>
+      <li><label><input type="checkbox"> work through one example of binary to denary, step by step</label></li>
+      <li><label><input type="checkbox"> work through one example of denary to binary, step by step</label></li>
+      <li><label><input type="checkbox"> end with a 3-question quiz, with the answers on the last slide</label></li>
+    </ul>
+
+    <h3>Option B: Invent a micro:bit gadget</h3>
+    <p>Make a PowerPoint of <b>4 to 6 slides</b> that pitches a gadget you could build with a micro:bit, such as a plant-watering reminder, a bike light or a room alarm. Your slides should:</p>
+    <ul class="extlist" data-opt="B">
+      <li><label><input type="checkbox"> say who the gadget is for and what problem it solves</label></li>
+      <li><label><input type="checkbox"> list its inputs, process and outputs in an IPO table</label></li>
+      <li><label><input type="checkbox"> include a flowchart of how it works, using the right symbols</label></li>
+      <li><label><input type="checkbox"> say which micro:bit parts it uses (buttons, sensors, lights, radio, speaker)</label></li>
+      <li><label><input type="checkbox"> explain one way it could go wrong and how you'd test it</label></li>
+    </ul>
+    <div class="tip-box"><b>Make it good:</b> one idea per slide, big text, a picture or diagram on every slide. You can draw flowcharts with <b>Insert &gt; Shapes</b>. Use your own words; don't copy from websites.</div>
+    <p>When you've ticked every box for your option and saved the file, click below.</p>
+    <button class="btn gold" id="extDone">I've finished my extension</button>
+    <div class="fb" id="extFb"></div>
+  </section>
+
   <section class="card" id="finish">
     <h2>🎓 Hand it in</h2>
     <p>Make sure your name and form are filled in at the top. Then save your certificate and upload it to the Teams assignment.</p>
@@ -304,7 +337,8 @@ var TROPHIES = [
   ["legend", "🏆", "Place Value Legend", "Show the count in binary (stretch)"],
   ["champ", "🥇", "Quiz Champion", "Score 8 or more in the final quiz"],
   ["perfect", "💯", "Perfect Ten", "Score 10 out of 10 in the final quiz"],
-  ["done", "🚀", "Mission Complete", "Finish Missions 1 to 5"]
+  ["done", "🚀", "Mission Complete", "Finish Missions 1 to 5"],
+  ["ext", "🎤", "Extension Expert", "Finish an extension PowerPoint"]
 ];
 var shelf = $("shelf");
 TROPHIES.forEach(function(t){
@@ -570,7 +604,7 @@ function drawCert(){
   g.fillText("Warm-up quiz: " + R.r1.s + " / 5     Final quiz: " + R.r5.s + " / 10", 600, 405);
   g.fillText("Trophies: " + R.got.length + " of " + TROPHIES.length, 600, 450);
   g.font = "46px 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif";
-  TROPHIES.forEach(function(t, i){ var x = 600 + (i - 3.5) * 90; g.globalAlpha = S.t[t[0]] ? 1 : 0.15; g.fillText(t[1], x, 545); });
+  TROPHIES.forEach(function(t, i){ var x = 600 + (i - (TROPHIES.length - 1) / 2) * 90; g.globalAlpha = S.t[t[0]] ? 1 : 0.15; g.fillText(t[1], x, 545); });
   g.globalAlpha = 1;
   g.font = "400 20px Lexend, Arial, sans-serif"; g.fillStyle = "#64748B";
   var names = R.got.map(function(t){ return t[2]; }).join(", ");
@@ -589,6 +623,7 @@ function summaryText(){
     "Warm-up quiz: " + R.r1.s + " / 5\n" +
     "Final quiz: " + R.r5.s + " / 10\n" +
     "Trophies (" + R.got.length + " of " + TROPHIES.length + "): " + (R.got.map(function(t){ return t[2]; }).join(", ") || "none yet") + "\n" +
+    (S.ext ? "Extension: Option " + S.ext + " PowerPoint (uploaded with this)\n" : "") +
     (S.q3n ? "My quiz machine number: " + S.q3n + " = " + toBin(S.q3n) + " in binary\n" : "");
 }
 function copyText(t, cb){
@@ -607,7 +642,7 @@ $("dlCert").onclick = function(){
     c.toBlob(function(blob){
       var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file;
       document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
-      $("finMsg").className = "fb ok"; $("finMsg").textContent = "✔ Saved as " + file + " (look in your Downloads folder). Upload it to the Teams assignment and click Hand in.";
+      $("finMsg").className = "fb ok"; $("finMsg").textContent = "✔ Saved as " + file + " (look in your Downloads folder). Upload it (and your extension PowerPoint, if you made one) to the Teams assignment and click Hand in.";
     });
   } catch (e) { $("finMsg").className = "fb no"; $("finMsg").textContent = "✘ The download was blocked. Use Copy my results instead."; }
 };
@@ -619,6 +654,27 @@ $("copySum").onclick = function(){
     $("finMsg").textContent = ok ? "✔ Copied. Paste it into the Teams assignment and click Hand in." : "✘ Copy didn't work. Select the text in the box below and press Ctrl + C.";
   });
 };
+
+/* ---------- extension ---------- */
+S.ext_ticks = S.ext_ticks || {};
+var extBoxes = document.querySelectorAll(".extlist input");
+for (var ei = 0; ei < extBoxes.length; ei++) (function(cb, i){
+  cb.checked = !!S.ext_ticks[i];
+  cb.onchange = function(){ S.ext_ticks[i] = cb.checked; save(); };
+})(extBoxes[ei], ei);
+$("extDone").onclick = function(){
+  var fb = $("extFb"), lists = document.querySelectorAll(".extlist"), opt = null;
+  for (var i = 0; i < lists.length; i++) {
+    var b = lists[i].querySelectorAll("input"), all = true;
+    for (var j = 0; j < b.length; j++) if (!b[j].checked) all = false;
+    if (all) opt = lists[i].dataset.opt;
+  }
+  if (!opt) { fb.className = "fb no"; fb.textContent = "✘ Tick every box for your option first. If a box isn't done yet, go back and add it to your slides."; return; }
+  S.ext = opt; save(); $("m6").classList.add("done");
+  fb.className = "fb ok"; fb.textContent = "✔ Great work. Upload your PowerPoint to the Teams assignment along with your certificate.";
+  award("ext");
+};
+if (S.ext) $("m6").classList.add("done");
 
 /* ---------- restore ---------- */
 ["m1", "m2", "m3", "m4", "m5"].forEach(function(m){ if (S["done_" + m]) $(m).classList.add("done"); });
