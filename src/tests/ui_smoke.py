@@ -19,7 +19,7 @@ from solutions4 import GOOD as G4         # noqa: E402
 # section page -> the pages its cards should open
 SECTIONS = {
     "ks3/": ["year-7/", "year-8/", "year-9/"],
-    "ks3/year-7/": ["html-setup.html", "html-reference.html"],
+    "ks3/year-7/": ["html-setup.html", "html-reference.html", "microbit-mission-control.html"],
     "ks3/year-8/": ["storage-through-time.html"],
     "ks3/year-9/": ["escape-the-dungeon-1.html", "escape-the-dungeon-2.html", "escape-the-dungeon-3.html", "heroes-dictionary.html", "python-rescue.html"],
     "ks4/": ["pseudocode-playground.html", "neko-cafe.html", "pocket-pet.html", "station-x.html", "crystal-caves.html", "dungeon-architect.html", "../ks5/robot-game-procedural.html", "sorting-visualiser.html", "bitmap-images.html", "gcse-jeopardy.html"],

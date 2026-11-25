@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>micro:bit Mission Control: Year 7</title>
+<meta name="description" content="A one-hour, work-at-your-own-pace micro:bit lesson for Year 7: binary, variables and two builds, with trophies and a certificate.">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B1F3A;--ink:#1B2A41;--blue:#1F6FD1;--sky:#5AA9F0;--deep:#0B3C7A;--ice:#EAF3FC;--line:#C9DBF0;--grey:#64748B;--gold:#F2B705;--green:#16A34A;--red:#DC2626;
+--basic:#1E90FF;--input:#D400D4;--led:#5C2D91;--vars:#DC143C;--logic:#00A4A6;--math:#9400D3}
+*{box-sizing:border-box}
+body{margin:0;font-family:Lexend,system-ui,'Segoe UI',Arial,sans-serif;color:var(--ink);background:#F5F9FE;line-height:1.55;font-size:17px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 18px 60px}
+header.hero{background:linear-gradient(135deg,var(--navy),var(--deep));color:#fff;padding:28px 18px 24px}
+header.hero .wrap{padding-bottom:0}
+.hero h1{margin:0 0 6px;font-size:2.1rem;line-height:1.15}
+.hero p{margin:0;color:#D6E6FA;max-width:680px}
+.who{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.who label{font-size:.85rem;color:#D6E6FA;display:flex;flex-direction:column;gap:3px}
+.who input{font:inherit;padding:8px 10px;border-radius:8px;border:0;min-width:200px}
+.banner{background:#FFF7DB;border:2px solid var(--gold);border-radius:12px;padding:12px 16px;margin:18px 0 0;display:none}
+.banner.show{display:block}
+.banner b{color:#7A5A00}
+.shelf{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 10px rgba(11,31,58,.06)}
+.shelf .wrap{display:flex;align-items:center;gap:10px;padding:8px 18px;flex-wrap:wrap}
+.shelf .lbl{font-weight:700;color:var(--navy);font-size:.9rem;margin-right:4px}
+.troph{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:21px;background:#EEF2F7;filter:grayscale(1);opacity:.45;position:relative;cursor:help;transition:.3s}
+.troph.got{filter:none;opacity:1;background:#FFF4CC;box-shadow:0 0 0 2px var(--gold)}
+.troph .tip{display:none;position:absolute;top:46px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:.78rem;padding:6px 9px;border-radius:7px;width:190px;text-align:center;z-index:30}
+.troph:hover .tip,.troph:focus .tip{display:block}
+.count{margin-left:auto;font-weight:700;color:var(--deep)}
+h2{color:var(--navy);margin:0 0 6px;font-size:1.5rem}
+h3{color:var(--deep);margin:22px 0 6px;font-size:1.12rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:22px 0;box-shadow:0 2px 0 var(--line)}
+.mission{border-left:8px solid var(--blue)}
+.mission.done{border-left-color:var(--green)}
+.mhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mnum{background:var(--blue);color:#fff;font-weight:700;border-radius:10px;padding:4px 10px;font-size:.85rem}
+.mission.done .mnum{background:var(--green)}
+.mins{color:var(--grey);font-size:.9rem}
+.tick{margin-left:auto;font-weight:700;color:var(--green);display:none}
+.mission.done .tick{display:inline}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.plan div{background:var(--ice);border-radius:10px;padding:10px 12px;font-size:.9rem}
+.plan b{display:block;color:var(--navy)}
+.tip-box{background:var(--ice);border-radius:12px;padding:12px 16px;margin:12px 0}
+.warn-box{background:#FFF1F1;border:1px solid #F5C2C2;border-radius:12px;padding:12px 16px;margin:12px 0}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 18px;background:var(--blue);color:#fff;cursor:pointer}
+.btn:hover{background:var(--deep)}
+.btn.alt{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+.btn.gold{background:var(--gold);color:var(--navy)}
+.btn:disabled{opacity:.5;cursor:default}
+.q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0;background:#FBFDFF}
+.q p{margin:0 0 10px;font-weight:600}
+.opts{display:grid;gap:8px}
+.opt{font:inherit;text-align:left;background:#fff;border:2px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--sky)}
+.opt.right{border-color:var(--green);background:#ECFDF3}
+.opt.wrong{border-color:var(--red);background:#FEF2F2}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.93rem}
+.fb.ok{color:var(--green)}.fb.no{color:var(--red)}
+.score{font-weight:700;color:var(--navy);margin-top:10px}
+/* binary bulbs */
+.bulbs{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+.bulb{display:flex;flex-direction:column;align-items:center;gap:6px}
+.bulb .pv{font-weight:700;color:var(--deep)}
+.led{width:54px;height:54px;border-radius:12px;background:#2A2F3A;border:3px solid #1A1E26;cursor:pointer;transition:.15s;position:relative}
+.led.on{background:#FF3B30;box-shadow:0 0 18px 4px rgba(255,59,48,.65);border-color:#FF6B60}
+.led:disabled{cursor:default}
+.bulb .bit{font-family:'JetBrains Mono',Consolas,monospace;font-size:1.2rem;font-weight:700}
+.round{font-size:1.1rem;font-weight:600;margin:6px 0}
+.dots{display:flex;gap:6px;margin:8px 0}
+.dots span{width:16px;height:16px;border-radius:50%;background:#E2E8F0}
+.dots span.g{background:var(--green)}
+input.num{font:inherit;width:110px;padding:8px 10px;border:2px solid var(--line);border-radius:8px}
+/* MakeCode style blocks */
+.code{background:#F7F9FC;border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0;overflow-x:auto}
+.stack{display:inline-block;margin:6px 14px 10px 0;vertical-align:top}
+.blk{color:#fff;font-weight:600;font-size:.92rem;padding:7px 12px;border-radius:6px;margin:2px 0;display:inline-block;min-width:150px;white-space:nowrap}
+.blk.ev{border-radius:14px 14px 4px 4px;padding-bottom:4px;display:block}
+.blk .in{margin:5px 0 4px 10px;padding:2px 0}
+.blk .in>.blk{display:block}
+.blk .end{height:10px}
+.slot{display:inline-block;background:#fff;color:var(--ink);border-radius:20px;padding:0 9px;margin:0 3px;font-weight:600}
+.slot.cmp{background:rgba(0,0,0,.18);color:#fff;border:1px solid rgba(255,255,255,.5)}
+.slot.v{background:rgba(255,255,255,.25);color:#fff;border:1px solid rgba(255,255,255,.6)}
+.Basic{background:var(--basic)}.Input{background:var(--input)}.Led{background:var(--led)}.Vars{background:var(--vars)}.Logic{background:var(--logic)}.Math{background:var(--math)}
+.chip{display:inline-block;color:#fff;font-size:.78rem;font-weight:700;border-radius:6px;padding:1px 8px;vertical-align:middle}
+.mini{display:inline-grid;grid-template-columns:repeat(5,12px);gap:3px;background:#fff;padding:4px;border-radius:6px;margin:4px 0 2px;vertical-align:middle}
+.mini i{width:12px;height:12px;border-radius:2px;background:#D6DCE6}
+.mini i.on{background:#FF3B30}
+ol.steps{padding-left:22px}
+ol.steps li{margin:8px 0}
+.check-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.stretch{border:2px dashed var(--gold);border-radius:14px;padding:14px 18px;margin-top:18px;background:#FFFCF0}
+.stretch h3{margin-top:0;color:#7A5A00}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.25);transition:.4s;z-index:50;text-align:center;visibility:hidden}
+.toast.show{transform:translateX(-50%) translateY(0);visibility:visible}
+.toast .big{font-size:2rem;display:block}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:40}
+textarea#summary{width:100%;height:150px;font-family:'JetBrains Mono',Consolas,monospace;font-size:.85rem;border:1px solid var(--line);border-radius:10px;padding:10px}
+.finish-grid{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30px}
+@media(max-width:600px){.hero h1{font-size:1.6rem}.led{width:44px;height:44px}.card{padding:18px}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <h1>🚀 micro:bit Mission Control</h1>
+    <p>This is a one-hour lesson you work through on your own. Read each mission, do it, and win trophies as you go. At the end you'll save a certificate to hand in.</p>
+    <div class="who">
+      <label>Your name<input id="nm" autocomplete="off" placeholder="First name and surname"></label>
+      <label>Your form<input id="fm" autocomplete="off" placeholder="e.g. 7H"></label>
+    </div>
+  </div>
+</header>
+
+<div class="shelf" aria-label="Your trophies">
+  <div class="wrap" id="shelf"><span class="lbl">Trophies</span></div>
+</div>
+
+<div class="wrap">
+
+  <div class="banner" id="teamsBanner">
+    <b>Did this open inside Teams?</b> MakeCode and the certificate download work best in a proper browser. Look for <b>Open in browser</b> (or the globe icon) at the top right, or copy this link into Edge or Chrome.
+    <div style="margin-top:8px"><button class="btn alt" id="copyLink">Copy this page's link</button> <span id="copyLinkMsg"></span></div>
+  </div>
+
+  <section class="card">
+    <h2>Before you start</h2>
+    <p>You've already learnt about <b>input, process and output</b>, smart devices, <b>flowcharts</b>, <b>variables</b> and <b>binary</b>. Today you'll use all of that to build two programs on your micro:bit.</p>
+    <div class="plan">
+      <div><b>Mission 1</b>Warm-up quiz<br>5 minutes</div>
+      <div><b>Mission 2</b>Binary lights<br>10 minutes</div>
+      <div><b>Mission 3</b>Build a binary quiz machine<br>15 minutes</div>
+      <div><b>Mission 4</b>Build a counter<br>15 minutes</div>
+      <div><b>Mission 5</b>Final quiz and certificate<br>10 minutes</div>
+    </div>
+    <div class="tip-box"><b>Stuck?</b> 1. Read the "If it doesn't work" list. 2. Ask the person next to you. 3. Still stuck? Move on to the next mission and come back later. You don't need a teacher for any of this.</div>
+    <div class="tip-box"><b>You'll need:</b> your micro:bit and its USB cable, and MakeCode open in a second tab. <button class="btn" id="openMC" style="margin-left:6px">Open MakeCode in a new tab</button></div>
+  </section>
+
+  <!-- MISSION 1 -->
+  <section class="card mission" id="m1">
+    <div class="mhead"><span class="mnum">Mission 1</span><h2>Warm-up quiz</h2><span class="mins">About 5 minutes</span><span class="tick">✔ Done</span></div>
+    <p>Five quick questions on what you already know. You get one try at each, so think first.</p>
+    <div id="quiz1"></div>
+    <div class="score" id="quiz1score"></div>
+  </section>
+
+  <!-- MISSION 2 -->
+  <section class="card mission" id="m2">
+    <div class="mhead"><span class="mnum">Mission 2</span><h2>Binary lights</h2><span class="mins">About 10 minutes</span><span class="tick">✔ Done</span></div>
+    <p>Each light has a <b>place value</b>: 16, 8, 4, 2 and 1. A light that is <b>on</b> is a binary <b>1</b>. Add up the place values of the lights that are on to get the denary number.</p>
+    <div class="tip-box">Example: <b>01101</b> means 8 + 4 + 1 = <b>13</b>.</div>
+    <div class="round" id="b2task"></div>
+    <div class="bulbs" id="b2bulbs"></div>
+    <div class="check-row" id="b2input"></div>
+    <div class="fb" id="b2fb"></div>
+    <div>Get 6 right to win the trophy:</div>
+    <div class="dots" id="b2dots"></div>
+  </section>
+
+  <!-- MISSION 3 -->
+  <section class="card mission" id="m3">
+    <div class="mhead"><span class="mnum">Mission 3</span><h2>Build a binary quiz machine</h2><span class="mins">About 15 minutes</span><span class="tick">✔ Done</span></div>
+    <p>You're going to turn your micro:bit into a quiz for a friend. <b>Button A</b> shows a number in binary on the top row of lights. Your friend works it out, then presses <b>button B</b> to see the answer in denary.</p>
+    <h3>Step 1: choose your secret number</h3>
+    <p>Pick any whole number from <b>1 to 31</b>. Work out its binary on paper or with the lights in Mission 2. The top row of the micro:bit has 5 lights, just like Mission 2: <b>16, 8, 4, 2, 1</b> from left to right.</p>
+    <h3>Step 2: build it in MakeCode</h3>
+    <p>Start a <b>New Project</b> and call it <b>Binary Quiz</b>. Build these three stacks. The coloured label tells you which drawer each block is in.</p>
+    <div class="code" id="code3"></div>
+    <ol class="steps">
+      <li><b>on start</b> is already there. Drag in <span class="chip Basic">Basic</span> <b>show icon</b> and pick a picture, so you know it's ready.</li>
+      <li>From <span class="chip Input">Input</span> drag out <b>on button A pressed</b>. Put a <span class="chip Basic">Basic</span> <b>show leds</b> inside it and click the <b>top row</b> squares to show your number in binary. The example above shows 13 (01101).</li>
+      <li>Drag out another <b>on button A pressed</b> and change the <b>A</b> to <b>B</b>. Put <span class="chip Basic">Basic</span> <b>show number</b> inside and type your secret number.</li>
+      <li>Click <b>Download</b> and send it to your micro:bit. Press A, then B. Does B show the number you meant?</li>
+    </ol>
+    <div class="warn-box"><b>If it doesn't work:</b>
+      <ul style="margin:6px 0 0">
+        <li>Are your blocks <b>inside</b> the event blocks? A block on its own looks faded and won't run.</li>
+        <li>Did you change the second button from A to <b>B</b>?</li>
+        <li>Did you download the newest version? Press the reset button on the back after downloading.</li>
+        <li>Is the cable plugged in properly? If Download doesn't send it, drag the .hex file onto the <b>MICROBIT</b> drive.</li>
+      </ul>
+    </div>
+    <h3>Step 3: prove it works</h3>
+    <p>Type the number button B shows, and click the lights to match what button A shows. If they match, you win the trophy.</p>
+    <div class="check-row"><label>Button B shows: <input class="num" id="q3num" type="number" min="1" max="31"></label></div>
+    <div class="bulbs" id="q3bulbs"></div>
+    <button class="btn" id="q3check">Check my quiz machine</button>
+    <div class="fb" id="q3fb"></div>
+    <div class="stretch">
+      <h3>⭐ Stretch: more questions</h3>
+      <p>Add a second question. Use <span class="chip Input">Input</span> <b>on shake</b> to show another binary number, and <b>on button A+B pressed</b> to show its answer. Swap micro:bits with someone near you and test each other.</p>
+    </div>
+  </section>
+
+  <!-- MISSION 4 -->
+  <section class="card mission" id="m4">
+    <div class="mhead"><span class="mnum">Mission 4</span><h2>Build a counter</h2><span class="mins">About 15 minutes</span><span class="tick">✔ Done</span></div>
+    <p>Counters are everywhere: step counters, people counters on shop doors, score boards. Yours uses a <b>variable</b> called <b>count</b> to remember the number, just like the dice and the dimmer switch you built before.</p>
+    <h3>Step 1: make the variable</h3>
+    <p>Start a <b>New Project</b> called <b>Counter</b>. Open <span class="chip Vars">Variables</span>, click <b>Make a Variable...</b> and name it <b>count</b> (all lower case).</p>
+    <h3>Step 2: build it</h3>
+    <div class="code" id="code4"></div>
+    <ol class="steps">
+      <li><b>on start</b>: <span class="chip Vars">Variables</span> <b>set count to 0</b>, then <span class="chip Basic">Basic</span> <b>show number</b>. Drag the round <b>count</b> block from Variables into the show number gap.</li>
+      <li><b>on button A pressed</b>: <span class="chip Vars">Variables</span> <b>change count by 1</b>, then <b>show number</b> with <b>count</b> in the gap.</li>
+      <li><b>on button B pressed</b>: <b>set count to 0</b>, then <b>show number</b> with <b>count</b> in the gap.</li>
+      <li>Download it and test it.</li>
+    </ol>
+    <div class="tip-box"><b>Input, process, output:</b> pressing a button is the <b>input</b>. Adding 1 to count is the <b>process</b>. The number on the lights is the <b>output</b>.</div>
+    <div class="warn-box"><b>If it doesn't work:</b>
+      <ul style="margin:6px 0 0">
+        <li>Is it always showing 0? Check you used <b>change count by 1</b>, not <b>set count to 1</b>.</li>
+        <li>Is it showing 0 forever? Check the round <b>count</b> block is in the show number gap, not the number 0.</li>
+        <li>Is your variable spelt the same everywhere? Use the drop-down on each block to pick <b>count</b>.</li>
+        <li>Blocks faded? They must sit inside an event block.</li>
+      </ul>
+    </div>
+    <h3>Step 3: prove it works</h3>
+    <div class="check-row"><label>Press <b>B</b>, then press <b>A seven times</b>. What does it show? <input class="num" id="q4a" type="number"></label></div>
+    <div class="check-row"><label>Now press <b>B</b> once. What does it show? <input class="num" id="q4b" type="number"></label></div>
+    <button class="btn" id="q4check">Check my counter</button>
+    <div class="fb" id="q4fb"></div>
+
+    <div class="stretch">
+      <h3>🏆 Legend challenge: show the count in binary</h3>
+      <p>Can your counter show its number in binary on the top row instead? This uses the <b>place value method</b>: check the biggest place value first. If the number is big enough, turn that light on and take the place value away. Then move to the next one.</p>
+      <p>You need one more variable called <b>n</b>, so your program can take numbers away without changing count. Change your <b>on button A pressed</b> to this. <b>if</b> is in <span class="chip Logic">Logic</span>, the <b>≥</b> and <b>&gt;</b> comparisons are in <span class="chip Logic">Logic</span> too (click the = to change it), and <b>plot x y</b> is in <span class="chip Led">Led</span>. <b>clear screen</b> is in <span class="chip Basic">Basic</span> under <b>...more</b>.</p>
+      <div class="code" id="code4b"></div>
+      <p>Also put <b>clear screen</b> in place of show number in <b>on start</b> and <b>on button B pressed</b>, so the old number disappears. Right-click a block and choose <b>Duplicate</b> to save time on the five <b>if</b> blocks.</p>
+      <p><b>Prove it:</b> press B, then press A <b>eleven</b> times. Click the lights below to match your top row.</p>
+      <div class="bulbs" id="q4bulbs"></div>
+      <button class="btn gold" id="q4lcheck">Check my legend program</button>
+      <div class="fb" id="q4lfb"></div>
+    </div>
+  </section>
+
+  <!-- MISSION 5 -->
+  <section class="card mission" id="m5">
+    <div class="mhead"><span class="mnum">Mission 5</span><h2>Final quiz</h2><span class="mins">About 10 minutes</span><span class="tick">✔ Done</span></div>
+    <p>Ten questions on everything from today. Score 8 or more for the Quiz Champion trophy. You get one try at each.</p>
+    <div id="quiz5"></div>
+    <div class="score" id="quiz5score"></div>
+  </section>
+
+  <section class="card" id="finish">
+    <h2>🎓 Hand it in</h2>
+    <p>Make sure your name and form are filled in at the top. Then save your certificate and upload it to the Teams assignment.</p>
+    <div class="finish-grid">
+      <button class="btn gold" id="dlCert">Download my certificate</button>
+      <button class="btn alt" id="copySum">Copy my results instead</button>
+    </div>
+    <div class="fb" id="finMsg"></div>
+    <p style="font-size:.9rem;color:var(--grey)">If the download doesn't work, click <b>Copy my results instead</b> and paste them into the assignment, or take a screenshot with <b>Windows key + Shift + S</b>.</p>
+    <canvas id="certPreview" width="1200" height="800" style="width:100%;max-width:600px;border:1px solid var(--line);border-radius:10px;display:block;margin-top:10px"></canvas>
+    <textarea id="summary" readonly aria-label="Your results as text"></textarea>
+  </section>
+
+  <footer class="small">Your progress is saved in this browser on this computer. Nothing you type is sent anywhere.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+<canvas id="fx"></canvas>
+
+<script>
+(function(){
+"use strict";
+var KEY = "mr-y7-microbit-mission-control-v1";
+var S = {};
+try { S = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { S = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+S.t = S.t || {}; S.q1 = S.q1 || {}; S.q5 = S.q5 || {};
+function $(id){ return document.getElementById(id); }
+
+/* ---------- Teams / embedded check ---------- */
+var embedded = false;
+try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+if (embedded || /Teams|Electron/i.test(navigator.userAgent)) $("teamsBanner").classList.add("show");
+$("copyLink").onclick = function(){
+  copyText(location.href, function(ok){ $("copyLinkMsg").textContent = ok ? "Copied. Paste it into Edge or Chrome." : "Copy didn't work. Select the address and copy it."; });
+};
+// MakeCode is a link, not something this page loads, so it opens in a new tab.
+$("openMC").onclick = function(){ window.open("https://makecode.microbit.org/", "_blank", "noopener"); };
+
+/* ---------- name and form ---------- */
+$("nm").value = S.name || ""; $("fm").value = S.form || "";
+$("nm").oninput = function(){ S.name = this.value.trim(); save(); };
+$("fm").oninput = function(){ S.form = this.value.trim(); save(); };
+
+/* ---------- trophies ---------- */
+var TROPHIES = [
+  ["warm", "🔥", "Warmed Up", "Finish the warm-up quiz"],
+  ["bin", "💡", "Binary Brain", "Get 6 right in Binary lights"],
+  ["quiz", "🧩", "Quiz Machine Builder", "Prove your binary quiz machine works"],
+  ["count", "🔢", "Counter Creator", "Prove your counter works"],
+  ["legend", "🏆", "Place Value Legend", "Show the count in binary (stretch)"],
+  ["champ", "🥇", "Quiz Champion", "Score 8 or more in the final quiz"],
+  ["perfect", "💯", "Perfect Ten", "Score 10 out of 10 in the final quiz"],
+  ["done", "🚀", "Mission Complete", "Finish Missions 1 to 5"]
+];
+var shelf = $("shelf");
+TROPHIES.forEach(function(t){
+  var d = document.createElement("span");
+  d.className = "troph"; d.id = "tr-" + t[0]; d.tabIndex = 0;
+  d.innerHTML = t[1] + '<span class="tip"><b>' + t[2] + "</b><br>" + t[3] + "</span>";
+  shelf.appendChild(d);
+});
+var cnt = document.createElement("span"); cnt.className = "count"; cnt.id = "tcount"; shelf.appendChild(cnt);
+function trophyName(k){ for (var i = 0; i < TROPHIES.length; i++) if (TROPHIES[i][0] === k) return TROPHIES[i]; }
+function drawShelf(){
+  var n = 0;
+  TROPHIES.forEach(function(t){ var got = !!S.t[t[0]]; if (got) n++; $("tr-" + t[0]).classList.toggle("got", got); });
+  $("tcount").textContent = n + " / " + TROPHIES.length;
+}
+function award(k){
+  if (S.t[k]) return;
+  S.t[k] = Date.now(); save(); drawShelf();
+  var t = trophyName(k);
+  toast('<span class="big">' + t[1] + "</span>Trophy won: " + t[2]);
+  confetti();
+  checkComplete();
+}
+var toastTimer;
+function toast(html){
+  var el = $("toast"); el.innerHTML = html; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 3200);
+}
+
+/* ---------- confetti ---------- */
+var fx = $("fx"), ctx = fx.getContext("2d"), parts = [], running = false;
+function sizeFx(){ fx.width = innerWidth; fx.height = innerHeight; }
+addEventListener("resize", sizeFx); sizeFx();
+function confetti(){
+  var cols = ["#1F6FD1", "#5AA9F0", "#F2B705", "#16A34A", "#FF3B30", "#D400D4"];
+  for (var i = 0; i < 120; i++) parts.push({x: innerWidth / 2, y: innerHeight * 0.35, vx: (Math.random() - 0.5) * 14, vy: Math.random() * -12 - 2, s: 5 + Math.random() * 6, c: cols[i % cols.length], life: 90 + Math.random() * 40});
+  if (!running) { running = true; requestAnimationFrame(step); }
+}
+function step(){
+  ctx.clearRect(0, 0, fx.width, fx.height);
+  parts = parts.filter(function(p){ return p.life > 0; });
+  parts.forEach(function(p){ p.x += p.vx; p.y += p.vy; p.vy += 0.35; p.life--; ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, p.s, p.s * 0.6); });
+  if (parts.length) requestAnimationFrame(step); else { running = false; ctx.clearRect(0, 0, fx.width, fx.height); }
+}
+
+/* ---------- multiple-choice quizzes ---------- */
+// The first option is always the right one; options are shuffled when shown.
+var QUIZ1 = [
+  ["Pressing button A on a micro:bit is an example of...", ["an input", "a process", "an output", "a variable"], "A button sends data into the micro:bit, so it's an input."],
+  ["Which flowchart symbol shows a decision?", ["A diamond", "A rounded rectangle", "A parallelogram", "A rectangle"], "Decisions are diamonds. Start and end are rounded rectangles, inputs and outputs are parallelograms, processes are rectangles."],
+  ["What is a variable?", ["A named place in memory that stores a value that can change", "A number that can never change", "A sensor on the micro:bit", "A type of flowchart symbol"], "A variable has a name, like count, and stores a value that can change while the program runs."],
+  ["How many bits are in a byte?", ["8", "4", "2", "10"], "A byte is 8 bits, which can store 0 to 255."],
+  ["What is an embedded system?", ["A small computer built into a bigger device to do one job", "Any device with a processor in it", "A laptop or desktop computer", "Another name for the internet"], "Think of the computer inside a washing machine or a smart doorbell: it does one dedicated job."]
+];
+var QUIZ5 = [
+  ["What is the binary number 1010 in denary?", ["10", "5", "12", "1010"], "8 + 2 = 10."],
+  ["What is 7 as a 4-bit binary number?", ["0111", "0110", "1110", "1000"], "4 + 2 + 1 = 7, so the 4, 2 and 1 bits are on: 0111."],
+  ["What is the binary number 11001 in denary?", ["25", "19", "26", "21"], "16 + 8 + 1 = 25."],
+  ["What is 26 as a 5-bit binary number?", ["11010", "10110", "11001", "11100"], "26 = 16 + 8 + 2, so the 16, 8 and 2 bits are on: 11010."],
+  ["What is the biggest number you can show with 5 bits?", ["31", "32", "16", "25"], "All five on: 16 + 8 + 4 + 2 + 1 = 31."],
+  ["What is the biggest number one byte (8 bits) can store?", ["255", "256", "128", "8"], "All eight bits on is 255. There are 256 different values, but they start at 0."],
+  ["In your counter, what does change count by 1 do?", ["Adds 1 to the value stored in count", "Sets count to 1", "Shows the number 1 on the lights", "Renames the variable to 1"], "Change adds to whatever is already stored. Set would replace it."],
+  ["In your counter, the number scrolling across the lights is...", ["an output", "an input", "a process", "a variable"], "Anything the user sees or hears from the device is an output."],
+  ["Why do computers use binary?", ["Their circuits have two states: on or off", "Binary numbers are shorter than denary", "It's easier for people to read", "It's quicker to type"], "Tiny switches called transistors are either on (1) or off (0)."],
+  ["A program runs but gives the wrong answer. This is called...", ["a logic error", "an input", "a variable", "a flowchart"], "The program runs, so it isn't crashing; the logic in it is wrong."]
+];
+function shuffle(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function buildQuiz(box, qs, store, onDone){
+  box.innerHTML = "";
+  qs.forEach(function(q, i){
+    var d = document.createElement("div"); d.className = "q";
+    d.innerHTML = "<p>" + (i + 1) + ". " + q[0] + '</p><div class="opts"></div><div class="fb"></div>';
+    var opts = d.querySelector(".opts"), fb = d.querySelector(".fb");
+    var order = store["o" + i] || shuffle([0, 1, 2, 3]);
+    store["o" + i] = order;
+    order.forEach(function(k){
+      var b = document.createElement("button"); b.className = "opt"; b.textContent = q[1][k]; b.dataset.k = k;
+      b.onclick = function(){ answer(k); };
+      opts.appendChild(b);
+    });
+    function show(k){
+      var bs = opts.querySelectorAll(".opt");
+      for (var j = 0; j < bs.length; j++) {
+        var kk = +bs[j].dataset.k; bs[j].disabled = true;
+        if (kk === 0) bs[j].classList.add("right"); else if (kk === k) bs[j].classList.add("wrong");
+      }
+      fb.className = "fb " + (k === 0 ? "ok" : "no");
+      fb.textContent = (k === 0 ? "✔ Correct. " : "✘ Not quite. ") + q[2];
+    }
+    function answer(k){ if (store["a" + i] !== undefined) return; store["a" + i] = k; save(); show(k); onDone(); }
+    if (store["a" + i] !== undefined) show(store["a" + i]);
+    box.appendChild(d);
+  });
+  save();
+}
+function quizScore(qs, store){ var s = 0, n = 0; qs.forEach(function(q, i){ if (store["a" + i] !== undefined) { n++; if (store["a" + i] === 0) s++; } }); return {s: s, n: n}; }
+function q1Done(){
+  var r = quizScore(QUIZ1, S.q1);
+  $("quiz1score").textContent = r.n ? "Score: " + r.s + " / " + QUIZ1.length + (r.n < QUIZ1.length ? " so far" : "") : "";
+  if (r.n === QUIZ1.length) { done("m1"); award("warm"); }
+}
+function q5Done(fresh){
+  var r = quizScore(QUIZ5, S.q5);
+  $("quiz5score").textContent = r.n ? "Score: " + r.s + " / " + QUIZ5.length + (r.n < QUIZ5.length ? " so far" : "") : "";
+  if (r.n === QUIZ5.length) { done("m5"); if (r.s >= 8) award("champ"); if (r.s === 10) award("perfect"); if (r.s < 8 && fresh) toast("You scored " + r.s + " / 10. Read the explanations, they'll help in your exam."); }
+}
+buildQuiz($("quiz1"), QUIZ1, S.q1, q1Done);
+buildQuiz($("quiz5"), QUIZ5, S.q5, function(){ q5Done(true); });
+
+function done(id){ S["done_" + id] = true; save(); $(id).classList.add("done"); checkComplete(); }
+function checkComplete(){
+  if (S.done_m1 && S.done_m2 && S.done_m3 && S.done_m4 && S.done_m5 && !S.t.done) award("done");
+  drawCert();
+}
+
+/* ---------- LED rows ---------- */
+var PV = [16, 8, 4, 2, 1];
+function ledRow(box, opts){
+  opts = opts || {};
+  box.innerHTML = "";
+  var state = [0, 0, 0, 0, 0], leds = [], bits = [];
+  PV.forEach(function(v, i){
+    var w = document.createElement("div"); w.className = "bulb";
+    var pv = document.createElement("div"); pv.className = "pv"; pv.textContent = v;
+    var b = document.createElement("button"); b.className = "led"; b.setAttribute("aria-label", "Light worth " + v);
+    var bit = document.createElement("div"); bit.className = "bit"; bit.textContent = "0";
+    b.onclick = function(){ if (row.locked) return; state[i] ^= 1; draw(); if (opts.onchange) opts.onchange(); };
+    w.appendChild(pv); w.appendChild(b); if (opts.bits !== false) w.appendChild(bit);
+    box.appendChild(w); leds.push(b); bits.push(bit);
+  });
+  function draw(){ state.forEach(function(s, i){ leds[i].classList.toggle("on", !!s); bits[i].textContent = s; leds[i].setAttribute("aria-pressed", s ? "true" : "false"); }); }
+  var row = {
+    value: function(){ return state.reduce(function(a, s, i){ return a + s * PV[i]; }, 0); },
+    set: function(n){ PV.forEach(function(v, i){ state[i] = (n & v) ? 1 : 0; }); draw(); },
+    lock: function(l){ row.locked = l; leds.forEach(function(b){ b.disabled = l; }); },
+    locked: false
+  };
+  draw();
+  return row;
+}
+function toBin(n){ var s = ""; PV.forEach(function(v){ s += (n & v) ? "1" : "0"; }); return s; }
+
+/* ---------- Mission 2: binary lights ---------- */
+var NEED = 6;
+S.b2 = S.b2 || 0;
+var b2row = ledRow($("b2bulbs"));
+var b2target, b2mode;
+function b2dots(){ var h = ""; for (var i = 0; i < NEED; i++) h += '<span class="' + (i < S.b2 ? "g" : "") + '"></span>'; $("b2dots").innerHTML = h; }
+function b2next(){
+  b2dots();
+  if (S.b2 >= NEED) {
+    $("b2task").textContent = "All done! Play on if you like: make any number and watch the bits change.";
+    b2row.lock(false); $("b2input").innerHTML = ""; return;
+  }
+  b2mode = S.b2 % 2 === 0 ? "make" : "read";
+  var last = b2target;
+  do { b2target = 1 + Math.floor(Math.random() * 31); } while (b2target === last);
+  $("b2fb").textContent = ""; $("b2fb").className = "fb";
+  if (b2mode === "make") {
+    $("b2task").innerHTML = "Turn on the lights to make <b>" + b2target + "</b>.";
+    b2row.set(0); b2row.lock(false);
+    $("b2input").innerHTML = '<button class="btn" id="b2go">Check</button>';
+    $("b2go").onclick = function(){
+      var v = b2row.value();
+      if (v === b2target) right(); else wrong("That makes " + v + ". Try again: start with the biggest place value that fits.");
+    };
+  } else {
+    $("b2task").innerHTML = "What is <b>" + toBin(b2target) + "</b> in denary?";
+    b2row.set(b2target); b2row.lock(true);
+    $("b2input").innerHTML = '<input class="num" id="b2ans" type="number" aria-label="Your answer"> <button class="btn" id="b2go">Check</button>';
+    $("b2go").onclick = function(){
+      var v = parseInt($("b2ans").value, 10);
+      if (v === b2target) right(); else wrong("Not quite. Add up the place values of the lights that are on.");
+    };
+    $("b2ans").onkeydown = function(e){ if (e.key === "Enter") $("b2go").click(); };
+  }
+}
+function right(){
+  S.b2++; save();
+  $("b2fb").className = "fb ok"; $("b2fb").textContent = "✔ Correct!";
+  if (S.b2 >= NEED) { done("m2"); award("bin"); }
+  setTimeout(b2next, 900);
+}
+function wrong(msg){ $("b2fb").className = "fb no"; $("b2fb").textContent = "✘ " + msg; }
+b2next();
+
+/* ---------- MakeCode block drawings ---------- */
+function slot(t, v){ return '<span class="slot' + (v ? " v" : "") + '">' + t + "</span>"; }
+function cmp(t){ return '<span class="slot cmp">' + t + "</span>"; }
+function mini(bitsTop){ var h = '<span class="mini">'; for (var r = 0; r < 5; r++) for (var c = 0; c < 5; c++) h += "<i" + (r === 0 && bitsTop[c] === "1" ? ' class="on"' : "") + "></i>"; return h + "</span>"; }
+function B(cat, html){ return '<div class="blk ' + cat + '">' + html + "</div>"; }
+function E(cat, html, inner){ return '<div class="stack"><div class="blk ev ' + cat + '">' + html + '<div class="in">' + inner.join("") + '</div><div class="end"></div></div></div>'; }
+function IF(cond, inner){ return '<div class="blk ev Logic" style="border-radius:6px">if ' + cond + ' then<div class="in">' + inner.join("") + '</div><div class="end"></div></div>'; }
+var V = function(n){ return slot(n, true); };
+
+$("code3").innerHTML =
+  E("Basic", "on start", [B("Basic", "show icon " + slot("♥"))]) +
+  E("Input", "on button " + slot("A") + " pressed", [B("Basic", "show leds<br>" + mini("01101"))]) +
+  E("Input", "on button " + slot("B") + " pressed", [B("Basic", "show number " + slot("13"))]);
+
+$("code4").innerHTML =
+  E("Basic", "on start", [B("Vars", "set " + V("count") + " to " + slot("0")), B("Basic", "show number " + V("count"))]) +
+  E("Input", "on button " + slot("A") + " pressed", [B("Vars", "change " + V("count") + " by " + slot("1")), B("Basic", "show number " + V("count"))]) +
+  E("Input", "on button " + slot("B") + " pressed", [B("Vars", "set " + V("count") + " to " + slot("0")), B("Basic", "show number " + V("count"))]);
+
+var legendIfs = PV.map(function(v, i){
+  return IF(cmp(V("n") + " ≥ " + slot(v)), [B("Led", "plot x " + slot(i) + " y " + slot("0")), B("Vars", "change " + V("n") + " by " + slot("-" + v))]);
+});
+$("code4b").innerHTML =
+  E("Input", "on button " + slot("A") + " pressed", [
+    B("Vars", "change " + V("count") + " by " + slot("1")),
+    IF(cmp(V("count") + " &gt; " + slot("31")), [B("Vars", "set " + V("count") + " to " + slot("0"))]),
+    B("Basic", "clear screen"),
+    B("Vars", "set " + V("n") + " to " + V("count"))
+  ].concat(legendIfs));
+
+/* ---------- Mission 3 check ---------- */
+var q3row = ledRow($("q3bulbs"));
+$("q3check").onclick = function(){
+  var n = parseInt($("q3num").value, 10), fb = $("q3fb");
+  if (!(n >= 1 && n <= 31)) { fb.className = "fb no"; fb.textContent = "✘ Type a whole number from 1 to 31 first."; return; }
+  if (q3row.value() === n) {
+    fb.className = "fb ok"; fb.textContent = "✔ Brilliant! " + toBin(n) + " really is " + n + ". Your quiz machine works.";
+    S.q3n = n; done("m3"); award("quiz");
+  } else {
+    fb.className = "fb no"; fb.textContent = "✘ Those lights make " + q3row.value() + ", not " + n + ". Check your show leds top row (and these lights) against the place values 16, 8, 4, 2, 1.";
+  }
+};
+
+/* ---------- Mission 4 checks ---------- */
+$("q4check").onclick = function(){
+  var a = parseInt($("q4a").value, 10), b = parseInt($("q4b").value, 10), fb = $("q4fb");
+  if (a === 7 && b === 0) { fb.className = "fb ok"; fb.textContent = "✔ Your counter works: the variable remembered 7, then button B reset it to 0."; done("m4"); award("count"); }
+  else if (a === 1) { fb.className = "fb no"; fb.textContent = "✘ Showing 1 every time? You probably used set count to 1. Use change count by 1."; }
+  else if (a === 0) { fb.className = "fb no"; fb.textContent = "✘ Stuck on 0? Check the round count block is in the show number gap, and that A uses change, not set."; }
+  else { fb.className = "fb no"; fb.textContent = "✘ Not quite. Press B first so you start from 0, then count your seven presses carefully. Check the If it doesn't work list too."; }
+};
+var q4row = ledRow($("q4bulbs"));
+$("q4lcheck").onclick = function(){
+  var fb = $("q4lfb");
+  if (q4row.value() === 11) { fb.className = "fb ok"; fb.textContent = "✔ 01011 = 8 + 2 + 1 = 11. You've built a binary counter. Legendary!"; award("legend"); }
+  else { fb.className = "fb no"; fb.textContent = "✘ Your lights make " + q4row.value() + ". After 11 presses it should be 11. Check each if block has the right place value, the right x position and the right minus number."; }
+};
+
+/* ---------- certificate and summary ---------- */
+function results(){
+  var r1 = quizScore(QUIZ1, S.q1), r5 = quizScore(QUIZ5, S.q5);
+  var got = TROPHIES.filter(function(t){ return S.t[t[0]]; });
+  var ms = ["m1", "m2", "m3", "m4", "m5"].filter(function(m){ return S["done_" + m]; }).length;
+  return {r1: r1, r5: r5, got: got, ms: ms};
+}
+function drawCert(){
+  var c = $("certPreview"), g = c.getContext("2d"), R = results();
+  g.fillStyle = "#0B1F3A"; g.fillRect(0, 0, 1200, 800);
+  g.fillStyle = "#fff"; roundRect(g, 30, 30, 1140, 740, 28); g.fill();
+  g.strokeStyle = "#F2B705"; g.lineWidth = 8; roundRect(g, 50, 50, 1100, 700, 22); g.stroke();
+  g.textAlign = "center"; g.fillStyle = "#0B3C7A";
+  g.font = "700 30px Lexend, Arial, sans-serif"; g.fillText("micro:bit Mission Control", 600, 130);
+  g.fillStyle = "#0B1F3A"; g.font = "700 58px Lexend, Arial, sans-serif"; g.fillText("Certificate of Achievement", 600, 205);
+  g.fillStyle = "#1F6FD1"; g.font = "700 46px Lexend, Arial, sans-serif"; g.fillText((S.name || "Your name here") + (S.form ? "  (" + S.form + ")" : ""), 600, 290);
+  g.fillStyle = "#1B2A41"; g.font = "400 26px Lexend, Arial, sans-serif";
+  g.fillText("Missions completed: " + R.ms + " of 5", 600, 360);
+  g.fillText("Warm-up quiz: " + R.r1.s + " / 5     Final quiz: " + R.r5.s + " / 10", 600, 405);
+  g.fillText("Trophies: " + R.got.length + " of " + TROPHIES.length, 600, 450);
+  g.font = "46px 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif";
+  TROPHIES.forEach(function(t, i){ var x = 600 + (i - 3.5) * 90; g.globalAlpha = S.t[t[0]] ? 1 : 0.15; g.fillText(t[1], x, 545); });
+  g.globalAlpha = 1;
+  g.font = "400 20px Lexend, Arial, sans-serif"; g.fillStyle = "#64748B";
+  var names = R.got.map(function(t){ return t[2]; }).join(", ");
+  wrapText(g, names || "No trophies yet", 600, 600, 1000, 28);
+  g.fillText(new Date().toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"}) + "  ·  Year 7 Computer Science", 600, 700);
+  $("summary").value = summaryText();
+}
+function roundRect(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+function wrapText(g, t, x, y, max, lh){ var words = t.split(" "), line = ""; words.forEach(function(w){ var test = line ? line + " " + w : w; if (g.measureText(test).width > max && line) { g.fillText(line, x, y); line = w; y += lh; } else line = test; }); g.fillText(line, x, y); }
+function summaryText(){
+  var R = results();
+  return "micro:bit Mission Control: Year 7\n" +
+    "Name: " + (S.name || "(not filled in)") + "   Form: " + (S.form || "(not filled in)") + "\n" +
+    "Date: " + new Date().toLocaleDateString("en-GB") + "\n" +
+    "Missions completed: " + R.ms + " of 5\n" +
+    "Warm-up quiz: " + R.r1.s + " / 5\n" +
+    "Final quiz: " + R.r5.s + " / 10\n" +
+    "Trophies (" + R.got.length + " of " + TROPHIES.length + "): " + (R.got.map(function(t){ return t[2]; }).join(", ") || "none yet") + "\n" +
+    (S.q3n ? "My quiz machine number: " + S.q3n + " = " + toBin(S.q3n) + " in binary\n" : "");
+}
+function copyText(t, cb){
+  function fallback(){ var ta = $("summary"); var old = ta.value; ta.value = t; ta.select(); var ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.value = old; cb(ok); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ cb(true); }, fallback); else fallback();
+}
+function needName(){
+  if (!S.name) { $("finMsg").className = "fb no"; $("finMsg").textContent = "✘ Fill in your name at the top of the page first."; $("nm").focus(); return true; }
+  return false;
+}
+$("dlCert").onclick = function(){
+  if (needName()) return;
+  drawCert();
+  var c = $("certPreview"), file = "microbit-certificate-" + (S.name || "pupil").replace(/[^a-z0-9]+/gi, "-") + ".png";
+  try {
+    c.toBlob(function(blob){
+      var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file;
+      document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      $("finMsg").className = "fb ok"; $("finMsg").textContent = "✔ Saved as " + file + " (look in your Downloads folder). Upload it to the Teams assignment and click Hand in.";
+    });
+  } catch (e) { $("finMsg").className = "fb no"; $("finMsg").textContent = "✘ The download was blocked. Use Copy my results instead."; }
+};
+$("copySum").onclick = function(){
+  if (needName()) return;
+  drawCert();
+  copyText(summaryText(), function(ok){
+    $("finMsg").className = "fb " + (ok ? "ok" : "no");
+    $("finMsg").textContent = ok ? "✔ Copied. Paste it into the Teams assignment and click Hand in." : "✘ Copy didn't work. Select the text in the box below and press Ctrl + C.";
+  });
+};
+
+/* ---------- restore ---------- */
+["m1", "m2", "m3", "m4", "m5"].forEach(function(m){ if (S["done_" + m]) $(m).classList.add("done"); });
+q1Done(); q5Done(); drawShelf(); drawCert();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawCert);
+})();
+</script>
+</body>
+</html>
