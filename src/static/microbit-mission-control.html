@@ -128,13 +128,13 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
 <div class="wrap">
 
   <div class="banner" id="teamsBanner">
-    <b>Did this open inside Teams?</b> MakeCode and the certificate download work best in a proper browser. Look for <b>Open in browser</b> (or the globe icon) at the top right, or copy this link into Edge or Chrome.
+    <b>Did this open inside Teams?</b> MakeCode and the certificate download work best in Edge. Look for <b>Open in browser</b> (or the globe icon) at the top right, or copy this link into Edge.
     <div style="margin-top:8px"><button class="btn alt" id="copyLink">Copy this page's link</button> <span id="copyLinkMsg"></span></div>
   </div>
 
   <section class="card">
     <h2>Before you start</h2>
-    <p>You've already learnt about <b>input, process and output</b>, smart devices, <b>flowcharts</b>, <b>variables</b> and <b>binary</b>. Today you'll use all of that to build two programs on your micro:bit.</p>
+    <p>You've already learnt about <b>input, process and output</b>, smart devices, <b>flowcharts</b>, <b>variables</b> and <b>binary</b>. Today you'll use all of that to build two micro:bit programs in MakeCode.</p>
     <div class="plan">
       <div><b>Mission 1</b>Warm-up quiz<br>5 minutes</div>
       <div><b>Mission 2</b>Binary lights<br>10 minutes</div>
@@ -143,7 +143,7 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
       <div><b>Mission 5</b>Final quiz and certificate<br>10 minutes</div>
     </div>
     <div class="tip-box"><b>Stuck?</b> 1. Read the "If it doesn't work" list. 2. Ask the person next to you. 3. Still stuck? Move on to the next mission and come back later. You don't need a teacher for any of this.</div>
-    <div class="tip-box"><b>You'll need:</b> your micro:bit and its USB cable, and MakeCode open in a second tab. <button class="btn" id="openMC" style="margin-left:6px">Open MakeCode in a new tab</button></div>
+    <div class="tip-box"><b>You'll need:</b> MakeCode open in a second tab. You don't need a real micro:bit today: the <b>simulator</b> (the virtual micro:bit on the left of the MakeCode screen) works just like one. Click its buttons to test your code. <button class="btn" id="openMC" style="margin-left:6px">Open MakeCode in a new tab</button></div>
   </section>
 
   <!-- MISSION 1 -->
@@ -170,7 +170,7 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
   <!-- MISSION 3 -->
   <section class="card mission" id="m3">
     <div class="mhead"><span class="mnum">Mission 3</span><h2>Build a binary quiz machine</h2><span class="mins">About 15 minutes</span><span class="tick">✔ Done</span></div>
-    <p>You're going to turn your micro:bit into a quiz for a friend. <b>Button A</b> shows a number in binary on the top row of lights. Your friend works it out, then presses <b>button B</b> to see the answer in denary.</p>
+    <p>You're going to turn a micro:bit into a quiz for a friend. <b>Button A</b> shows a number in binary on the top row of lights. Your friend works it out, then presses <b>button B</b> to see the answer in denary.</p>
     <h3>Step 1: choose your secret number</h3>
     <p>Pick any whole number from <b>1 to 31</b>. Work out its binary on paper or with the lights in Mission 2. The top row of the micro:bit has 5 lights, just like Mission 2: <b>16, 8, 4, 2, 1</b> from left to right.</p>
     <h3>Step 2: build it in MakeCode</h3>
@@ -180,14 +180,14 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
       <li><b>on start</b> is already there. Drag in <span class="chip Basic">Basic</span> <b>show icon</b> and pick a picture, so you know it's ready.</li>
       <li>From <span class="chip Input">Input</span> drag out <b>on button A pressed</b>. Put a <span class="chip Basic">Basic</span> <b>show leds</b> inside it and click the <b>top row</b> squares to show your number in binary. The example above shows 13 (01101).</li>
       <li>Drag out another <b>on button A pressed</b> and change the <b>A</b> to <b>B</b>. Put <span class="chip Basic">Basic</span> <b>show number</b> inside and type your secret number.</li>
-      <li>Click <b>Download</b> and send it to your micro:bit. Press A, then B. Does B show the number you meant?</li>
+      <li>Test it on the <b>simulator</b>: click button <b>A</b> on the virtual micro:bit, then button <b>B</b>. Does B show the number you meant?</li>
     </ol>
     <div class="warn-box"><b>If it doesn't work:</b>
       <ul style="margin:6px 0 0">
         <li>Are your blocks <b>inside</b> the event blocks? A block on its own looks faded and won't run.</li>
         <li>Did you change the second button from A to <b>B</b>?</li>
-        <li>Did you download the newest version? Press the reset button on the back after downloading.</li>
-        <li>Is the cable plugged in properly? If Download doesn't send it, drag the .hex file onto the <b>MICROBIT</b> drive.</li>
+        <li>Simulator looks stuck? Click the <b>restart</b> button (the circular arrow) underneath it.</li>
+        <li>Nothing scrolling? Wait for the icon to finish, then click the button again.</li>
       </ul>
     </div>
     <h3>Step 3: prove it works</h3>
@@ -198,7 +198,7 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
     <div class="fb" id="q3fb"></div>
     <div class="stretch">
       <h3>⭐ Stretch: more questions</h3>
-      <p>Add a second question. Use <span class="chip Input">Input</span> <b>on shake</b> to show another binary number, and <b>on button A+B pressed</b> to show its answer. Swap micro:bits with someone near you and test each other.</p>
+      <p>Add a second question. Use <span class="chip Input">Input</span> <b>on shake</b> to show another binary number, and <b>on button A+B pressed</b> to show its answer. The simulator grows a <b>SHAKE</b> button and an <b>A+B</b> button when you use them. Ask the person next to you to try your quiz on your screen.</p>
     </div>
   </section>
 
@@ -214,7 +214,7 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
       <li><b>on start</b>: <span class="chip Vars">Variables</span> <b>set count to 0</b>, then <span class="chip Basic">Basic</span> <b>show number</b>. Drag the round <b>count</b> block from Variables into the show number gap.</li>
       <li><b>on button A pressed</b>: <span class="chip Vars">Variables</span> <b>change count by 1</b>, then <b>show number</b> with <b>count</b> in the gap.</li>
       <li><b>on button B pressed</b>: <b>set count to 0</b>, then <b>show number</b> with <b>count</b> in the gap.</li>
-      <li>Download it and test it.</li>
+      <li>Test it on the simulator by clicking buttons A and B.</li>
     </ol>
     <div class="tip-box"><b>Input, process, output:</b> pressing a button is the <b>input</b>. Adding 1 to count is the <b>process</b>. The number on the lights is the <b>output</b>.</div>
     <div class="warn-box"><b>If it doesn't work:</b>
@@ -226,8 +226,8 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
       </ul>
     </div>
     <h3>Step 3: prove it works</h3>
-    <div class="check-row"><label>Press <b>B</b>, then press <b>A seven times</b>. What does it show? <input class="num" id="q4a" type="number"></label></div>
-    <div class="check-row"><label>Now press <b>B</b> once. What does it show? <input class="num" id="q4b" type="number"></label></div>
+    <div class="check-row"><label>Click <b>B</b> on the simulator, then click <b>A seven times</b>. What does it show? <input class="num" id="q4a" type="number"></label></div>
+    <div class="check-row"><label>Now click <b>B</b> once. What does it show? <input class="num" id="q4b" type="number"></label></div>
     <button class="btn" id="q4check">Check my counter</button>
     <div class="fb" id="q4fb"></div>
 
@@ -237,7 +237,7 @@ footer.small{color:var(--grey);font-size:.85rem;text-align:center;margin-top:30p
       <p>You need one more variable called <b>n</b>, so your program can take numbers away without changing count. Change your <b>on button A pressed</b> to this. <b>if</b> is in <span class="chip Logic">Logic</span>, the <b>≥</b> and <b>&gt;</b> comparisons are in <span class="chip Logic">Logic</span> too (click the = to change it), and <b>plot x y</b> is in <span class="chip Led">Led</span>. <b>clear screen</b> is in <span class="chip Basic">Basic</span> under <b>...more</b>.</p>
       <div class="code" id="code4b"></div>
       <p>Also put <b>clear screen</b> in place of show number in <b>on start</b> and <b>on button B pressed</b>, so the old number disappears. Right-click a block and choose <b>Duplicate</b> to save time on the five <b>if</b> blocks.</p>
-      <p><b>Prove it:</b> press B, then press A <b>eleven</b> times. Click the lights below to match your top row.</p>
+      <p><b>Prove it:</b> click B on the simulator, then click A <b>eleven</b> times. Click the lights below to match your top row.</p>
       <div class="bulbs" id="q4bulbs"></div>
       <button class="btn gold" id="q4lcheck">Check my legend program</button>
       <div class="fb" id="q4lfb"></div>
@@ -316,7 +316,7 @@ var embedded = false;
 try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
 if (embedded || /Teams|Electron/i.test(navigator.userAgent)) $("teamsBanner").classList.add("show");
 $("copyLink").onclick = function(){
-  copyText(location.href, function(ok){ $("copyLinkMsg").textContent = ok ? "Copied. Paste it into Edge or Chrome." : "Copy didn't work. Select the address and copy it."; });
+  copyText(location.href, function(ok){ $("copyLinkMsg").textContent = ok ? "Copied. Paste it into Edge." : "Copy didn't work. Select the address and copy it."; });
 };
 // MakeCode is a link, not something this page loads, so it opens in a new tab.
 $("openMC").onclick = function(){ window.open("https://makecode.microbit.org/", "_blank", "noopener"); };
